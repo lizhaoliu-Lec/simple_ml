@@ -1,2 +1,2 @@
-# ml_py
-Machine Learning in Python.
+# simple_ml
+Simple Machine Learning in Python.
