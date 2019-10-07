@@ -1,11 +1,11 @@
 import numpy as np
 
-from . import get_activation
-from . import xavier_uniform_initializer
+from .activation import get_activation
+from .initializer import xavier_uniform_initializer
 
 __all__ = [
     'Input', 'FullyConnected', 'Linear', 'Dense',
-    'Softmax', 'Flatten', 'Dropout', 'Activation'
+    'Softmax', 'Flatten', 'Dropout', 'Activation',
 ]
 
 
@@ -330,7 +330,7 @@ class Flatten(Layer):
                                                               'Make sure to pass a complete "input_shape" '
                                                               'or "batch_input_shape" argument to the first '
                                                               'layer in your model.')
-        return (input_shape[0], np.prod(input_shape[1:]))
+        return input_shape[0], np.prod(input_shape[1:])
 
 
 class Dropout(Layer):
@@ -368,10 +368,10 @@ class Dropout(Layer):
         self.pre_layer = pre_layer
         pre_layer.next_layer = self
 
-    def forward(self, inputs, is_train=True, *args, **kwargs):
+    def forward(self, inputs, is_training=True, *args, **kwargs):
         self.input = inputs
         if 0. < self.dropout < 1:
-            if is_train:
+            if is_training:
                 self.mask = np.random.binomial(1, 1 - self.dropout, np.asarray(self.input.shape)[self.axis])
                 return self.mask * self.input / (1 - self.dropout)
             else:

@@ -1,16 +1,203 @@
 import sys
+import random
 
 import numpy as np
 
-from . import get_optimizer
-from . import get_loss
+from .optimizer import get_optimizer
+from .loss import get_loss
 
 __all__ = [
     'Sequential', 'Model'
 ]
 
 
-class Sequential(object):
+class Module(object):
+    def __init__(self):
+        self.optimizer = None
+        self.loss = None
+
+    def compile(self, loss, optimizer='sgd'):
+        """Configures the model for training.
+        # Arguments
+            loss: str (name of objective function) or objective function.
+                See [losses](/losses).
+                If the model has multiple outputs, you can use a different loss
+                on each output by passing a dictionary or a list of losses.
+                The loss value that will be minimized by the model
+                will then be the sum of all individual losses.
+            optimizer: str (name of optimizer) or optimizer object.
+                See [optimizers](/optimizers).
+        # Raises
+            ValueError: In case of invalid arguments for
+                `optimizer`, `loss`.
+        """
+        loss = loss or None
+        optimizer = optimizer or None
+        self.optimizer = get_optimizer(optimizer)
+        self.loss = get_loss(loss)
+
+    def peak(self, X, y, peek_type, set_type, num_show=5):
+        allow_set_types = ['train', 'valid']
+        allow_peek_types = ['single-cls', 'single-reg']
+        assert set_type in allow_set_types
+        assert peek_type in allow_peek_types
+        # random select examples
+        sample_idx = [_ for _ in range(X.shape[0])]
+        num_show = 5
+        random.shuffle(sample_idx)
+        sample_X = X[sample_idx[:num_show]]
+        sample_y = y[sample_idx[:num_show]]
+        sample_y_pred = self.forward(sample_X, False)
+        if peek_type == 'single-reg':
+            sample_y = sample_y.squeeze()
+            sample_y_pred = sample_y_pred.squeeze()
+        elif peek_type == 'single-cls':
+            sample_y = np.argmax(sample_y, axis=1)
+            sample_y_pred = np.argmax(sample_y_pred, axis=1)
+        else:
+            pass
+        for i in range(num_show):
+            out_str = "%s-example %d/%d: expect-[%s], predict-[%s]" % (
+                set_type, i + 1, num_show,
+                str(sample_y[i]), str(sample_y_pred[i]))
+            print(out_str)
+
+    @staticmethod
+    def convert_dtype(dtype, *args):
+        converted_data = [
+            data.astype(dtype) if not np.issubdtype(dtype, data.dtype) else data for data in args
+        ]
+        return converted_data
+
+    @staticmethod
+    def data_loader(X, y, batch_size, shuffle=False):
+        total_size = y.shape[0]
+        assert total_size != 0, 'provided X, y must has at least one example.'
+        num_steps = total_size // batch_size
+        if total_size % batch_size != 0:
+            num_steps = num_steps + 1
+
+        if shuffle:
+            rand_idx = [i for i in range(total_size)]
+            random.shuffle(rand_idx)
+            X = X[rand_idx]
+            y = y[rand_idx]
+
+        for i in range(num_steps):
+            begin = i * batch_size
+            end = min(begin + batch_size, total_size)
+            yield X[begin:end], y[begin:end]
+
+    def fit(self, X: np.array, y: np.array,
+            epochs=100, batch_size=64, shuffle=True,
+            validation_split=0., validation_data=None,
+            verbose=1, file=sys.stdout, dtype=np.float64,
+            metric=None, *args, **kwargs):
+        # prepare data
+        train_X, train_y = self.convert_dtype(dtype, X, y)
+
+        if 1. > validation_split > 0.:
+            split = int(train_y.shape[0] * validation_split)
+            valid_X, valid_y = train_X[-split:], train_y[-split:]
+            train_X, train_y = train_X[:-split], train_y[:-split]
+            val_size = valid_y.shape[0]
+        elif validation_data is not None:
+            valid_X, valid_y = validation_data
+            valid_X = np.asarray(valid_X)
+            valid_y = np.asarray(valid_y)
+            val_size = valid_y.shape[0]
+        else:
+            valid_X, valid_y = None, None
+
+        self.train(train_X=train_X, train_y=train_y,
+                   epochs=epochs, batch_size=batch_size, shuffle=shuffle,
+                   valid_X=valid_X, valid_y=valid_y,
+                   verbose=verbose, file=file,
+                   metric=metric, *args, **kwargs)
+
+    def train(self, train_X, train_y, epochs,
+              batch_size, shuffle,
+              valid_X=None, valid_y=None,
+              verbose=1, file=sys.stdout,
+              metric=None, *args, **kwargs):
+        peek_type = kwargs.get('peek_type', None)
+        num_show = kwargs.get('num_show', 5)
+        train_size = train_y.shape[0]
+        for iter_idx in range(1, epochs + 1):
+
+            # training
+            train_losses = 0
+            train_matrices = 0
+            for x_batch, y_batch in self.data_loader(train_X, train_y, batch_size, shuffle):
+                # forward propagation
+                y_pred = self.forward(x_batch, is_training=True)
+
+                # backward propagation
+                self.backward(y_pred, y_batch)
+
+                # optimize
+                self.optimize()
+
+                # batch losses
+                train_losses += self.loss.forward(y_pred, y_batch)
+
+                if metric is not None:
+                    train_matrices += metric(y_pred, y_batch)
+
+            run_out = "epoch %5d/%5d, train-[loss: %.4f" % (
+                iter_idx, epochs,
+                float(train_losses / train_size))
+
+            if metric is not None:
+                run_out += ' | metric: %.4f]; ' % float(train_matrices / train_size)
+            else:
+                run_out += ']; '
+
+            if valid_X is not None and valid_y is not None:
+                val_size = valid_y.shape[0]
+                # valid
+                valid_matrices = 0
+                valid_losses = 0
+                for x_batch, y_batch in self.data_loader(valid_X, valid_y, batch_size=batch_size):
+                    # forward propagation
+                    y_pred = self.forward(x_batch, is_training=False)
+
+                    # batch loss
+                    # valid_losses += self.loss.forward(y_pred, y_batch)
+                    valid_losses += self.loss.forward(y_pred, y_batch)
+
+                    if metric is not None:
+                        valid_matrices += metric(y_pred, y_batch)
+
+                run_out += "valid-[loss: %.4f" % (float(valid_losses / val_size))
+                if metric is not None:
+                    run_out += ' | metric: %.4f]; ' % float(valid_matrices / val_size)
+                else:
+                    run_out += ']; '
+
+            if verbose > 0 and iter_idx % verbose == 0:
+                print(run_out, file=file)
+                if peek_type is not None:
+                    if valid_X is not None and valid_y is not None:
+                        self.peak(valid_X, valid_y,
+                                  peek_type=peek_type, set_type='valid',
+                                  num_show=num_show)
+                    else:
+                        self.peak(train_X, train_y,
+                                  peek_type=peek_type, set_type='train',
+                                  num_show=num_show)
+
+    def forward(self, X, is_training=False, *args, **kwargs):
+        raise NotImplementedError
+
+    def backward(self, y_hat, y, *args, **kwargs):
+        raise NotImplementedError
+
+    def optimize(self):
+        raise NotImplementedError
+
+
+class Sequential(Module):
     """Linear stack of layers.
     # Arguments
         layers: list of layers to add to the model.
@@ -42,9 +229,8 @@ class Sequential(object):
     """
 
     def __init__(self):
+        super(Sequential, self).__init__()
         self.layers = list()
-        self.optimizer = None
-        self.loss = None
 
     def add(self, layer):
         self.layers.append(layer)
@@ -64,132 +250,38 @@ class Sequential(object):
             ValueError: In case of invalid arguments for
                 `optimizer`, `loss`.
         """
-        loss = loss or None
-        optimizer = optimizer or None
-        self.optimizer = get_optimizer(optimizer)
-        self.loss = get_loss(loss)
+        super(Sequential, self).compile(loss=loss, optimizer=optimizer, )
 
         prev_layer = None
         for layer in self.layers:
             layer.connection(prev_layer)
             prev_layer = layer
 
-    def fit(self, X, y, epochs=100, batch_size=64, shuffle=True,
-            validation_split=0., validation_data=None, verbose=1, file=sys.stdout):
-        # prepare data
-        X = np.asarray(X)
-        y = np.asarray(y)
-        train_X = X.astype(np.float64) if not np.issubdtype(np.float64, X.dtype) else X
-        train_y = y.astype(np.float64) if not np.issubdtype(np.float64, y.dtype) else y
-
-        if 1. > validation_split > 0.:
-            split = int(train_y.shape[0] * validation_split)
-            valid_X, valid_y = train_X[-split:], train_y[-split:]
-            train_X, train_y = train_X[:-split], train_y[:-split]
-        elif validation_data is not None:
-            valid_X, valid_y = validation_data
-            valid_X = np.asarray(valid_X)
-            valid_y = np.asarray(valid_y)
-        else:
-            valid_X, valid_y = None, None
-
-        iter_idx = 0
-        while iter_idx < epochs:
-            iter_idx += 1
-
-            # shuffle
-            if shuffle:
-                seed = np.random.randint(1107)
-                np.random.seed(seed)
-                np.random.shuffle(train_X)
-                np.random.seed(seed)
-                np.random.shuffle(train_y)
-
-            # train
-            train_losses, train_predicts, train_targets = [], [], []
-            total_round = train_y.shape[0] // batch_size
-            if total_round != train_y.shape[0] * 1.0 / batch_size:
-                total_round += 1
-            for b in range(total_round):
-                batch_begin = b * batch_size
-                batch_end = min(batch_begin + batch_size, train_y.shape[0])
-                x_batch = train_X[batch_begin:batch_end]
-                y_batch = train_y[batch_begin:batch_end]
-
-                # forward propagation
-                y_pred = self.predict(x_batch, is_train=True)
-
-                # backward propagation
-                next_grad = self.loss.backward(y_pred, y_batch)
-                for layer in self.layers[::-1]:
-                    next_grad = layer.backward(next_grad)
-
-                # get parameter and gradients
-                params = list()
-                grads = list()
-                for layer in self.layers:
-                    params += layer.params
-                    grads += layer.grads
-
-                # update parameters
-                self.optimizer.minimize(params, grads)
-
-                # got loss and predict
-                train_losses.append(self.loss.forward(y_pred, y_batch))
-                train_predicts.extend(y_pred)
-                train_targets.extend(y_batch)
-                if verbose == 2:
-                    runout = "epoch %d/%d, batch %d/%d, train-[loss %.4f, acc %.4f]; " % (
-                        iter_idx, epochs, b + 1, total_round, float(np.mean(train_losses)),
-                        float(self.accuracy(train_predicts, train_targets)))
-                    print(runout, file=file)
-
-            # output train status
-            runout = "epoch %d/%d, train-[loss %.4f, acc %.4f]; " % (
-                iter_idx, epochs, float(np.mean(train_losses)),
-                float(self.accuracy(train_predicts, train_targets)))
-
-            if valid_X is not None and valid_y is not None:
-                # valid
-                valid_losses, valid_predicts, valid_targets = [], [], []
-                for b in range(valid_X.shape[0] // batch_size):
-                    batch_begin = b * batch_size
-                    batch_end = batch_begin + batch_size
-                    x_batch = valid_X[batch_begin:batch_end]
-                    y_batch = valid_y[batch_begin:batch_end]
-
-                    # forward propagation
-                    y_pred = self.predict(x_batch, is_train=False)
-
-                    # got loss and predict
-                    valid_losses.append(self.loss.forward(y_pred, y_batch))
-                    valid_predicts.extend(y_pred)
-                    valid_targets.extend(y_batch)
-
-                # output valid status
-                runout += "valid-[loss %.4f, acc %.4f]; " % (
-                    float(np.mean(valid_losses)), float(self.accuracy(valid_predicts, valid_targets)))
-
-            if verbose > 0 and iter_idx % verbose == 0:
-                print(runout, file=file)
-
-    def predict(self, X, is_train=False):
+    def forward(self, X, is_training=False, *args, **kwargs):
         """ Calculate an output Y for the given input X. """
-        x_next = X
         for layer in self.layers[:]:
-            x_next = layer.forward(x_next, is_train=is_train)
-        y_pred = x_next
-        return y_pred
+            X = layer.forward(X, is_training=is_training)
+        return X
 
-    @staticmethod
-    def accuracy(outputs, targets):
-        y_predicts = np.argmax(outputs, axis=1)
-        y_targets = np.argmax(targets, axis=1)
-        acc = y_predicts == y_targets
-        return np.mean(acc)
+    def backward(self, y_hat, y, *args, **kwargs):
+        # backward propagation
+        grad = self.loss.backward(y_hat, y)
+        for layer in self.layers[::-1]:
+            grad = layer.backward(grad)
+
+    def optimize(self):
+        # get parameter and gradients
+        params = list()
+        grads = list()
+        for layer in self.layers:
+            params += layer.params
+            grads += layer.grads
+
+        # update parameters
+        self.optimizer.minimize(params, grads)
 
 
-class Model(object):
+class Model(Module):
     """Layers with multiple input and multiple output.
     # Arguments
         input: the input layer
@@ -220,146 +312,32 @@ class Model(object):
     """
 
     def __init__(self, input, output):
+        super(Model, self).__init__()
         self.input = input
         self.output = output
-        self.optimizer = None
-        self.loss = None
 
-    def compile(self, loss, optimizer='sgd', **kwargs):
-        """Configures the model for training.
-        # Arguments
-            loss: str (name of objective function) or objective function.
-                See [losses](/losses).
-                If the model has multiple outputs, you can use a different loss
-                on each output by passing a dictionary or a list of losses.
-                The loss value that will be minimized by the model
-                will then be the sum of all individual losses.
-            optimizer: str (name of optimizer) or optimizer object.
-                See [optimizers](/optimizers).
-        # Raises
-            ValueError: In case of invalid arguments for
-                `optimizer`, `loss`.
-        """
-        loss = loss or None
-        optimizer = optimizer or None
-        self.optimizer = get_optimizer(optimizer)
-        self.loss = get_loss(loss)
-
-    def fit(self, X, y, epochs=100, batch_size=64, shuffle=True,
-            validation_split=0., validation_data=None, verbose=1, file=sys.stdout):
-        # prepare data
-        X = np.asarray(X)
-        y = np.asarray(y)
-        train_X = X.astype(np.float64) if not np.issubdtype(np.float64, X.dtype) else X
-        train_y = y.astype(np.float64) if not np.issubdtype(np.float64, y.dtype) else y
-
-        if 1. > validation_split > 0.:
-            split = int(train_y.shape[0] * validation_split)
-            valid_X, valid_y = train_X[-split:], train_y[-split:]
-            train_X, train_y = train_X[:-split], train_y[:-split]
-        elif validation_data is not None:
-            valid_X, valid_y = validation_data
-            valid_X = np.asarray(valid_X)
-            valid_y = np.asarray(valid_y)
-        else:
-            valid_X, valid_y = None, None
-
-        iter_idx = 0
-        while iter_idx < epochs:
-            iter_idx += 1
-
-            # shuffle
-            if shuffle:
-                seed = np.random.randint(1107)
-                np.random.seed(seed)
-                np.random.shuffle(train_X)
-                np.random.seed(seed)
-                np.random.shuffle(train_y)
-
-            # train
-            train_losses, train_predicts, train_targets = [], [], []
-            total_round = train_y.shape[0] // batch_size
-            if total_round != train_y.shape[0] * 1.0 / batch_size:
-                total_round += 1
-            for b in range(total_round):
-                batch_begin = b * batch_size
-                batch_end = min(batch_begin + batch_size, train_y.shape[0])
-                x_batch = train_X[batch_begin:batch_end]
-                y_batch = train_y[batch_begin:batch_end]
-
-                # forward propagation
-                y_pred = self.predict(x_batch, is_train=True)
-
-                # backward propagation
-                next_grad = self.loss.backward(y_pred, y_batch)
-                pre_layer = self.output
-                while pre_layer is not None:
-                    next_grad = pre_layer.backward(next_grad)
-                    pre_layer = pre_layer.pre_layer
-
-                # get parameter and gradients
-                params = list()
-                grads = list()
-                pre_layer = self.output
-                while pre_layer is not None:
-                    params += pre_layer.params
-                    grads += pre_layer.grads
-                    pre_layer = pre_layer.pre_layer
-
-                # update parameters
-                self.optimizer.minimize(params, grads)
-
-                # got loss and predict
-                train_losses.append(self.loss.forward(y_pred, y_batch))
-                train_predicts.extend(y_pred)
-                train_targets.extend(y_batch)
-                if verbose == 2:
-                    runout = "epoch %d/%d, batch %d/%d, train-[loss %.4f, acc %.4f]; " % (
-                        iter_idx, epochs, b + 1, total_round, float(np.mean(train_losses)),
-                        float(self.accuracy(train_predicts, train_targets)))
-                    print(runout, file=file)
-
-            # output train status
-            runout = "epoch %d/%d, train-[loss %.4f, acc %.4f]; " % (
-                iter_idx, epochs, float(np.mean(train_losses)),
-                float(self.accuracy(train_predicts, train_targets)))
-
-            if valid_X is not None and valid_y is not None:
-                # valid
-                valid_losses, valid_predicts, valid_targets = [], [], []
-                for b in range(valid_X.shape[0] // batch_size):
-                    batch_begin = b * batch_size
-                    batch_end = batch_begin + batch_size
-                    x_batch = valid_X[batch_begin:batch_end]
-                    y_batch = valid_y[batch_begin:batch_end]
-
-                    # forward propagation
-                    y_pred = self.predict(x_batch, is_train=False)
-
-                    # got loss and predict
-                    valid_losses.append(self.loss.forward(y_pred, y_batch))
-                    valid_predicts.extend(y_pred)
-                    valid_targets.extend(y_batch)
-
-                # output valid status
-                runout += "valid-[loss %.4f, acc %.4f]; " % (
-                    float(np.mean(valid_losses)), float(self.accuracy(valid_predicts, valid_targets)))
-
-            if verbose > 0:
-                print(runout, file=file)
-
-    def predict(self, X, is_train=False):
-        """ Calculate an output Y for the given input X. """
+    def forward(self, X, is_training=False, *args, **kwargs):
         layer = self.input
-        X_next = X
         while layer is not None:
-            X_next = layer.forward(X_next)
+            X = layer.forward(X, is_training=is_training)
             layer = layer.next_layer
-        return X_next
+        return X
 
-    @staticmethod
-    def accuracy(outputs, targets):
-        y_predicts = np.argmax(outputs, axis=1)
-        y_targets = np.argmax(targets, axis=1)
-        acc = y_predicts == y_targets
-        return np.mean(acc)
+    def backward(self, y_hat, y, *args, **kwargs):
+        grad = self.loss.backward(y_hat, y)
+        layer = self.output
+        while layer is not None:
+            grad = layer.backward(grad)
+            layer = layer.pre_layer
+
+    def optimize(self):
+        params = list()
+        grads = list()
+        pre_layer = self.output
+        while pre_layer is not None:
+            params += pre_layer.params
+            grads += pre_layer.grads
+            pre_layer = pre_layer.pre_layer
+
+        # update parameters
+        self.optimizer.minimize(params, grads)

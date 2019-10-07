@@ -1,7 +1,7 @@
-from . import sigmoid, delta_sigmoid
-from . import relu, delta_relu
-from . import identity, delta_identity
-from . import softmax, delta_softmax
+from .ops import sigmoid, delta_sigmoid
+from .ops import relu, delta_relu
+from .ops import identity, delta_identity
+from .ops import softmax, delta_softmax
 
 __all__ = [
     # original class

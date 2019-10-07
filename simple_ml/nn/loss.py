@@ -2,10 +2,10 @@ import numpy as np
 
 __all__ = [
     # original class
-    'MeanSquareLoss', 'CrossEntropy', 'LogLikelihoodLoss',
+    'MeanSquareLoss', 'CrossEntropy', 'LogLikelihoodLoss', 'MeanAbsoluteLoss',
 
     # alias
-    'mse', 'ce', 'MSE', 'CE',
+    'mse', 'ce', 'MSE', 'CE', 'MAE', 'mae',
 
     # factory interface
     'get_loss'
@@ -14,11 +14,11 @@ __all__ = [
 
 class Loss(object):
     @staticmethod
-    def forward(y_hat, y):
+    def forward(y_hat: np.array, y: np.array):
         raise NotImplementedError
 
     @staticmethod
-    def backward(y_hat, y):
+    def backward(y_hat: np.array, y: np.array):
         raise NotImplementedError
 
 
@@ -28,12 +28,34 @@ class MeanSquareLoss(Loss):
     """
 
     @staticmethod
-    def forward(y_hat, y):
-        return 0.5 * np.sum(np.power(y_hat - y, 2))
+    def forward(y_hat: np.array, y: np.array):
+        batch_size = y.shape[0]
+        y_hat = np.reshape(y_hat, (batch_size, -1))
+        y = np.reshape(y, (batch_size, -1))
+        return 0.5 * np.sum(np.mean((y_hat - y) ** 2, axis=-1), axis=0)
 
     @staticmethod
-    def backward(y_hat, y):
+    def backward(y_hat: np.array, y: np.array):
         return y_hat - y
+
+
+class MeanAbsoluteLoss(Loss):
+    """
+    calculate the MAE
+    """
+
+    @staticmethod
+    def forward(y_hat: np.array, y: np.array):
+        batch_size = y.shape[0]
+        y_hat = np.reshape(y_hat, (batch_size, -1))
+        y = np.reshape(y, (batch_size, -1))
+        return np.sum(np.mean(np.abs(y_hat - y), axis=-1), axis=0)
+
+    @staticmethod
+    def backward(y_hat: np.array, y: np.array):
+        gradient = np.zeros_like(y)
+        gradient = gradient + (y_hat > y) - (y_hat < y)
+        return np.array(gradient, dtype=float)
 
 
 class LogLikelihoodLoss(Loss):
@@ -42,15 +64,15 @@ class LogLikelihoodLoss(Loss):
     """
 
     @staticmethod
-    def forward(y_hat, y):
+    def forward(y_hat: np.array, y: np.array):
         assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
         assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
         y_hat = _cutoff(y_hat)
         y = _cutoff(y)
-        return -np.mean(np.sum(np.nan_to_num(y * np.log(y_hat)), axis=1))
+        return -np.sum(np.sum(np.nan_to_num(y * np.log(y_hat)), axis=1), axis=0)
 
     @staticmethod
-    def backward(y_hat, y):
+    def backward(y_hat: np.array, y: np.array):
         """
         The loss partial by z is : y_hat * (y - y_hat) / (-1 / y_hat) = y_hat - y
         softmax + loglikelihoodCost == sigmoid + crossentropyCost
@@ -68,6 +90,7 @@ class LogLikelihoodLoss(Loss):
 
 # alias
 mse = MSE = MeanSquareLoss
+mae = MAE = MeanAbsoluteLoss
 ce = CE = CrossEntropy = LogLikelihoodLoss
 
 cutoff = 1e-12
@@ -79,7 +102,8 @@ def _cutoff(z):
 
 _loss_map = {
     'mse': MeanSquareLoss,
-    'ce': CrossEntropy
+    'mae': MeanAbsoluteLoss,
+    'ce': CrossEntropy,
 }
 
 

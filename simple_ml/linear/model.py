@@ -2,7 +2,7 @@ import numpy as np
 
 from ..utils import sigmoid
 
-__all__ = ['LinearRegression']
+__all__ = ['LinearRegression', 'RidgeRegression']
 
 
 class LinearRegression(object):
