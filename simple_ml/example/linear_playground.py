@@ -7,7 +7,7 @@ from simple_ml.nn.initializer import zeros
 from simple_ml.utils.metric import accuracy, mean_absolute_error
 
 
-def mlp_random_cls():
+def seq_mlp_random_cls():
     """test MLP with random data and Sequential
 
     """
@@ -24,16 +24,18 @@ def mlp_random_cls():
     model.add(Dense(100, activation='relu'))
     model.add(Softmax(label_size))
     model.compile('CE')
-    model.fit(train_X, train_y, verbose=100, epochs=5000)
+    model.fit(train_X, train_y, verbose=100, epochs=5000,
+              validation_split=0.2,
+              metric=accuracy, peek_type='single-cls')
 
 
-def mlp_random_reg():
+def model_mlp_random_reg():
     """test MLP with random data and Sequential
 
     """
     input_size = 600
     input_dim = 20
-    output_dim = 10
+    output_dim = 1
     train_X = np.random.random((input_size, input_dim))
     random_weight = np.random.random((input_dim, output_dim))
     random_noise = np.random.random((input_size, output_dim))
@@ -45,10 +47,13 @@ def mlp_random_reg():
     X = Dense(output_dim, activation=None)(X)
     model = Model(Inputs, X)
     model.compile('MSE', optimizer='momentum')
-    model.fit(train_X, train_y, verbose=10, epochs=100, validation_split=0.1, batch_size=256)
+    model.fit(train_X, train_y,
+              verbose=100, epochs=1000, batch_size=256,
+              validation_split=0.1,
+              metric=mean_absolute_error, peek_type='single-reg')
 
 
-def mlp_mnist():
+def seq_mlp_mnist():
     """test MLP with MNIST data and Sequential
 
     """
@@ -64,15 +69,15 @@ def mlp_mnist():
     model = Sequential()
     model.add(Input(input_shape=(input_dim,)))
     model.add(Dense(300, activation='relu'))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.5))
     model.add(Softmax(label_size))
     model.compile('CE', optimizer=SGD())
     model.fit(training_data, training_label,
-              # validation_data=(valid_data, valid_label),
+              validation_data=(valid_data, valid_label),
               metric=accuracy, peek_type='single-cls')
 
 
-def model_mlp_random():
+def model_mlp_random_cls():
     """test MLP with random data and Model
 
     """
@@ -89,7 +94,9 @@ def model_mlp_random():
     X = Softmax(label_size)(X)
     model = Model(Inputs, X)
     model.compile('CE')
-    model.fit(train_X, train_y, verbose=100, epochs=5000)
+    model.fit(train_X, train_y,
+              verbose=100, epochs=5000,
+              metric=accuracy, peek_type='single-cls')
 
 
 def model_mlp_mnist():
@@ -112,12 +119,14 @@ def model_mlp_mnist():
     model = Model(Inputs, X)
     model.compile('CE', optimizer='Adadelta')
     # model.compile('CE', optimizer=Momentum(nesterov=True))
-    model.fit(training_data, training_label, validation_data=(valid_data, valid_label))
+    model.fit(training_data, training_label,
+              validation_data=(valid_data, valid_label),
+              metric=accuracy, peek_type='single-cls')
 
 
 if __name__ == '__main__':
-    # mlp_random_cls()
-    # mlp_random_reg()
-    mlp_mnist()
-    # model_mlp_random()
-    # model_mlp_mnist()
+    # seq_mlp_random_cls()
+    # model_mlp_random_reg()
+    # seq_mlp_mnist()
+    # model_mlp_random_cls()
+    model_mlp_mnist()

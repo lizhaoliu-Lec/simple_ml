@@ -49,17 +49,20 @@ class Module(object):
         sample_y = y[sample_idx[:num_show]]
         sample_y_pred = self.forward(sample_X, False)
         if peek_type == 'single-reg':
-            sample_y = sample_y.squeeze()
-            sample_y_pred = sample_y_pred.squeeze()
+            sample_y = np.around(sample_y, 2).squeeze()
+            sample_y_pred = np.around(sample_y_pred, 2).squeeze()
+            dtype = float
         elif peek_type == 'single-cls':
             sample_y = np.argmax(sample_y, axis=1)
             sample_y_pred = np.argmax(sample_y_pred, axis=1)
+            dtype = int
         else:
             pass
+            dtype = None
         for i in range(num_show):
             out_str = "%s-example %d/%d: expect-[%s], predict-[%s]" % (
                 set_type, i + 1, num_show,
-                str(sample_y[i]), str(sample_y_pred[i]))
+                str(dtype(sample_y[i])), str(dtype(sample_y_pred[i])))
             print(out_str)
 
     @staticmethod

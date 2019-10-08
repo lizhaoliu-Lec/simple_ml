@@ -38,12 +38,12 @@ pprint(train_col_names)
 
 x_cols = train_col_names
 # predict the grade point setup
-x_cols.remove('Machine learning')
-y_col = ['Machine learning grade point']
+# x_cols.remove('Machine learning')
+# y_col = ['Machine learning grade point']
 
 # predict the score setup
-# x_cols.remove('Machine learning grade point')
-# y_col = ['Machine learning']
+x_cols.remove('Machine learning grade point')
+y_col = ['Machine learning']
 
 # read the data
 train_x, train_y = read_csv_to_xy(TRAIN_PATH, x_cols, y_col)
@@ -101,9 +101,9 @@ def dlr():
     X = Linear(output_dim=1, activation=None, initializer=ones)(Inputs)
     model = Model(Inputs, X)
     # 0.01 for grade point prediction, use MSE is a lot better than MAE
-    model.compile('MSE', optimizer=SGD(lr=0.001))
+    # model.compile('MSE', optimizer=SGD(lr=0.001))
     # 0.1 for score prediction, use MAE is slightly better than MSE
-    # model.compile('MAE', optimizer=SGD(lr=0.01))
+    model.compile('MAE', optimizer=SGD(lr=0.01))
     model.fit(train_x, train_y,
               verbose=1000, epochs=10000,
               validation_data=(test_x, test_y),
