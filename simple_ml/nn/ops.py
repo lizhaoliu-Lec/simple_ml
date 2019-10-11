@@ -1,9 +1,15 @@
 import numpy as np
 
-__all__ = ['sigmoid', 'delta_sigmoid',
-           'relu', 'delta_relu',
-           'identity', 'delta_identity',
-           'softmax', 'delta_softmax']
+__all__ = [
+    'sigmoid', 'delta_sigmoid',
+    'relu', 'delta_relu',
+    'swish', 'delta_swish',
+    'identity', 'delta_identity',
+    'softmax', 'delta_softmax',
+    'softplus', 'delta_softplus',
+    'tanh', 'delta_tanh',
+    'mish', 'delta_mish',
+]
 
 
 ###########
@@ -34,9 +40,6 @@ def relu(z, alpha=0., max_value=None):
     return x
 
 
-############
-# identity #
-############
 def delta_relu(z, alpha=0., max_value=None):
     z = np.asarray(z)
     if max_value is not None:
@@ -44,6 +47,18 @@ def delta_relu(z, alpha=0., max_value=None):
                + alpha * (z < 0).astype(int)
     else:
         return (z >= 0).astype(int) + alpha * (z < 0).astype(int)
+
+
+#########
+# swish #
+#########
+def swish(z, beta=1.):
+    return z * sigmoid(beta * z)
+
+
+def delta_swish(z, beta=1.):
+    cache = sigmoid(beta * z)
+    return cache + z * beta * cache * (1 - cache)
 
 
 def identity(z):
@@ -76,3 +91,38 @@ def softmax(z):
 def delta_softmax(z):
     z = np.asarray(z)
     return np.ones(z.shape, dtype=z.dtype)
+
+
+############
+# softplus #
+############
+def softplus(z):
+    return np.log(1 + np.exp(z))
+
+
+def delta_softplus(z):
+    return sigmoid(z)
+
+
+########
+# tanh #
+########
+def tanh(z):
+    z = np.asarray(z)
+    return np.tanh(z)
+
+
+def delta_tanh(z):
+    z = np.asarray(z)
+    return 1 - np.power(np.tanh(z), 2)
+
+
+########
+# mish #
+########
+def mish(z):
+    return tanh(softplus(z))
+
+
+def delta_mish(z):
+    return delta_tanh(softplus(z)) * delta_softplus(z)

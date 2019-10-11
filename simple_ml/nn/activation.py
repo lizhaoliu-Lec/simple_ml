@@ -1,11 +1,17 @@
 from .ops import sigmoid, delta_sigmoid
 from .ops import relu, delta_relu
+from .ops import swish, delta_swish
 from .ops import identity, delta_identity
 from .ops import softmax, delta_softmax
+from .ops import softplus, delta_softplus
+from .ops import tanh, delta_tanh
+from .ops import mish, delta_mish
 
 __all__ = [
     # original class
     'Sigmoid', 'Relu', 'Identity',
+    'Swish', 'Softplus', 'Tanh',
+    'Mish',
 
     # alias
     'Linear',
@@ -43,6 +49,17 @@ class Relu(Activation):
         return delta_relu(x, self.alpha, self.max_value)
 
 
+class Swish(Activation):
+    def __init__(self, beta=1.):
+        self.beta = beta
+
+    def forward(self, x, *args, **kwargs):
+        return swish(x, self.beta)
+
+    def backward(self, x, *args, **kwargs):
+        return delta_swish(x, self.beta)
+
+
 class Identity(Activation):
     def forward(self, x, *args, **kwargs):
         return identity(x)
@@ -53,6 +70,33 @@ class Identity(Activation):
 
 # alias
 Linear = Identity
+
+
+class Softplus(Activation):
+
+    def forward(self, x, *args, **kwargs):
+        return softplus(x)
+
+    def backward(self, x, *args, **kwargs):
+        return delta_softplus(x)
+
+
+class Tanh(Activation):
+
+    def forward(self, x, *args, **kwargs):
+        return tanh(x)
+
+    def backward(self, x, *args, **kwargs):
+        return delta_tanh(x)
+
+
+class Mish(Activation):
+
+    def forward(self, x, *args, **kwargs):
+        return mish(x)
+
+    def backward(self, x, *args, **kwargs):
+        return delta_mish(x)
 
 
 class Softmax(Activation):
@@ -66,9 +110,13 @@ class Softmax(Activation):
 _activation_map = {
     'sigmoid': Sigmoid,
     'relu': Relu,
+    'swish': Swish,
     'linear': Linear,
     'identity': Identity,
-    'softmax': Softmax
+    'softmax': Softmax,
+    'softplus': Softplus,
+    'tanh': Tanh,
+    'mish': Mish,
 }
 
 
