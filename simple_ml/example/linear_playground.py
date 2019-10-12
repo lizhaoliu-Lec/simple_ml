@@ -104,16 +104,17 @@ def model_mlp_mnist():
 
     """
     from tensorflow.examples.tutorials.mnist import input_data
-    mnist = input_data.read_data_sets('./tmp/data', one_hot=True)
+    mnist = input_data.read_data_sets('./tmp/data', one_hot=False)
     training_data = np.array([image.flatten() for image in mnist.train.images])
     training_label = mnist.train.labels
     valid_data = np.array([image.flatten() for image in mnist.validation.images])
     valid_label = mnist.validation.labels
     input_dim = training_data.shape[1]
-    label_size = training_label.shape[1]
+    label_size = 10
 
     Inputs = Dense(300, input_dim=input_dim, activation=None)
-    X = Activation('relu')(Inputs)
+    # X = Activation('relu')(Inputs)
+    X = Activation('relu6')(Inputs)
     X = Dropout(0.2)(X)
     X = Softmax(label_size)(X)
     model = Model(Inputs, X)

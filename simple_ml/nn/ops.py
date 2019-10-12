@@ -78,17 +78,23 @@ def delta_identity(z):
 # softmax #
 ###########
 def softmax(z):
-    z = np.asarray(z)
-    if len(z.shape) > 1:
-        z -= np.sum(z, axis=1).reshape([z.shape[0], 1])
-        z = np.exp(z)
-        z /= np.sum(z, axis=1).reshape([z.shape[0], 1])
-        return z
-    else:
-        z -= np.max(z)
-        z = np.exp(z)
-        z /= np.sum(z)
-        return z
+    # z = np.asarray(z)
+    # if len(z.shape) > 1:
+    #     z -= np.sum(z, axis=1).reshape([z.shape[0], 1])
+    #     z = np.exp(z)
+    #     z /= np.sum(z, axis=1).reshape([z.shape[0], 1])
+    #     return z
+    # else:
+    #     z -= np.max(z)
+    #     z = np.exp(z)
+    #     z /= np.sum(z)
+    #     return z
+    z = np.asanyarray(z)
+    # shift
+    z -= np.max(z, axis=-1, keepdims=True)
+    z = np.exp(z)
+    z /= np.sum(z, axis=-1, keepdims=True)
+    return z
 
 
 def delta_softmax(z):

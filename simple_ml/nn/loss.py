@@ -65,11 +65,21 @@ class LogLikelihoodLoss(Loss):
 
     @staticmethod
     def forward(y_hat: np.array, y: np.array):
-        assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
-        assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
+        # assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
+        # assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
+        # print(y)
+        # print(y.shape)
+        # y_hat = _cutoff(y_hat)
+        # y = _cutoff(y)
+        # return -np.sum(np.sum(np.nan_to_num(y * np.log(y_hat)), axis=1), axis=0)
+        # print('y_hat size:', y_hat.shape)
+        # print('y size:', y.shape)
+        # exit()
+        y = y.astype(int)
         y_hat = _cutoff(y_hat)
-        y = _cutoff(y)
-        return -np.sum(np.sum(np.nan_to_num(y * np.log(y_hat)), axis=1), axis=0)
+        log_probs = np.log(y_hat)
+        batch_size = y_hat.shape[0]
+        return -np.sum(log_probs[np.arange(batch_size), y])
 
     @staticmethod
     def backward(y_hat: np.array, y: np.array):
@@ -81,11 +91,16 @@ class LogLikelihoodLoss(Loss):
         :param activator:
         :return:
         """
-        assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
-        assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
+        # assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
+        # assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
+        # y_hat = _cutoff(y_hat)
+        # y = _cutoff(y)
+        # return y_hat - y
+        y = y.astype(int)
         y_hat = _cutoff(y_hat)
-        y = _cutoff(y)
-        return y_hat - y
+        batch_size = y_hat.shape[0]
+        y_hat[np.arange(batch_size), y] -= 1
+        return y_hat
 
 
 # alias

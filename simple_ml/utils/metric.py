@@ -5,7 +5,8 @@ __all__ = ['accuracy', 'mean_absolute_error', 'mean_square_error']
 
 def accuracy(outputs, targets):
     y_predicts = np.argmax(outputs, axis=1)
-    y_targets = np.argmax(targets, axis=1)
+    # y_targets = np.argmax(targets, axis=1)
+    y_targets = targets
     acc = y_predicts == y_targets
     return np.sum(acc, axis=0)
 

@@ -53,7 +53,8 @@ class Module(object):
             sample_y_pred = np.around(sample_y_pred, 2).squeeze()
             dtype = float
         elif peek_type == 'single-cls':
-            sample_y = np.argmax(sample_y, axis=1)
+            # sample_y = np.argmax(sample_y, axis=1)
+            sample_y = sample_y
             sample_y_pred = np.argmax(sample_y_pred, axis=1)
             dtype = int
         else:
