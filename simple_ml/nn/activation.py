@@ -11,7 +11,7 @@ __all__ = [
     # original class
     'Sigmoid', 'Relu', 'Identity',
     'Swish', 'Softplus', 'Tanh',
-    'Mish',
+    'Mish', 'Relu6', 'LeakyRelu',
 
     # alias
     'Linear',
@@ -38,7 +38,7 @@ class Sigmoid(Activation):
 
 
 class Relu(Activation):
-    def __init__(self, alpha=0., max_value=None):
+    def __init__(self, alpha=None, max_value=None):
         self.alpha = alpha
         self.max_value = max_value
 
@@ -47,6 +47,16 @@ class Relu(Activation):
 
     def backward(self, x, *args, **kwargs):
         return delta_relu(x, self.alpha, self.max_value)
+
+
+class Relu6(Relu):
+    def __init__(self, alpha=None):
+        super(Relu6, self).__init__(alpha=alpha, max_value=6)
+
+
+class LeakyRelu(Relu):
+    def __init__(self, alpha=0.1, max_value=None):
+        super(LeakyRelu, self).__init__(alpha=alpha, max_value=max_value)
 
 
 class Swish(Activation):
@@ -117,6 +127,8 @@ _activation_map = {
     'softplus': Softplus,
     'tanh': Tanh,
     'mish': Mish,
+    'relu6': Relu6,
+    'leaky_relu': LeakyRelu,
 }
 
 

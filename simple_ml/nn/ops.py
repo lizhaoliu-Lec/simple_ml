@@ -15,38 +15,41 @@ __all__ = [
 ###########
 # sigmoid #
 ###########
-def sigmoid(x):
-    x = np.asarray(x)
-    return 1. / (1 + np.exp(-x))
+def sigmoid(z):
+    z = np.asarray(z)
+    return 1. / (1 + np.exp(-z))
 
 
-def delta_sigmoid(x):
-    x = np.asarray(x)
-    cache = sigmoid(x)
+def delta_sigmoid(z):
+    z = np.asarray(z)
+    cache = sigmoid(z)
     return cache * (1. - cache)
 
 
 ########
 # relu #
 ########
-def relu(z, alpha=0., max_value=None):
+def relu(z, alpha=None, max_value=None):
     z = np.asarray(z)
     x = np.maximum(z, 0)
     if max_value is not None:
         x = np.clip(x, 0, max_value)
-    if alpha != 0.:
-        negative_part = np.maximum(-z, 0)
-        x -= alpha * negative_part
+    if alpha is not None:
+        neg_mask = (z < 0).astype(int)
+        x += alpha * z * neg_mask
     return x
 
 
-def delta_relu(z, alpha=0., max_value=None):
+def delta_relu(z, alpha=None, max_value=None):
     z = np.asarray(z)
+    x = (z >= 0).astype(int)
+    if alpha is not None:
+        neg = alpha * (z < 0).astype(float)
+        x = x + neg
     if max_value is not None:
-        return (np.where(z <= max_value, z, -1e-6 * z) >= 0).astype(int) \
-               + alpha * (z < 0).astype(int)
-    else:
-        return (z >= 0).astype(int) + alpha * (z < 0).astype(int)
+        pos_big = (z > max_value).astype(int)
+        x = x - pos_big
+    return x
 
 
 #########
@@ -126,3 +129,14 @@ def mish(z):
 
 def delta_mish(z):
     return delta_tanh(softplus(z)) * delta_softplus(z)
+
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+
+    x = np.linspace(start=-10, stop=10, num=500)
+    y = relu(x, alpha=0.1, max_value=6)
+    dy = delta_relu(x, alpha=0.1, max_value=6)
+    plt.plot(x, y)
+    plt.plot(x, dy)
+    plt.show()
