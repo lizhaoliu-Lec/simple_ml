@@ -2,10 +2,12 @@ import numpy as np
 
 __all__ = [
     # original class
-    'MeanSquareLoss', 'CrossEntropy', 'LogLikelihoodLoss', 'MeanAbsoluteLoss',
+    'MeanSquareLoss', 'CrossEntropy', 'LogLikelihoodLoss',
+    'MeanAbsoluteLoss', 'HuberLoss',
 
     # alias
     'mse', 'ce', 'MSE', 'CE', 'MAE', 'mae',
+    'hb', 'HB',
 
     # factory interface
     'get_loss'
@@ -58,6 +60,32 @@ class MeanAbsoluteLoss(Loss):
         return np.array(gradient, dtype=float)
 
 
+class HuberLoss(Loss):
+    """
+    calculate the huber loss
+    """
+
+    @staticmethod
+    def forward(y_hat: np.array, y: np.array):
+        batch_size = y.shape[0]
+        y_hat = np.reshape(y_hat, (batch_size, -1))
+        y = np.reshape(y, (batch_size, -1))
+        abs_diff = np.abs(y_hat - y)
+        inner_part = (abs_diff <= 1).astype(int)
+        outer_part = (abs_diff > 1).astype(int)
+        diff = inner_part * 0.5 * abs_diff ** 2 + outer_part * (abs_diff - 0.5)
+
+        return np.sum(np.mean(diff, axis=-1), axis=0)
+
+    @staticmethod
+    def backward(y_hat: np.array, y: np.array):
+        abs_diff = np.abs(y_hat - y)
+        inner_part = (abs_diff <= 1).astype(int)
+        outer_part = (abs_diff > 1).astype(int)
+        gradient = inner_part * (y_hat - y) + outer_part * ((y_hat > y).astype(int) - (y_hat < y).astype(int))
+        return np.array(gradient, dtype=float)
+
+
 class LogLikelihoodLoss(Loss):
     """
         多分类的log loss, 主要用于前一层为softmax的情况
@@ -107,6 +135,7 @@ class LogLikelihoodLoss(Loss):
 mse = MSE = MeanSquareLoss
 mae = MAE = MeanAbsoluteLoss
 ce = CE = CrossEntropy = LogLikelihoodLoss
+hb = HB = HuberLoss
 
 cutoff = 1e-12
 
@@ -119,6 +148,7 @@ _loss_map = {
     'mse': MeanSquareLoss,
     'mae': MeanAbsoluteLoss,
     'ce': CrossEntropy,
+    'hb': HuberLoss,
 }
 
 
