@@ -10,6 +10,7 @@ __all__ = [
     'tanh', 'delta_tanh',
     'mish', 'delta_mish',
     'l2', 'delta_l2',
+    'l1', 'delta_l1',
 ]
 
 
@@ -138,15 +139,26 @@ def delta_mish(z):
     return delta_tanh(softplus(z)) * delta_softplus(z)
 
 
-########
+######
 # l2 #
-########
+######
 def l2(z, weight_decay):
     return 0.5 * weight_decay * np.sum(np.square(z))
 
 
 def delta_l2(z, weight_decay):
     return weight_decay * z
+
+
+######
+# l1 #
+######
+def l1(z, weight_decay):
+    return weight_decay * np.sum(np.abs(z))
+
+
+def delta_l1(z, weight_decay):
+    return weight_decay * (z >= 0).astype(float) - (z < 0).astype(float)
 
 
 if __name__ == '__main__':

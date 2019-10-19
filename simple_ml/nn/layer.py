@@ -376,15 +376,19 @@ class Dropout(Layer):
         pre_layer.next_layer = self
 
     def forward(self, inputs, is_training=True, *args, **kwargs):
-        self.input = inputs
-        if 0. < self.dropout < 1:
-            if is_training:
-                self.mask = np.random.binomial(1, 1 - self.dropout, np.asarray(self.input.shape)[self.axis])
-                return self.mask * self.input / (1 - self.dropout)
-            else:
-                return self.input * (1 - self.dropout)
+        # if 0. < self.dropout < 1:
+        #     if is_training:
+        #         self.mask = np.random.binomial(1, 1 - self.dropout, np.asarray(inputs.shape)[self.axis])
+        #         return self.mask * inputs / (1 - self.dropout)
+        #     else:
+        #         return inputs
+        # else:
+        #     return inputs
+        if 0. < self.dropout < 1 and is_training:
+            self.mask = np.random.binomial(1, 1 - self.dropout, np.asarray(inputs.shape)[self.axis])
+            return self.mask * inputs / (1 - self.dropout)
         else:
-            return self.input
+            return inputs
 
     def backward(self, pre_delta, *args, **kwargs):
         if 0. < self.dropout < 1.:

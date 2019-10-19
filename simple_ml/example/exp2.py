@@ -9,7 +9,7 @@ from simple_ml.linear.model import LogisticRegression
 from simple_ml.nn.layer import Input, Linear, Dropout, Softmax
 from simple_ml.nn.model import Model
 from simple_ml.nn.initializer import zeros, ones
-from simple_ml.nn.regularizer import L2_Regularizer
+from simple_ml.nn.regularizer import L2_Regularizer, L1_Regularizer, L1L2_Regularizer
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
 from simple_ml.utils.metric import accuracy, mean_absolute_error, mean_square_error
 
@@ -70,19 +70,29 @@ def dlr():
     # build the linear model with gradient descent
     # define layer
     Inputs = Input(input_shape=X_train.shape[1])
-    linear_out = Linear(output_dim=64,
-                        regularizer=L2_Regularizer(1),
-                        activation='swish')(Inputs)
-    linear_out = Linear(output_dim=128,
-                        regularizer=L2_Regularizer(1),
-                        activation='swish')(linear_out)
-    linear_out = Linear(output_dim=256,
-                        regularizer=L2_Regularizer(1),
-                        activation='swish')(linear_out)
-    linear_out = Linear(output_dim=1,
-                        regularizer=L2_Regularizer(1),
-                        activation='sigmoid')(linear_out)
-    model = Model(Inputs, linear_out)
+    X = Linear(output_dim=64,
+               # regularizer=L2_Regularizer(1),
+               # regularizer=L1_Regularizer(1e-2),
+               regularizer=L1L2_Regularizer(l2=1),
+               activation='swish')(Inputs)
+    X = Linear(output_dim=128,
+               # regularizer=L2_Regularizer(1),
+               # regularizer=L1_Regularizer(1e-2),
+               regularizer=L1L2_Regularizer(l2=1),
+               activation='swish')(X)
+    X = Dropout(dropout=0.2)(X)
+    X = Linear(output_dim=256,
+               # regularizer=L2_Regularizer(1),
+               # regularizer=L1_Regularizer(1e-2),
+               regularizer=L1L2_Regularizer(l2=1),
+               activation='swish')(X)
+    X = Dropout(dropout=0.2)(X)
+    X = Linear(output_dim=1,
+               # regularizer=L2_Regularizer(1),
+               # regularizer=L1_Regularizer(1e-2),
+               regularizer=L1L2_Regularizer(l2=1),
+               activation='sigmoid')(X)
+    model = Model(Inputs, X)
     model.compile('BCE', optimizer=Adam(lr=0.001))
     model.fit(X_train, y_train,
               verbose=10, epochs=100,
@@ -102,41 +112,6 @@ def dlr():
     plt.show()
     print(10 * '#' + ' SGD Linear model end ' + 10 * '#')
     print()
-
-
-# def dmlr():
-#     print(10 * '#' + ' SGD Deep Linear model ' + 10 * '#')
-#
-#     # build the linear model with gradient descent
-#     # define layer
-#     Inputs = Input(input_shape=X_train.shape[1])
-#     linear_out = Linear(output_dim=64, activation='swish')(Inputs)
-#     linear_out = Linear(output_dim=128, activation='swish')(linear_out)
-#     linear_out = Linear(output_dim=256, activation='swish')(linear_out)
-#     linear_out = Linear(output_dim=2, activation='sigmoid')(linear_out)
-#     model = Model(Inputs, linear_out)
-#     model.compile('MSE', optimizer=Momentum(lr=0.0001))
-#     model.fit(X_train, y_train,
-#               verbose=100, epochs=500,
-#               validation_data=(X_test, y_test),
-#               batch_size=256, metric='Accuracy',
-#               shuffle=True,
-#               peek_type='single-cls')
-#     # y_pred = model.forward(X_test)
-#     # for yp, yt in zip(y_pred, y_test):
-#     #     print(yp, yt)
-#     plt.title('Deep Linear model')
-#     plt.subplot(211)
-#     plt.plot(model.train_losses, label='train_losses')
-#     plt.plot(model.validation_losses, label='valid_losses')
-#     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-#     plt.subplot(212)
-#     plt.plot(model.train_metrics, label='train_metrics')
-#     plt.plot(model.validation_metrics, label='valid_metrics')
-#     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-#     plt.show()
-#     print(10 * '#' + ' SGD Deep Linear model end ' + 10 * '#')
-#     print()
 
 
 if __name__ == '__main__':

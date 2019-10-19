@@ -194,14 +194,15 @@ class Module(object):
                     train_matrices += metric(y_pred, y_batch)
 
             train_losses = train_losses / train_size + self.regularizer_loss()
+            train_matrices = train_matrices / train_size
             run_out = "epoch %5d/%5d, train-[loss: %.4f" % (
                 iter_idx, epochs,
                 float(train_losses))
             self._add_training_loss(train_losses)
 
             if metric is not None:
-                run_out += ' | metric: %.4f]; ' % float(train_matrices / train_size)
-                self._add_training_metric(train_matrices / train_size)
+                run_out += ' | metric: %.4f]; ' % float(train_matrices)
+                self._add_training_metric(train_matrices)
             else:
                 run_out += ']; '
 
@@ -222,6 +223,7 @@ class Module(object):
                         valid_matrices += metric(y_pred, y_batch)
 
                 valid_losses = valid_losses / val_size + self.regularizer_loss()
+                valid_matrices = valid_matrices / val_size
 
                 run_out += "valid-[loss: %.4f" % (float(valid_losses))
                 self._add_valid_loss(valid_losses)
