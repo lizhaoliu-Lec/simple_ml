@@ -80,13 +80,11 @@ def dlr():
                # regularizer=L1_Regularizer(1e-2),
                regularizer=L1L2_Regularizer(l2=1),
                activation='swish')(X)
-    X = Dropout(dropout=0.2)(X)
     X = Linear(output_dim=256,
                # regularizer=L2_Regularizer(1),
                # regularizer=L1_Regularizer(1e-2),
                regularizer=L1L2_Regularizer(l2=1),
                activation='swish')(X)
-    X = Dropout(dropout=0.2)(X)
     X = Linear(output_dim=1,
                # regularizer=L2_Regularizer(1),
                # regularizer=L1_Regularizer(1e-2),
