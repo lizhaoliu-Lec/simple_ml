@@ -71,24 +71,24 @@ def dlr():
     # define layer
     Inputs = Input(input_shape=X_train.shape[1])
     X = Linear(output_dim=64,
-               # regularizer=L2_Regularizer(1),
+               regularizer=L2_Regularizer(1),
                # regularizer=L1_Regularizer(1e-2),
-               regularizer=L1L2_Regularizer(l2=1),
+               # regularizer=L1L2_Regularizer(l2=1),
                activation='swish')(Inputs)
     X = Linear(output_dim=128,
-               # regularizer=L2_Regularizer(1),
+               regularizer=L2_Regularizer(1),
                # regularizer=L1_Regularizer(1e-2),
-               regularizer=L1L2_Regularizer(l2=1),
+               # regularizer=L1L2_Regularizer(l2=1),
                activation='swish')(X)
     X = Linear(output_dim=256,
-               # regularizer=L2_Regularizer(1),
+               regularizer=L2_Regularizer(1),
                # regularizer=L1_Regularizer(1e-2),
-               regularizer=L1L2_Regularizer(l2=1),
+               # regularizer=L1L2_Regularizer(l2=1),
                activation='swish')(X)
     X = Linear(output_dim=1,
-               # regularizer=L2_Regularizer(1),
+               regularizer=L2_Regularizer(1),
                # regularizer=L1_Regularizer(1e-2),
-               regularizer=L1L2_Regularizer(l2=1),
+               # regularizer=L1L2_Regularizer(l2=1),
                activation='sigmoid')(X)
     model = Model(Inputs, X)
     model.compile('BCE', optimizer=Adam(lr=0.001))
