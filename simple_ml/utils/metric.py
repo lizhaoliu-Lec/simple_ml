@@ -11,7 +11,7 @@ def accuracy(outputs, targets):
     # y_targets = np.argmax(targets, axis=1)
     y_targets = targets
     acc = y_predicts == y_targets
-    return np.sum(acc, axis=0)
+    return np.mean(np.sum(acc, axis=0))
 
 
 def mean_square_error(outputs, targets):
