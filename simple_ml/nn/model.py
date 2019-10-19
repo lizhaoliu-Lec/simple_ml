@@ -5,6 +5,7 @@ import numpy as np
 
 from .optimizer import get_optimizer
 from .loss import get_loss
+from simple_ml.utils.metric import get_metric
 
 __all__ = [
     'Sequential', 'Model'
@@ -15,6 +16,49 @@ class Module(object):
     def __init__(self):
         self.optimizer = None
         self.loss = None
+        self.training_losses = []
+        self.valid_losses = []
+        self.training_metrics = {}
+        self.valid_metrics = {}
+        self.metric = None
+
+    def _add_training_loss(self, training_loss):
+        self.training_losses.append(training_loss)
+
+    def _add_valid_loss(self, valid_loss):
+        self.valid_losses.append(valid_loss)
+
+    def _add_training_metric(self, training_metric):
+        metric_name = self.metric
+        if metric_name is not None:
+            if metric_name not in self.training_metrics:
+                self.training_metrics[metric_name] = []
+            self.training_metrics[metric_name].append(training_metric)
+
+    def _add_valid_metric(self, valid_metric):
+        metric_name = self.metric
+        if metric_name is not None:
+            if metric_name not in self.valid_metrics:
+                self.valid_metrics[metric_name] = []
+            self.valid_metrics[metric_name].append(valid_metric)
+
+    @property
+    def train_losses(self):
+        return self.training_losses
+
+    @property
+    def validation_losses(self):
+        return self.valid_losses
+
+    @property
+    def train_metrics(self):
+        return self.training_metrics[self.metric]
+
+    @property
+    def validation_metrics(self):
+        if self.metric not in self.valid_metrics:
+            return []
+        return self.valid_metrics[self.metric]
 
     def compile(self, loss, optimizer='sgd'):
         """Configures the model for training.
@@ -43,7 +87,6 @@ class Module(object):
         assert peek_type in allow_peek_types
         # random select examples
         sample_idx = [_ for _ in range(X.shape[0])]
-        num_show = 5
         random.shuffle(sample_idx)
         sample_X = X[sample_idx[:num_show]]
         sample_y = y[sample_idx[:num_show]]
@@ -69,7 +112,7 @@ class Module(object):
     @staticmethod
     def convert_dtype(dtype, *args):
         converted_data = [
-            data.astype(dtype) if not np.issubdtype(dtype, data.dtype) else data for data in args
+            np.asarray(data).astype(dtype) if not np.issubdtype(dtype, data.dtype) else data for data in args
         ]
         return converted_data
 
@@ -99,6 +142,8 @@ class Module(object):
             metric=None, *args, **kwargs):
         # prepare data
         train_X, train_y = self.convert_dtype(dtype, X, y)
+        self.metric = metric
+        metric = get_metric(metric)
 
         if 1. > validation_split > 0.:
             split = int(train_y.shape[0] * validation_split)
@@ -128,7 +173,6 @@ class Module(object):
         num_show = kwargs.get('num_show', 5)
         train_size = train_y.shape[0]
         for iter_idx in range(1, epochs + 1):
-
             # training
             train_losses = 0
             train_matrices = 0
@@ -151,9 +195,11 @@ class Module(object):
             run_out = "epoch %5d/%5d, train-[loss: %.4f" % (
                 iter_idx, epochs,
                 float(train_losses / train_size))
+            self._add_training_loss(train_losses / train_size)
 
             if metric is not None:
                 run_out += ' | metric: %.4f]; ' % float(train_matrices / train_size)
+                self._add_training_metric(train_matrices / train_size)
             else:
                 run_out += ']; '
 
@@ -174,8 +220,10 @@ class Module(object):
                         valid_matrices += metric(y_pred, y_batch)
 
                 run_out += "valid-[loss: %.4f" % (float(valid_losses / val_size))
+                self._add_valid_loss(valid_losses / val_size)
                 if metric is not None:
                     run_out += ' | metric: %.4f]; ' % float(valid_matrices / val_size)
+                    self._add_valid_metric(valid_matrices / val_size)
                 else:
                     run_out += ']; '
 

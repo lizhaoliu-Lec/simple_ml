@@ -65,8 +65,8 @@ def lr():
     test_y_hat = linear_regression.predict(test_x)
     train_y_hat = linear_regression.predict(train_x)
 
-    training_error = euclidean(train_y, train_y_hat)
-    test_error = euclidean(test_y, test_y_hat)
+    training_error = mean_absolute_error(train_y, train_y_hat)
+    test_error = mean_absolute_error(test_y, test_y_hat)
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)
@@ -83,8 +83,8 @@ def rlr():
     test_y_hat = ridge_regression.predict(test_x)
     train_y_hat = ridge_regression.predict(train_x)
 
-    training_error = euclidean(train_y, train_y_hat)
-    test_error = euclidean(test_y, test_y_hat)
+    training_error = mean_absolute_error(train_y, train_y_hat)
+    test_error = mean_absolute_error(test_y, test_y_hat)
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)
@@ -108,10 +108,19 @@ def dlr():
     # model.compile('HB', optimizer=SGD(lr=0.01))
     # or we can use HB (huber loss) for both two #
     model.fit(train_x, train_y,
-              verbose=1000, epochs=10000,
+              verbose=100, epochs=10000,
               validation_data=(test_x, test_y),
-              batch_size=128, metric=mean_square_error,
+              batch_size=32, metric='mae',
               peek_type='single-reg')
+    plt.subplot(211)
+    plt.plot(model.train_losses, label='train_losses')
+    plt.plot(model.validation_losses, label='valid_losses')
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    plt.subplot(212)
+    plt.plot(model.train_metrics, label='train_metrics')
+    plt.plot(model.validation_metrics, label='valid_metrics')
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    plt.show()
     print(10 * '#' + ' Linear model end ' + 10 * '#')
     print()
 
@@ -123,6 +132,6 @@ if __name__ == '__main__':
     train_x = standardizer.transform(train_x)
     test_x = standardizer.transform(test_x)
 
-    # lr()
-    # rlr()
+    lr()
+    rlr()
     dlr()

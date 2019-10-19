@@ -6,6 +6,8 @@ from simple_ml.nn.optimizer import SGD, Momentum, Adam
 from simple_ml.nn.initializer import zeros
 from simple_ml.utils.metric import accuracy, mean_absolute_error
 
+import matplotlib.pyplot as plt
+
 
 def seq_mlp_random_cls():
     """test MLP with random data and Sequential
@@ -26,7 +28,7 @@ def seq_mlp_random_cls():
     model.compile('CE')
     model.fit(train_X, train_y, verbose=100, epochs=5000,
               validation_split=0.2,
-              metric=accuracy, peek_type='single-cls')
+              metric='Accuracy', peek_type='single-cls')
 
 
 def model_mlp_random_reg():
@@ -48,9 +50,19 @@ def model_mlp_random_reg():
     model = Model(Inputs, X)
     model.compile('MSE', optimizer='momentum')
     model.fit(train_X, train_y,
-              verbose=100, epochs=1000, batch_size=256,
-              validation_split=0.1,
-              metric=mean_absolute_error, peek_type='single-reg')
+              verbose=100, epochs=600, batch_size=256,
+              # validation_split=0.1,
+              metric='MAE', peek_type='single-reg')
+    print(len(model.train_losses))
+    print(len(model.validation_losses))
+    print(len(model.train_metrics))
+    print(len(model.validation_metrics))
+    plt.axis([0, len(model.train_losses), 0, 5])
+    plt.plot(model.train_losses)
+    plt.plot(model.validation_losses)
+    # plt.plot(model.train_metrics)
+    # plt.plot(model.validation_metrics)
+    plt.show()
 
 
 def seq_mlp_mnist():
@@ -74,7 +86,7 @@ def seq_mlp_mnist():
     model.compile('CE', optimizer=SGD())
     model.fit(training_data, training_label,
               validation_data=(valid_data, valid_label),
-              metric=accuracy, peek_type='single-cls')
+              metric='Accuracy', peek_type='single-cls')
 
 
 def model_mlp_random_cls():
@@ -96,7 +108,7 @@ def model_mlp_random_cls():
     model.compile('CE')
     model.fit(train_X, train_y,
               verbose=100, epochs=5000,
-              metric=accuracy, peek_type='single-cls')
+              metric='Accuracy', peek_type='single-cls')
 
 
 def model_mlp_mnist():
@@ -122,7 +134,7 @@ def model_mlp_mnist():
     # model.compile('CE', optimizer=Momentum(nesterov=True))
     model.fit(training_data, training_label,
               validation_data=(valid_data, valid_label),
-              metric=accuracy, peek_type='single-cls')
+              metric='Accuracy', peek_type='single-cls')
 
 
 if __name__ == '__main__':
