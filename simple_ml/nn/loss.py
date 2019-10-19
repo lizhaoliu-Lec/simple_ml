@@ -3,11 +3,11 @@ import numpy as np
 __all__ = [
     # original class
     'MeanSquareLoss', 'CrossEntropy', 'LogLikelihoodLoss',
-    'MeanAbsoluteLoss', 'HuberLoss',
+    'MeanAbsoluteLoss', 'HuberLoss', 'BinaryCrossEntropy',
 
     # alias
     'mse', 'ce', 'MSE', 'CE', 'MAE', 'mae',
-    'hb', 'HB',
+    'hb', 'HB', 'bce', 'BCE',
 
     # factory interface
     'get_loss'
@@ -103,11 +103,14 @@ class LogLikelihoodLoss(Loss):
         # print('y_hat size:', y_hat.shape)
         # print('y size:', y.shape)
         # exit()
-        y = y.astype(int)
+        y = y.astype(int).squeeze()
         y_hat = _cutoff(y_hat)
         log_probs = np.log(y_hat)
         batch_size = y_hat.shape[0]
-        return -np.sum(log_probs[np.arange(batch_size), y])
+        # print(log_probs.shape, 'log_probs')
+        # print(y.shape, 'y')
+        # print(log_probs[np.arange(batch_size), y].shape)
+        return -np.sum(log_probs[np.arange(batch_size), y], axis=0)
 
     @staticmethod
     def backward(y_hat: np.array, y: np.array):
@@ -131,10 +134,49 @@ class LogLikelihoodLoss(Loss):
         return y_hat
 
 
+class BinaryCrossEntropy(Loss):
+    """
+        多分类的log loss, 主要用于前一层为softmax的情况
+    """
+
+    @staticmethod
+    def forward(y_hat: np.array, y: np.array):
+        y = y.astype(int).squeeze()
+        y_hat = _cutoff(y_hat)
+        y = np.reshape(y, (-1, 1))
+        # return -np.sum(np.log(y_hat[y == 1]).sum() + np.log(1 - y_hat[y == 0]).sum(), axis=0)
+        # for yt, yp in zip(y, y_hat):
+        #     print(yt, ' | ', yp, ' | ', np.sum(yp), ' | ', np.log(yp), ' | ', np.log(1-yp))
+
+        # print(-np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat)))
+        # import sys
+        # sys.exit(0)
+        return -np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+
+    @staticmethod
+    def backward(y_hat: np.array, y: np.array):
+        """
+        The loss partial by z is : y_hat * (y - y_hat) / (-1 / y_hat) = y_hat - y
+        softmax + loglikelihoodCost == sigmoid + crossentropyCost
+        :param y_hat:
+        :param y:
+        :param activator:
+        :return:
+        """
+        # assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
+        # assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
+        # y_hat = _cutoff(y_hat)
+        # y = _cutoff(y)
+        # return y_hat - y
+        y_hat = _cutoff(y_hat)
+        return (y_hat - y) / ((1 - y_hat) * y_hat)
+
+
 # alias
 mse = MSE = MeanSquareLoss
 mae = MAE = MeanAbsoluteLoss
 ce = CE = CrossEntropy = LogLikelihoodLoss
+bce = BCE = BinaryCrossEntropy
 hb = HB = HuberLoss
 
 cutoff = 1e-12
@@ -149,6 +191,7 @@ _loss_map = {
     'mae': MeanAbsoluteLoss,
     'ce': CrossEntropy,
     'hb': HuberLoss,
+    'bce': BinaryCrossEntropy,
 }
 
 

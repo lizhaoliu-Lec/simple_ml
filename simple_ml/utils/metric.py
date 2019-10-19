@@ -2,16 +2,34 @@ import numpy as np
 
 __all__ = [
     'get_metric',
-    'accuracy', 'mean_absolute_error', 'mean_square_error'
+    'accuracy', 'mean_absolute_error', 'mean_square_error',
+    'binary_accuracy',
 ]
+
+
+def binary_accuracy(outputs, targets):
+    y_predicts = (outputs >= 0.5).astype(int)
+    # y_targets = np.argmax(targets, axis=1)
+    y_targets = targets
+    acc = y_predicts == y_targets
+    # print('y_predicts', y_predicts)
+    # print(y_predicts.shape, 'y_predicts')
+    # print(targets.shape, 'targets')
+    # print(np.sum(acc, axis=0).shape, 'np.sum(acc, axis=0)')
+    # print(acc.shape, 'np.sum(acc, axis=0)')
+    return np.sum(acc, axis=0)
 
 
 def accuracy(outputs, targets):
     y_predicts = np.argmax(outputs, axis=1)
     # y_targets = np.argmax(targets, axis=1)
-    y_targets = targets
+    y_targets = targets.squeeze()
     acc = y_predicts == y_targets
-    return np.mean(np.sum(acc, axis=0))
+    # print(y_predicts.shape, 'y_predicts')
+    # print(targets.shape, 'targets')
+    # print(np.sum(acc, axis=0).shape, 'np.sum(acc, axis=0)')
+    # print(acc.shape, 'np.sum(acc, axis=0)')
+    return np.sum(acc, axis=0)
 
 
 def mean_square_error(outputs, targets):
@@ -19,7 +37,7 @@ def mean_square_error(outputs, targets):
     outputs = np.reshape(outputs, (batch_size, -1))
     targets = np.reshape(targets, (batch_size, -1))
 
-    return np.mean(np.mean(0.5 * (outputs - targets) ** 2, axis=1), axis=0)
+    return np.sum(np.mean(0.5 * (outputs - targets) ** 2, axis=1), axis=0)
 
 
 def mean_absolute_error(outputs, targets):
@@ -27,13 +45,15 @@ def mean_absolute_error(outputs, targets):
     outputs = np.reshape(outputs, (batch_size, -1))
     targets = np.reshape(targets, (batch_size, -1))
 
-    return np.mean(np.mean(np.abs(outputs - targets), axis=1), axis=0)
+    return np.sum(np.mean(np.abs(outputs - targets), axis=1), axis=0)
 
 
 _metric_map = {
     'mae': mean_absolute_error,
     'mse': mean_square_error,
     'accuracy': accuracy,
+    'binary_accuracy': binary_accuracy,
+    'binaryaccuracy': binary_accuracy,
 }
 
 

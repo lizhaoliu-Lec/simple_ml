@@ -41,8 +41,8 @@ def lr():
     test_y_hat = linear_regression.predict(X_test)
     train_y_hat = linear_regression.predict(X_train)
 
-    training_error = mean_absolute_error(y_train, train_y_hat)
-    test_error = mean_absolute_error(y_test, test_y_hat)
+    training_error = mean_absolute_error(y_train, train_y_hat) / y_train.shape[0]
+    test_error = mean_absolute_error(y_test, test_y_hat) / y_test.shape[0]
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)
@@ -61,8 +61,8 @@ def rlr():
     test_y_hat = ridge_regression.predict(X_test)
     train_y_hat = ridge_regression.predict(X_train)
 
-    training_error = mean_absolute_error(y_train, train_y_hat)
-    test_error = mean_absolute_error(y_test, test_y_hat)
+    training_error = mean_absolute_error(y_train, train_y_hat) / y_train.shape[0]
+    test_error = mean_absolute_error(y_test, test_y_hat) / y_test.shape[0]
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)
@@ -82,12 +82,30 @@ def dlr():
     model = Model(Inputs, linear_out)
     model.compile('MSE', optimizer=SGD(lr=0.01))
     model.fit(X_train, y_train,
-              verbose=100, epochs=500,
+              verbose=-1, epochs=5000,
               validation_data=(X_test, y_test),
               batch_size=256, metric='MAE',
               shuffle=True,
               # peek_type='single-reg'
               )
+
+    plt.subplot(211)
+    plt.plot(model.train_losses, label='train_losses')
+    plt.plot(model.validation_losses, label='valid_losses')
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    plt.subplot(212)
+    plt.plot(model.train_metrics, label='train_metrics')
+    plt.plot(model.validation_metrics, label='valid_metrics')
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    plt.show()
+
+    train_y_hat = model.forward(X_train)
+    test_y_hat = model.forward(X_test)
+    training_error = mean_absolute_error(y_train, train_y_hat) / y_train.shape[0]
+    test_error = mean_absolute_error(y_test, test_y_hat) / y_test.shape[0]
+
+    print('Training error: ', training_error)
+    print('Test error: ', test_error)
     print(10 * '#' + ' SGD Linear model end ' + 10 * '#')
     print()
 
@@ -137,4 +155,4 @@ if __name__ == '__main__':
     lr()
     rlr()
     dlr()
-    dmlr()
+    # dmlr()

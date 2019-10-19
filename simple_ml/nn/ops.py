@@ -9,6 +9,7 @@ __all__ = [
     'softplus', 'delta_softplus',
     'tanh', 'delta_tanh',
     'mish', 'delta_mish',
+    'l2', 'delta_l2',
 ]
 
 
@@ -21,7 +22,7 @@ def sigmoid(z):
 
 
 def delta_sigmoid(z):
-    z = np.asarray(z)
+    # z = np.asarray(z)
     cache = sigmoid(z)
     return cache * (1. - cache)
 
@@ -135,6 +136,17 @@ def mish(z):
 
 def delta_mish(z):
     return delta_tanh(softplus(z)) * delta_softplus(z)
+
+
+########
+# l2 #
+########
+def l2(z, weight_decay):
+    return 0.5 * weight_decay * np.sum(np.square(z))
+
+
+def delta_l2(z, weight_decay):
+    return weight_decay * z
 
 
 if __name__ == '__main__':

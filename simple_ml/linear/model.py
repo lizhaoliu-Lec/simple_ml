@@ -1,8 +1,12 @@
+from tqdm import tqdm
 import numpy as np
+
 
 from ..utils import sigmoid
 
-__all__ = ['LinearRegression', 'RidgeRegression']
+__all__ = ['LinearRegression', 'RidgeRegression',
+           'LogisticRegression',
+           ]
 
 
 class LinearRegression(object):
@@ -47,7 +51,8 @@ class LinearRegression(object):
         if self.fit_intercept:
             X = np.c_[np.ones(X.shape[0]), X]
 
-        pseudo_inverse = np.dot(np.linalg.inv(np.dot(X.T, X)), X.T)
+        # pseudo_inverse = np.dot(np.linalg.inv(np.dot(X.T, X)), X.T)
+        pseudo_inverse = np.dot(np.linalg.pinv(np.dot(X.T, X)), X.T)
         self.beta = np.dot(pseudo_inverse, y)
 
     def predict(self, X: np.array) -> np.array:
@@ -126,6 +131,7 @@ class RidgeRegression(object):
 
         A = self.alpha * np.eye(X.shape[1])
         pseudo_inverse = np.dot(np.linalg.inv(X.T @ X + A), X.T)
+        # pseudo_inverse = np.dot(np.linalg.pinv(X.T @ X + A), X.T)
         self.beta = pseudo_inverse @ y
 
     def predict(self, X):
@@ -149,7 +155,7 @@ class RidgeRegression(object):
         return np.dot(X, self.beta)
 
 
-class LogisticRegression:
+class LogisticRegression(object):
     def __init__(self, penalty="l2", gamma=0, fit_intercept=True):
         """
         A simple logistic regression model fit via gradient descent on the
@@ -198,9 +204,10 @@ class LogisticRegression:
         if self.fit_intercept:
             X = np.c_[np.ones(X.shape[0]), X]
 
+        y = y.squeeze()
         l_prev = np.inf
         self.beta = np.random.rand(X.shape[1])
-        for _ in range(int(max_iter)):
+        for _ in tqdm(range(int(max_iter))):
             y_pred = sigmoid(np.dot(X, self.beta))
             loss = self._NLL(X, y, y_pred)
             if l_prev - loss < tol:

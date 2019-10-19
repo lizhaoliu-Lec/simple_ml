@@ -1,6 +1,7 @@
 import numpy as np
 
 from .activation import get_activation
+from .regularizer import get_regularizer
 from .initializer import xavier_uniform_initializer
 
 __all__ = [
@@ -150,6 +151,7 @@ class FullyConnected(Layer):
     def __init__(self, output_dim,
                  input_dim=None,
                  activation='relu',
+                 regularizer=None,
                  initializer=xavier_uniform_initializer):
         """
         全连接层，即Dense层
@@ -163,6 +165,7 @@ class FullyConnected(Layer):
         super(FullyConnected, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
+        self.regularizer = get_regularizer(regularizer)
         self.activation = get_activation(activation)
         self.initializer = initializer
         self.input_shape = None
@@ -269,11 +272,15 @@ class FullyConnected(Layer):
             pre_delta = pre_delta[None, :]
         batch_size, _ = self.inputs.shape
         act_delta = pre_delta * self.activation.backward(self.logit)
-        # here should calulate the average value of batch
-        self.delta_W = np.dot(act_delta.T, self.inputs)
+        # here should calculate the average value of batch
+        self.delta_W = np.dot(act_delta.T, self.inputs) + self.regularizer.backward(self.W)
         self.delta_b = np.mean(act_delta, axis=0)
         self.delta = np.dot(act_delta, self.W)
         return self.delta
+
+    @property
+    def regularizer_loss(self):
+        return self.regularizer.forward(self.W)
 
 
 Linear = Dense = FullyConnected

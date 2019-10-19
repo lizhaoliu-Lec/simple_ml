@@ -1,5 +1,6 @@
 import sys
 import random
+from tqdm import tqdm
 
 import numpy as np
 
@@ -103,11 +104,11 @@ class Module(object):
         else:
             pass
             dtype = None
-        for i in range(num_show):
-            out_str = "%s-example %d/%d: expect-[%s], predict-[%s]" % (
-                set_type, i + 1, num_show,
-                str(dtype(sample_y[i])), str(dtype(sample_y_pred[i])))
-            print(out_str)
+        out = ["%s-example %d/%d: expect-[%s], predict-[%s]" % (
+            set_type, i + 1, num_show,
+            str(dtype(sample_y[i])), str(dtype(sample_y_pred[i]))) for i in range(num_show)]
+
+        print('\n'.join(out))
 
     @staticmethod
     def convert_dtype(dtype, *args):
@@ -172,7 +173,7 @@ class Module(object):
         peek_type = kwargs.get('peek_type', None)
         num_show = kwargs.get('num_show', 5)
         train_size = train_y.shape[0]
-        for iter_idx in range(1, epochs + 1):
+        for iter_idx in tqdm(range(1, epochs + 1)):
             # training
             train_losses = 0
             train_matrices = 0
@@ -192,10 +193,11 @@ class Module(object):
                 if metric is not None:
                     train_matrices += metric(y_pred, y_batch)
 
+            train_losses = train_losses / train_size + self.regularizer_loss()
             run_out = "epoch %5d/%5d, train-[loss: %.4f" % (
                 iter_idx, epochs,
-                float(train_losses / train_size))
-            self._add_training_loss(train_losses / train_size)
+                float(train_losses))
+            self._add_training_loss(train_losses)
 
             if metric is not None:
                 run_out += ' | metric: %.4f]; ' % float(train_matrices / train_size)
@@ -219,16 +221,18 @@ class Module(object):
                     if metric is not None:
                         valid_matrices += metric(y_pred, y_batch)
 
-                run_out += "valid-[loss: %.4f" % (float(valid_losses / val_size))
-                self._add_valid_loss(valid_losses / val_size)
+                valid_losses = valid_losses / val_size + self.regularizer_loss()
+
+                run_out += "valid-[loss: %.4f" % (float(valid_losses))
+                self._add_valid_loss(valid_losses)
                 if metric is not None:
-                    run_out += ' | metric: %.4f]; ' % float(valid_matrices / val_size)
-                    self._add_valid_metric(valid_matrices / val_size)
+                    run_out += ' | metric: %.4f]; ' % float(valid_matrices)
+                    self._add_valid_metric(valid_matrices)
                 else:
                     run_out += ']; '
 
             if verbose > 0 and iter_idx % verbose == 0:
-                print(run_out, file=file)
+                print('\n' + run_out, file=file)
                 if peek_type is not None:
                     if valid_X is not None and valid_y is not None:
                         self.peak(valid_X, valid_y,
@@ -246,6 +250,9 @@ class Module(object):
         raise NotImplementedError
 
     def optimize(self):
+        raise NotImplementedError
+
+    def regularizer_loss(self):
         raise NotImplementedError
 
 
@@ -315,6 +322,13 @@ class Sequential(Module):
             X = layer.forward(X, is_training=is_training)
         return X
 
+    def regularizer_loss(self):
+        reg_loss = 0
+        for layer in self.layers[:]:
+            if hasattr(layer, 'regularizer'):
+                reg_loss += layer.regularizer_loss
+        return reg_loss
+
     def backward(self, y_hat, y, *args, **kwargs):
         # backward propagation
         grad = self.loss.backward(y_hat, y)
@@ -374,6 +388,16 @@ class Model(Module):
             X = layer.forward(X, is_training=is_training)
             layer = layer.next_layer
         return X
+
+    def regularizer_loss(self):
+        reg_loss = 0
+
+        layer = self.input
+        while layer is not None:
+            if hasattr(layer, 'regularizer'):
+                reg_loss += layer.regularizer_loss
+            layer = layer.next_layer
+        return reg_loss
 
     def backward(self, y_hat, y, *args, **kwargs):
         grad = self.loss.backward(y_hat, y)
