@@ -55,7 +55,7 @@ class MeanAbsoluteLoss(Loss):
 
     @staticmethod
     def backward(y_hat: np.array, y: np.array):
-        gradient = (y_hat > y) - (y_hat < y)
+        gradient = (y_hat > y).astype(int) - (y_hat < y).astype(int)
         return np.array(gradient, dtype=float)
 
 
