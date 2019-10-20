@@ -11,6 +11,7 @@ from simple_ml.linear.model import LinearRegression, RidgeRegression
 from simple_ml.nn.layer import Input, Linear
 from simple_ml.nn.model import Model
 from simple_ml.nn.initializer import zeros, ones
+from simple_ml.nn.regularizer import L2_Regularizer
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
 from simple_ml.utils.metric import accuracy, mean_absolute_error, mean_square_error
 
@@ -108,7 +109,9 @@ def dlr():
     # define layer
     input_dim = train_x.shape[1]
     Inputs = Input(input_shape=input_dim)
-    X = Linear(output_dim=1, activation=None, initializer=ones)(Inputs)
+    X = Linear(output_dim=1, activation=None,
+               regularizer=L2_Regularizer(1),
+               initializer=ones)(Inputs)
     model = Model(Inputs, X)
 
     # lr = 0.001 for grade point prediction, use MSE is a lot better than MAE
