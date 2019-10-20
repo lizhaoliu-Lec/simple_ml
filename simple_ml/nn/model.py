@@ -83,7 +83,7 @@ class Module(object):
 
     def peak(self, X, y, peek_type, set_type, num_show=5):
         allow_set_types = ['train', 'valid']
-        allow_peek_types = ['single-cls', 'single-reg']
+        allow_peek_types = ['single-cls', 'single-reg', 'single-logistic-cls', 'single-svm-cls']
         assert set_type in allow_set_types
         assert peek_type in allow_peek_types
         # random select examples
@@ -97,13 +97,19 @@ class Module(object):
             sample_y_pred = np.around(sample_y_pred, 2).squeeze()
             dtype = float
         elif peek_type == 'single-cls':
-            # sample_y = np.argmax(sample_y, axis=1)
             sample_y = sample_y
             sample_y_pred = np.argmax(sample_y_pred, axis=1)
             dtype = int
+        elif peek_type in 'single-logistic-cls':
+            sample_y = sample_y
+            sample_y_pred = np.where(sample_y_pred >= 0.5, 1, 0)
+            dtype = int
+        elif peek_type in 'single-svm-cls':
+            sample_y = sample_y
+            sample_y_pred = np.where(sample_y_pred >= 0, 1, -1)
+            dtype = int
         else:
-            pass
-            dtype = None
+            raise ValueError('Unexpected error occur.')
         out = ["%s-example %d/%d: expect-[%s], predict-[%s]" % (
             set_type, i + 1, num_show,
             str(dtype(sample_y[i])), str(dtype(sample_y_pred[i]))) for i in range(num_show)]
@@ -311,7 +317,7 @@ class Sequential(Module):
             ValueError: In case of invalid arguments for
                 `optimizer`, `loss`.
         """
-        super(Sequential, self).compile(loss=loss, optimizer=optimizer, )
+        super(Sequential, self).compile(loss=loss, optimizer=optimizer)
 
         prev_layer = None
         for layer in self.layers:

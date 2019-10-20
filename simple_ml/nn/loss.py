@@ -4,10 +4,11 @@ __all__ = [
     # original class
     'MeanSquareLoss', 'CrossEntropy', 'LogLikelihoodLoss',
     'MeanAbsoluteLoss', 'HuberLoss', 'BinaryCrossEntropy',
+    'HingeLoss', 'ExponentialLoss',
 
     # alias
     'mse', 'ce', 'MSE', 'CE', 'MAE', 'mae',
-    'hb', 'HB', 'bce', 'BCE',
+    'hb', 'HB', 'bce', 'BCE', 'hl', 'HL', 'el', 'EL',
 
     # factory interface
     'get_loss'
@@ -92,23 +93,11 @@ class LogLikelihoodLoss(Loss):
 
     @staticmethod
     def forward(y_hat: np.array, y: np.array):
-        # assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
-        # assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
-        # print(y)
-        # print(y.shape)
-        # y_hat = _cutoff(y_hat)
-        # y = _cutoff(y)
-        # return -np.sum(np.sum(np.nan_to_num(y * np.log(y_hat)), axis=1), axis=0)
-        # print('y_hat size:', y_hat.shape)
-        # print('y size:', y.shape)
-        # exit()
         y = y.astype(int).squeeze()
-        y_hat = _cutoff(y_hat)
+        y_hat = _cut_off(y_hat)
         log_probs = np.log(y_hat)
         batch_size = y_hat.shape[0]
-        # print(log_probs.shape, 'log_probs')
-        # print(y.shape, 'y')
-        # print(log_probs[np.arange(batch_size), y].shape)
+
         return -np.sum(log_probs[np.arange(batch_size), y], axis=0)
 
     @staticmethod
@@ -121,54 +110,56 @@ class LogLikelihoodLoss(Loss):
         :param activator:
         :return:
         """
-        # assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
-        # assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
-        # y_hat = _cutoff(y_hat)
-        # y = _cutoff(y)
-        # return y_hat - y
         y = y.astype(int)
-        y_hat = _cutoff(y_hat)
+        y_hat = _cut_off(y_hat)
         batch_size = y_hat.shape[0]
         y_hat[np.arange(batch_size), y] -= 1
         return y_hat
 
 
 class BinaryCrossEntropy(Loss):
-    """
-        多分类的log loss, 主要用于前一层为softmax的情况
-    """
 
     @staticmethod
     def forward(y_hat: np.array, y: np.array):
         y = y.astype(int).squeeze()
-        y_hat = _cutoff(y_hat)
+        y_hat = _cut_off(y_hat)
         y = np.reshape(y, (-1, 1))
-        # return -np.sum(np.log(y_hat[y == 1]).sum() + np.log(1 - y_hat[y == 0]).sum(), axis=0)
-        # for yt, yp in zip(y, y_hat):
-        #     print(yt, ' | ', yp, ' | ', np.sum(yp), ' | ', np.log(yp), ' | ', np.log(1-yp))
-
-        # print(-np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat)))
-        # import sys
-        # sys.exit(0)
         return -np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
 
     @staticmethod
     def backward(y_hat: np.array, y: np.array):
-        """
-        The loss partial by z is : y_hat * (y - y_hat) / (-1 / y_hat) = y_hat - y
-        softmax + loglikelihoodCost == sigmoid + crossentropyCost
-        :param y_hat:
-        :param y:
-        :param activator:
-        :return:
-        """
-        # assert (np.abs(np.sum(y_hat, axis=1) - 1.) < cutoff).all()
-        # assert (np.abs(np.sum(y, axis=1) - 1.) < cutoff).all()
-        # y_hat = _cutoff(y_hat)
-        # y = _cutoff(y)
-        # return y_hat - y
-        y_hat = _cutoff(y_hat)
+        y_hat = _cut_off(y_hat)
         return (y_hat - y) / ((1 - y_hat) * y_hat)
+
+
+class HingeLoss(Loss):
+
+    @staticmethod
+    def forward(y_hat: np.array, y: np.array):
+        y = np.reshape(y, (-1,)).astype(int).squeeze()
+        y_hat = np.reshape(y_hat, (-1,))
+        z = y_hat * y
+        return np.sum(np.maximum(0, 1 - z))
+
+    @staticmethod
+    def backward(y_hat: np.array, y: np.array):
+        z = y_hat * y
+        return np.array(-1 * (z <= 1).astype(int) * y, dtype=np.float)
+
+
+class ExponentialLoss(Loss):
+
+    @staticmethod
+    def forward(y_hat: np.array, y: np.array):
+        y_hat = _chop_off(y_hat)
+        z = y_hat * y
+        return np.sum(np.exp(- z))
+
+    @staticmethod
+    def backward(y_hat: np.array, y: np.array):
+        y_hat = _chop_off(y_hat)
+        z = y_hat * y
+        return np.array(-1 * np.exp(-z) * y, dtype=np.float)
 
 
 # alias
@@ -177,12 +168,19 @@ mae = MAE = MeanAbsoluteLoss
 ce = CE = CrossEntropy = LogLikelihoodLoss
 bce = BCE = BinaryCrossEntropy
 hb = HB = HuberLoss
+hl = HL = HingeLoss
+el = EL = ExponentialLoss
 
-cutoff = 1e-12
+cut_off = 1e-12
+chop_off = 5
 
 
-def _cutoff(z):
-    return np.clip(z, cutoff, 1 - cutoff)
+def _cut_off(z):
+    return np.clip(z, cut_off, 1 - cut_off)
+
+
+def _chop_off(z):
+    return np.clip(z, -chop_off, chop_off)
 
 
 _loss_map = {
@@ -191,6 +189,8 @@ _loss_map = {
     'ce': CrossEntropy,
     'hb': HuberLoss,
     'bce': BinaryCrossEntropy,
+    'hl': HingeLoss,
+    'el': ExponentialLoss,
 }
 
 
