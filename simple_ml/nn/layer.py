@@ -1,9 +1,8 @@
 import numpy as np
-
 from .activation import get_activation
 from .regularizer import get_regularizer
 from .initializer import xavier_uniform_initializer
-from .utils import conv2D, im2col, col2im
+from .utils import conv2D, im2col, col2im, split_by_strides
 
 __all__ = [
     'Input', 'FullyConnected', 'Linear', 'Dense',
@@ -393,12 +392,6 @@ class Dropout(Layer):
 
 class Activation(Layer):
     def __init__(self, activation, input_shape=None):
-        """
-        将激活函数应用到输入，得到经过激活函数的输出output
-
-        # Params
-        activator: 激活函数名
-        """
         super(Activation, self).__init__()
         self.activator = get_activation(activation)
         self.input_shape = input_shape
@@ -508,6 +501,8 @@ class Conv2d(Layer):
         super(Conv2d, self).__init__()
         if isinstance(padding, int):
             padding = (padding, padding)
+        if isinstance(kernel_size, int):
+            kernel_size = (kernel_size, kernel_size)
         self._check_convolution_layer(kernel_size, channel_out, padding, stride)
         self.input_shape = input_shape
         self.kernel_size = kernel_size
@@ -632,14 +627,10 @@ class Conv2d(Layer):
 
     @staticmethod
     def pad(inputs, padding):
-        """
-        对输入的feature map进行零填充
-
-        # Params
-        inputs: 输入的feature map
-        zero_padding: 需要填充的零的个数，输入是一个二元tuple，分别表示填充在高度和宽度上的零的个数
-        """
         inputs = np.asarray(inputs)
+        if isinstance(padding, int):
+            padding = (padding, padding)
+
         if list(padding) == [0, 0]:
             return inputs
 
@@ -647,12 +638,6 @@ class Conv2d(Layer):
             inputs = inputs[:, :, :, None]
 
         if inputs.ndim == 4:
-            # input_batch, input_height, input_width, input_channel = inputs.shape
-            # padded_input = np.zeros([input_batch, input_height + 2 * padding[0],
-            #                          input_width + 2 * padding[1], input_channel])
-            # padded_input[:, padding[0]:input_height + padding[0],
-            # padding[1]:input_width + padding[1], :] = inputs
-            #
             padded_input = np.pad(inputs, ((0, 0), (padding[0], padding[0]), (padding[1], padding[1]), (0, 0)))
             return padded_input
         else:
@@ -660,7 +645,7 @@ class Conv2d(Layer):
 
     @staticmethod
     def _calc_output_size(input_len, filter_len, stride, zero_padding):
-        return int((input_len + 2 * zero_padding - filter_len) / stride + 1)
+        return (input_len + 2 * zero_padding - filter_len) // stride
 
     def _calc_output_shape(self, input_shape, kernel_size, stride, padding, channel_out):
         """
@@ -777,37 +762,61 @@ class FastConv2d(Conv2d):
 
     def forward(self, input, *args, **kwargs):
         self.input = input
-        self.logit = conv2D(input, self.weight, self.stride, self.padding) + self.bias
+        _kh, _kw, _cin, _ = self.weight.shape
+        s = self.stride
+        padded_input = self.pad(input, self.padding)
+        self.padded_input = padded_input
+        # input_split.shape: (batch_size, _oh, _ow, _kh, _kw, _cin)
+        input_split = split_by_strides(padded_input, _kh, _kw, s)
+        self.logit = np.tensordot(input_split, self.weight, axes=[(3, 4, 5), (0, 1, 2)]) + self.bias
         return self.activation.forward(self.logit)
+
+    @staticmethod
+    def transpose_weight(weight):
+        return weight[::-1, ::-1, ...]
+
+    @staticmethod
+    def transpose_feature_map(input):
+        return input[:, ::-1, ::-1, :]
+
+    @staticmethod
+    def dilate_input(x, dilate=1):
+        if dilate == 1:
+            return x
+        b, h, w, c = x.shape
+        s = dilate
+        output = np.zeros((b, (h - 1) * s + 1, (w - 1) * s + 1, c), dtype=np.float32)
+        output[:, ::dilate, ::dilate, :] = x
+        return output
 
     def backward(self, pre_delta, *args, **kwargs):
         pre_delta = pre_delta * self.activation.backward(self.logit)
 
         _kh, _kw = self.kernel_size, self.kernel_size
-        _cin, _cout = self.input_shape[3], self.channel_out
-        x = self.input
+        H_hat, W_hat = self.output_shape[1], self.output_shape[2]
+        padded_input = self.padded_input
         w = self.weight
         p = self.padding
         s = self.stride
 
-        pre_delta_col = pre_delta.transpose(3, 1, 2, 0).reshape(_cout, -1)
-        w_col = w.transpose(3, 2, 0, 1).reshape(_cout, -1).T
-        x_col, p = im2col(x, w.shape, p, s)
+        self.delta_bias = np.sum(pre_delta, axis=(0, 1, 2), keepdims=True)
+        pre_delta_dilate = self.dilate_input(pre_delta, s)
+        pre_delta_pad = self.pad(pre_delta_dilate, s - 1)
+        pre_delta_split = split_by_strides(pre_delta_pad, _kh, _kw)
+        pre_delta_transpose = self.transpose_feature_map(pre_delta_split)
+        delta_pad = np.tensordot(pre_delta_transpose, w, axes=[(3, 4, 5), (0, 1, 3)])
+        self.delta = delta_pad[:, p:-p, p:-p, :]
 
-        # compute gradients via matrix multiplication and reshape
-        self.delta_bias = -1 * pre_delta_col.sum(axis=1).reshape(1, 1, 1, -1)
-        # self.delta_weight = np.dot(pre_delta_col, x_col.T).reshape((_cout, _cin, _kh, _kw)).transpose(2, 3, 1, 0)
-        self.delta_weight = -1 * (pre_delta_col @ x_col.T).reshape((_cout, _cin, _kh, _kw)).transpose(2, 3, 1, 0)
-
-        # reshape columnized dX back into the same format as the input volume
-        delta_col = np.dot(w_col, pre_delta_col)
-        # delta_col = w_col @ pre_delta_col
-        self.delta = col2im(delta_col, x.shape, w.shape, p, s).transpose(0, 2, 3, 1)
+        split_input = split_by_strides(padded_input, H_hat, W_hat, d=s)
+        # maybe a bug here.
+        # TODO, fix it
+        self.delta_weight = np.tensordot(split_input, pre_delta, axes=[(0, 3, 4), (0, 1, 2)])[:_kh, :_kw, :, :]
 
         return self.delta
 
     def _calc_output_shape(self, input_shape, kernel_size, stride, padding, channel_out):
-
+        self.input_shape, self.kernel_size,
+        self.stride, self.padding, self.channel_out
         output_spatial = self._calc_output_size(input_shape[1], kernel_size, stride, padding)
         return [input_shape[0], output_spatial, output_spatial, channel_out]
 
@@ -1034,6 +1043,7 @@ class AvgPool2D(Layer):
                 _h_end, _w_end = _h_begin + kernel_h, _w_begin + kernel_w
                 output_avg_sub = np.mean(x[:, _h_begin:_h_end, _w_begin:_w_end, :], axis=(1, 2))
                 output[:, _h, _w, :] = output_avg_sub
+
         if len(self.output_shape) == 3:
             return output[:, :, :, 0]
         else:
@@ -1044,18 +1054,20 @@ class AvgPool2D(Layer):
             __delta = np.zeros(tuple(self.input_shape) + (1,))
         else:
             __delta = np.zeros(self.inputs.shape)
-
         H_hat, W_hat = self.output_shape[1], self.output_shape[2]
         stride_h, stride_w = self.stride[0], self.stride[1]
         kernel_h, kernel_w = self.kernel_size[0], self.kernel_size[1]
+        _cin = pre_delta.shape[3]
 
         num_pixel = kernel_h * kernel_w
-        delta_avg_sub = np.ones((1, kernel_h, kernel_w, 1)) / num_pixel
+        delta_avg_mask = np.ones((1, kernel_h, kernel_w, 1)) / num_pixel
         for _h in range(H_hat):
             for _w in range(W_hat):
                 _h_begin, _w_begin = _h * stride_h, _w * stride_w
                 _h_end, _w_end = _h_begin + kernel_h, _w_begin + kernel_w
-                __delta[:, _h_begin:_h_end, _w_begin:_w_end, :] += delta_avg_sub
+                # delta_avg_sub = np.reshape(pre_delta[:, _h, _w, :], (-1, 1, 1, _cin))
+                # __delta[:, _h_begin:_h_end, _w_begin:_w_end, :] += delta_avg_mask * delta_avg_sub
+                __delta[:, _h_begin:_h_end, _w_begin:_w_end, :] += delta_avg_mask
 
         self.__delta = __delta
         if len(self.input_shape) == 3:
