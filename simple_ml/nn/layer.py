@@ -237,22 +237,15 @@ class Linear(Layer):
         self.delta = np.zeros([self.input_dim])
 
     def forward(self, inputs, *args, **kwargs):
-        """
-        全连接层的前向传播
-
-        # Params
-        inputs: 二维矩阵，行代表一个batch的大小，列代表特征
-
-        # Return: 经过该层的输出结果
-        """
         inputs = np.asarray(inputs)
         if len(inputs.shape) == 1:
             inputs = inputs[None, :]
+        print(self.input_shape[1:], list(inputs.shape[1:]))
         assert list(self.input_shape[1:]) == list(inputs.shape[1:])
+
         self.input_shape = inputs.shape
         self.output_shape[0] = self.input_shape[0]
         self.inputs = inputs
-        # 关键操作，主要是输入与参数矩阵W、偏置b之间的操作，以及激活函数
         self.logit = np.dot(self.inputs, self.weight.T) + self.bias
         self.output = self.activation.forward(self.logit)
         return self.output
@@ -288,9 +281,6 @@ class Softmax(Linear):
 
 class Flatten(Layer):
     def __init__(self):
-        """
-        将输入的多维tensor展开成向量
-        """
         super(Flatten, self).__init__()
 
     @property
@@ -315,10 +305,12 @@ class Flatten(Layer):
 
     def forward(self, input, *args, **kwargs):
         self.input_shape = input.shape
+        # print(self.input_shape)
         self.output_shape = self._compute_output_shape(self.input_shape)
         return np.reshape(input, self.output_shape)
 
     def backward(self, pre_delta, *args, **kwargs):
+        # print(self.output_shape)
         return np.reshape(pre_delta, self.input_shape)
 
     @staticmethod
@@ -644,8 +636,8 @@ class Conv2d(Layer):
             raise ValueError('Your input must be a 3-D or 4-D tensor.')
 
     @staticmethod
-    def _calc_output_size(input_len, filter_len, stride, zero_padding):
-        return (input_len + 2 * zero_padding - filter_len) // stride
+    def _calc_output_size(input_spatial, kernel_size, stride, padding):
+        return (input_spatial + 2 * padding - kernel_size) // stride + 1
 
     def _calc_output_shape(self, input_shape, kernel_size, stride, padding, channel_out):
         """
@@ -761,6 +753,7 @@ class FastConv2d(Conv2d):
         self.delta_bias = np.zeros((1, 1, 1, _cout))
 
     def forward(self, input, *args, **kwargs):
+        # print('\nexpect: ', self.input_shape, self.output_shape)
         self.input = input
         _kh, _kw, _cin, _ = self.weight.shape
         s = self.stride
@@ -769,6 +762,7 @@ class FastConv2d(Conv2d):
         # input_split.shape: (batch_size, _oh, _ow, _kh, _kw, _cin)
         input_split = split_by_strides(padded_input, _kh, _kw, s)
         self.logit = np.tensordot(input_split, self.weight, axes=[(3, 4, 5), (0, 1, 2)]) + self.bias
+        # print('got: ', input.shape, self.logit.shape)
         return self.activation.forward(self.logit)
 
     @staticmethod
@@ -807,16 +801,14 @@ class FastConv2d(Conv2d):
         delta_pad = np.tensordot(pre_delta_transpose, w, axes=[(3, 4, 5), (0, 1, 3)])
         self.delta = delta_pad[:, p:-p, p:-p, :]
 
-        split_input = split_by_strides(padded_input, H_hat, W_hat, d=s)
+        split_input = split_by_strides(padded_input, H_hat, W_hat, d=s, _h=_kh, _w=_kw)
         # maybe a bug here.
         # TODO, fix it
-        self.delta_weight = np.tensordot(split_input, pre_delta, axes=[(0, 3, 4), (0, 1, 2)])[:_kh, :_kw, :, :]
+        self.delta_weight = np.tensordot(split_input, pre_delta, axes=[(0, 3, 4), (0, 1, 2)])
 
         return self.delta
 
     def _calc_output_shape(self, input_shape, kernel_size, stride, padding, channel_out):
-        self.input_shape, self.kernel_size,
-        self.stride, self.padding, self.channel_out
         output_spatial = self._calc_output_size(input_shape[1], kernel_size, stride, padding)
         return [input_shape[0], output_spatial, output_spatial, channel_out]
 

@@ -3,16 +3,24 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 
-def split_by_strides(x, kh, kw, s=1, d=1):
+def split_by_strides(x, kh, kw, s=1, d=1, _h=None, _w=None):
     N, H, W, C = x.shape
-    oh = (H - (kh + (d - 1) * (kh - 1))) // s + 1
-    ow = (W - (kw + (d - 1) * (kw - 1))) // s + 1
-
+    # oh = _h if _h is not None else (H - d * (kh - 1) + 1) // s + 1
+    # ow = _w if _w is not None else (W - d * (kw - 1) + 1) // s + 1
+    oh = (H - d * (kh - 1) + 1) // s + 1
+    ow = (W - d * (kw - 1) + 1) // s + 1
     shape = (N, oh, ow, kh, kw, C)
     strides = list(x.strides[:-1] + x.strides[1:])
     strides = (strides[0], strides[1] * s, strides[2] * s, strides[3] * d, strides[4] * d, strides[5])
 
-    return as_strided(x, shape=shape, strides=strides)
+    out = as_strided(x, shape=shape, strides=strides)
+    if _h is not None and _w is not None:
+        out = out[:, :_h, :_w, ...]
+    elif _h is not None:
+        out = out[:, :_h, ...]
+    elif _w is not None:
+        out = out[:, :, :_w, ...]
+    return out
 
 
 def calc_pad_dims_2D(X_shape, out_dim, kernel_shape, stride, dilation=0):

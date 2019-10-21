@@ -153,9 +153,9 @@ def seq_cnn_mnist():
 
     model = Sequential()
     model.add(Input(batch_input_shape=(None, 28, 28, 1)))
-    model.add(Conv2d(3, 16, stride=1, padding=0, activation='relu'))
+    model.add(Conv2d(3, 16, stride=2, padding=1, activation='relu'))
     # model.add(AvgPooling2D((2, 2), stride=1))
-    model.add(Conv2d(3, 32, stride=1, padding=0, activation='relu'))
+    model.add(Conv2d(3, 32, stride=2, padding=1, activation='relu'))
     # model.add(AvgPooling2D((2, 2), stride=1))
     model.add(Flatten())
     model.add(Softmax(label_size))
@@ -164,7 +164,7 @@ def seq_cnn_mnist():
     #           batch_size=256, verbose=1, epochs=40, metric='Accuracy', peek_type='single-cls')
     # model.fit(training_data[:1000], training_label[:1000], validation_data=(valid_data[:1000], valid_label[:1000]),
     #           batch_size=256, verbose=10, epochs=100, metric='Accuracy', peek_type='single-cls')
-    model.fit(training_data[:100], training_label[:100], validation_data=(valid_data[:500], valid_label[:500]),
+    model.fit(training_data[:100], training_label[:100], validation_data=(valid_data[:50], valid_label[:50]),
               batch_size=256, verbose=10, epochs=40, metric='Accuracy', peek_type='single-cls')
     plt.subplot(211)
     plt.plot(model.train_losses, label='train_losses')
