@@ -753,7 +753,7 @@ class FastConv2d(Conv2d):
         self.delta_bias = np.zeros((1, 1, 1, _cout))
 
     def forward(self, input, *args, **kwargs):
-        # print('\nexpect: ', self.input_shape, self.output_shape)
+        print('\nexpect: ', self.input_shape, self.output_shape)
         self.input = input
         _kh, _kw, _cin, _ = self.weight.shape
         s = self.stride
@@ -762,7 +762,7 @@ class FastConv2d(Conv2d):
         # input_split.shape: (batch_size, _oh, _ow, _kh, _kw, _cin)
         input_split = split_by_strides(padded_input, _kh, _kw, s)
         self.logit = np.tensordot(input_split, self.weight, axes=[(3, 4, 5), (0, 1, 2)]) + self.bias
-        # print('got: ', input.shape, self.logit.shape)
+        print('got: ', input.shape, self.logit.shape)
         return self.activation.forward(self.logit)
 
     @staticmethod
@@ -785,7 +785,7 @@ class FastConv2d(Conv2d):
 
     def backward(self, pre_delta, *args, **kwargs):
         pre_delta = pre_delta * self.activation.backward(self.logit)
-
+        print('pre_delta: ', pre_delta.shape)
         _kh, _kw = self.kernel_size, self.kernel_size
         H_hat, W_hat = self.output_shape[1], self.output_shape[2]
         padded_input = self.padded_input

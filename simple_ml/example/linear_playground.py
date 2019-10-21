@@ -155,7 +155,7 @@ def seq_cnn_mnist():
     model.add(Input(batch_input_shape=(None, 28, 28, 1)))
     model.add(Conv2d(3, 16, stride=2, padding=1, activation='relu'))
     # model.add(AvgPooling2D((2, 2), stride=1))
-    model.add(Conv2d(3, 32, stride=2, padding=1, activation='relu'))
+    # model.add(Conv2d(3, 32, stride=1, padding=1, activation='relu'))
     # model.add(AvgPooling2D((2, 2), stride=1))
     model.add(Flatten())
     model.add(Softmax(label_size))
