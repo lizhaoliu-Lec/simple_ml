@@ -74,6 +74,11 @@ class Layer(object):
     def call(self, *args, **kwargs):
         raise NotImplementedError
 
+    @staticmethod
+    def assert_shape(expect_shape, got_shape):
+        got, expect = list(got_shape[1:]), list(expect_shape[1:])
+        assert got == expect, 'expect shape: `%s`, but got `%s` instead.' % (expect, got)
+
 
 class Input(Layer):
     def __init__(self,
@@ -240,28 +245,27 @@ class Linear(Layer):
         inputs = np.asarray(inputs)
         if len(inputs.shape) == 1:
             inputs = inputs[None, :]
-        print(self.input_shape[1:], list(inputs.shape[1:]))
-        assert list(self.input_shape[1:]) == list(inputs.shape[1:])
-
+        self.assert_shape(self.input_shape, inputs.shape)
         self.input_shape = inputs.shape
         self.output_shape[0] = self.input_shape[0]
         self.inputs = inputs
         self.logit = np.dot(self.inputs, self.weight.T) + self.bias
+        self.assert_shape(self.output_shape, self.logit.shape)
         self.output = self.activation.forward(self.logit)
+        self.assert_shape(self.output_shape, self.output.shape)
         return self.output
 
     def backward(self, pre_delta, *args, **kwargs):
-        """
-        梯度更新
-        """
         if len(pre_delta.shape) == 1:
             pre_delta = pre_delta[None, :]
+        self.assert_shape(self.output_shape, pre_delta.shape)
         batch_size, _ = self.inputs.shape
         act_delta = pre_delta * self.activation.backward(self.logit)
-        # here should calculate the average value of batch
+        self.assert_shape(self.output_shape, act_delta.shape)
         self.delta_weight = np.dot(act_delta.T, self.inputs) + self.regularizer.backward(self.weight)
         self.delta_bias = np.mean(act_delta, axis=0)
         self.delta = np.dot(act_delta, self.weight)
+        self.assert_shape(self.input_shape, self.delta.shape)
         return self.delta
 
     @property
@@ -636,6 +640,24 @@ class Conv2d(Layer):
             raise ValueError('Your input must be a 3-D or 4-D tensor.')
 
     @staticmethod
+    def un_pad(inputs, padding):
+        inputs = np.asarray(inputs)
+        if isinstance(padding, int):
+            padding = (padding, padding)
+
+        if list(padding) == [0, 0]:
+            return inputs
+
+        if inputs.ndim == 3:
+            inputs = inputs[:, :, :, None]
+
+        if inputs.ndim == 4:
+            padded_input = inputs[:, padding[0]:-padding[0], padding[1]:-padding[1], :]
+            return padded_input
+        else:
+            raise ValueError('Your input must be a 3-D or 4-D tensor.')
+
+    @staticmethod
     def _calc_output_size(input_spatial, kernel_size, stride, padding):
         return (input_spatial + 2 * padding - kernel_size) // stride + 1
 
@@ -753,20 +775,26 @@ class FastConv2d(Conv2d):
         self.delta_bias = np.zeros((1, 1, 1, _cout))
 
     def forward(self, input, *args, **kwargs):
-        print('\nexpect: ', self.input_shape, self.output_shape)
+        # print('\nexpect forward: ', self.input_shape, self.output_shape)
+        self.assert_shape(self.input_shape, input.shape)
         self.input = input
         _kh, _kw, _cin, _ = self.weight.shape
         s = self.stride
         padded_input = self.pad(input, self.padding)
+        # print(padded_input.shape)
         self.padded_input = padded_input
         # input_split.shape: (batch_size, _oh, _ow, _kh, _kw, _cin)
         input_split = split_by_strides(padded_input, _kh, _kw, s)
         self.logit = np.tensordot(input_split, self.weight, axes=[(3, 4, 5), (0, 1, 2)]) + self.bias
-        print('got: ', input.shape, self.logit.shape)
-        return self.activation.forward(self.logit)
+        self.assert_shape(self.output_shape, self.logit.shape)
+        # print('got forward: ', input.shape, self.logit.shape)
+        output = self.activation.forward(self.logit)
+        self.assert_shape(self.output_shape, output.shape)
+        return output
 
     @staticmethod
     def transpose_weight(weight):
+        # _kh, _kw, _cin, _cout
         return weight[::-1, ::-1, ...]
 
     @staticmethod
@@ -784,8 +812,12 @@ class FastConv2d(Conv2d):
         return output
 
     def backward(self, pre_delta, *args, **kwargs):
+        # print('\nexpect backward: ', self.output_shape, self.input_shape)
+
+        self.assert_shape(self.output_shape, pre_delta.shape)
         pre_delta = pre_delta * self.activation.backward(self.logit)
-        print('pre_delta: ', pre_delta.shape)
+        self.assert_shape(self.output_shape, pre_delta.shape)
+
         _kh, _kw = self.kernel_size, self.kernel_size
         H_hat, W_hat = self.output_shape[1], self.output_shape[2]
         padded_input = self.padded_input
@@ -795,16 +827,28 @@ class FastConv2d(Conv2d):
 
         self.delta_bias = np.sum(pre_delta, axis=(0, 1, 2), keepdims=True)
         pre_delta_dilate = self.dilate_input(pre_delta, s)
-        pre_delta_pad = self.pad(pre_delta_dilate, s - 1)
+        # print('pre_delta_dilate', pre_delta_dilate.shape)
+        pre_delta_pad = self.pad(pre_delta_dilate, _kh - 1)
+        # print('pre_delta_pad', pre_delta_pad.shape)
         pre_delta_split = split_by_strides(pre_delta_pad, _kh, _kw)
-        pre_delta_transpose = self.transpose_feature_map(pre_delta_split)
-        delta_pad = np.tensordot(pre_delta_transpose, w, axes=[(3, 4, 5), (0, 1, 3)])
-        self.delta = delta_pad[:, p:-p, p:-p, :]
+        # print('pre_delta_split', pre_delta_split.shape)
+
+        # pre_delta_transpose = self.transpose_feature_map(pre_delta_split)
+        # print('pre_delta_transpose', pre_delta_transpose.shape)
+        # delta_pad = np.tensordot(pre_delta_transpose, w, axes=[(3, 4, 5), (0, 1, 3)])
+
+        delta_pad = np.tensordot(pre_delta_split, self.transpose_weight(w), axes=[(3, 4, 5), (0, 1, 3)])
+
+        # print('delta_pad', delta_pad.shape)
+        self.delta = self.un_pad(delta_pad, p)
+        # print('get backward: ', pre_delta.shape, self.delta.shape)
+        self.assert_shape(self.input_shape, self.delta.shape)
 
         split_input = split_by_strides(padded_input, H_hat, W_hat, d=s, _h=_kh, _w=_kw)
         # maybe a bug here.
         # TODO, fix it
-        self.delta_weight = np.tensordot(split_input, pre_delta, axes=[(0, 3, 4), (0, 1, 2)])
+        # self.delta_weight = np.tensordot(split_input, pre_delta, axes=[(0, 3, 4), (0, 1, 2)])
+        self.delta_weight = np.tensordot(split_input, pre_delta_dilate, axes=[(0, 3, 4), (0, 1, 2)])
 
         return self.delta
 

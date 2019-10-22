@@ -413,6 +413,8 @@ def batch_conv2d_weight_backward_f(kernel, input, stride=(1, 1)):
 
 
 def batch_conv2d_im_backward_f(x, kernel, stride=(1, 1)):
+    # x: predelta
+    # kernel: weight
     '''input is result tensor grad, kernel is weight tensor'''
     ksize = kernel.shape
     x = dilate_input(x, stride)
@@ -436,7 +438,7 @@ def im2bchwkl(input, ksize, stride=(1, 1), padding=(0, 0), dilation=(1, 1), writ
 
     isize = input.shape
     istrides = input.strides
-
+    # ow = (W - (d * (kw - 1) + 1)) // s + 1
     H = (isize[2] - (dilation[0] * (ksize[0] - 1) + 1)) / (stride[0]) + 1
     W = (isize[3] - (dilation[1] * (ksize[1] - 1) + 1)) / (stride[1]) + 1
     assert int(H) == H and int(W) == W, 'conv2d not aligned'
