@@ -16,6 +16,10 @@ __all__ = [
 
 
 class Loss(object):
+    """
+    Base Loss.
+    """
+
     @staticmethod
     def forward(y_hat: np.array, y: np.array):
         raise NotImplementedError
@@ -62,7 +66,7 @@ class MeanAbsoluteLoss(Loss):
 
 class HuberLoss(Loss):
     """
-    calculate the huber loss
+    calculate the huber loss. A combination of MAE loss and MSE loss.
     """
 
     @staticmethod
@@ -88,7 +92,10 @@ class HuberLoss(Loss):
 
 class LogLikelihoodLoss(Loss):
     """
-        多分类的log loss, 主要用于前一层为softmax的情况
+        Multi class CrossEntropy.
+        # TODO fix the connection without softmax.
+        # for now, softmax layer's back prop is identical value
+        # because this loss function do the job for him.
     """
 
     @staticmethod
@@ -102,14 +109,6 @@ class LogLikelihoodLoss(Loss):
 
     @staticmethod
     def backward(y_hat: np.array, y: np.array):
-        """
-        The loss partial by z is : y_hat * (y - y_hat) / (-1 / y_hat) = y_hat - y
-        softmax + loglikelihoodCost == sigmoid + crossentropyCost
-        :param y_hat:
-        :param y:
-        :param activator:
-        :return:
-        """
         y = y.astype(int)
         y_hat = _cut_off(y_hat)
         batch_size = y_hat.shape[0]
@@ -118,6 +117,10 @@ class LogLikelihoodLoss(Loss):
 
 
 class BinaryCrossEntropy(Loss):
+    """
+    Binary CrossEntropy.
+    for binary classification.
+    """
 
     @staticmethod
     def forward(y_hat: np.array, y: np.array):
@@ -133,6 +136,9 @@ class BinaryCrossEntropy(Loss):
 
 
 class HingeLoss(Loss):
+    """
+    Hinge Loss, for binary svm classification.
+    """
 
     @staticmethod
     def forward(y_hat: np.array, y: np.array):
@@ -148,6 +154,10 @@ class HingeLoss(Loss):
 
 
 class ExponentialLoss(Loss):
+    """
+    A proximation to hinge loss.
+    # for now, it is not stable.
+    """
 
     @staticmethod
     def forward(y_hat: np.array, y: np.array):

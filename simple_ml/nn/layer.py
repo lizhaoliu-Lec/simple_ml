@@ -16,6 +16,10 @@ __all__ = [
 
 
 class Layer(object):
+    """
+    Base Layer.
+    """
+
     def __init__(self):
         self.__input_shape = None
         self.__output_shape = None
@@ -84,6 +88,10 @@ class Layer(object):
 
 
 class Input(Layer):
+    """
+    Input Layer.
+    """
+
     def __init__(self,
                  input_shape=None,
                  batch_size=None,
@@ -287,6 +295,10 @@ class Softmax(Linear):
 
 
 class Flatten(Layer):
+    """
+    Flatten Layer.
+    """
+
     def __init__(self):
         super(Flatten, self).__init__()
 
@@ -335,11 +347,7 @@ class Flatten(Layer):
 class Dropout(Layer):
     def __init__(self, dropout=0., axis=None):
         """
-        Dropout层
-
-        # Params
-        dropout: dropout的概率
-        axis: 沿某个维度axis进行dropout操作，如果为None则是对所有元素进行
+        Dropout Layer.
         """
         super(Dropout, self).__init__()
         self.dropout = dropout

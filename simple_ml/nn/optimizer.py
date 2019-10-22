@@ -97,14 +97,14 @@ class Momentum(Optimizer):
 
 class Adam(Optimizer):
     """
-        Uses the Adam update rule, which incorporates moving averages of both the
-        gradient and its square and a bias correction term.
+    Uses the Adam update rule, which incorporates moving averages of both the
+    gradient and its square and a bias correction term.
 
-        beta1: Decay rate for moving average of first moment of gradient.
-        beta2: Decay rate for moving average of second moment of gradient.
-        epsilon: Small scalar used for smoothing to avoid dividing by zero.
-        m: Moving average of gradient.
-        v: Moving average of squared gradient.
+    beta1: Decay rate for moving average of first moment of gradient.
+    beta2: Decay rate for moving average of second moment of gradient.
+    epsilon: Small scalar used for smoothing to avoid dividing by zero.
+    m: Moving average of gradient.
+    v: Moving average of squared gradient.
     """
 
     def __init__(self, beta1=0.9, beta2=0.999, epsilon=1e-8, *args, **kwargs):
