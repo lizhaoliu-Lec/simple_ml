@@ -3,12 +3,13 @@ from .activation import get_activation
 from .regularizer import get_regularizer
 from .initializer import xavier_uniform_initializer
 from .utils import conv_forward_im2col, conv_backward_im2col
+from .utils import max_pool_forward_fast, max_pool_backward_fast
 
 __all__ = [
     'Input', 'FullyConnected', 'Linear', 'Dense',
     'Softmax', 'Flatten', 'Dropout', 'Activation',
     'Conv2d', 'AvgPooling2D', 'AvgPool2D',
-    'MaxPooling2D', 'MaxPool2D', 'FastConv2d',
+    'MaxPooling2D', 'MaxPool2D',
 ]
 
 
@@ -441,253 +442,7 @@ class Activation(Layer):
         return act_delta
 
 
-class Filter(object):
-    def __init__(self, filter_shape, initializer):
-        """
-        Filter，过滤器，滤波器
-
-        # Params
-        filter_shape: (filter_height, filter_width, input_depth)
-        initializer: 滤波器的初始化方法
-        """
-        assert len(filter_shape) == 3
-        self.filter_shape = filter_shape
-        self.__W = initializer(filter_shape)  # filter权重矩阵
-        self.__b = 0.  # filter偏置bias
-        self.__delta_W = np.zeros(filter_shape)  # filter的权重矩阵梯度
-        self.__delta_b = 0.  # filter的偏置梯度
-
-    @property
-    def weight(self):
-        return self.__W
-
-    @property
-    def bias(self):
-        return self.__b
-
-    @property
-    def delta_weight(self):
-        return self.__delta_W
-
-    @property
-    def delta_bias(self):
-        return self.__delta_b
-
-    @weight.setter
-    def weight(self, W):
-        self.__W = W
-
-    @bias.setter
-    def bias(self, b):
-        self.__b = b
-
-    @delta_weight.setter
-    def delta_weight(self, delta_W):
-        self.__delta_W = delta_W
-
-    @delta_bias.setter
-    def delta_bias(self, delta_b):
-        self.__delta_b = delta_b
-
-
 class Conv2d(Layer):
-    def __init__(self, kernel_size, channel_out, input_shape=None,
-                 padding=0, stride=1, activation='relu', initializer=xavier_uniform_initializer):
-
-        super(Conv2d, self).__init__()
-        if isinstance(padding, int):
-            padding = (padding, padding)
-        if isinstance(kernel_size, int):
-            kernel_size = (kernel_size, kernel_size)
-        self._check_convolution_layer(kernel_size, channel_out, padding, stride)
-        self.input_shape = input_shape
-        self.kernel_size = kernel_size
-        self.channel_out = channel_out
-        self.output_shape = None
-        self.padding = padding
-        self.activation = get_activation(activation)
-        self.initializer = initializer
-        self.stride = stride if isinstance(stride, (list, tuple)) else (stride, stride)
-        if self.input_shape is not None:
-            self.connection(None)
-
-    @property
-    def delta(self):
-        return self.__delta
-
-    @delta.setter
-    def delta(self, delta):
-        self.__delta = delta
-
-    @property
-    def weight(self):
-        return [f.weight for f in self.filters]
-
-    @property
-    def bias(self):
-        return [f.bias for f in self.filters]
-
-    @property
-    def delta_weight(self):
-        return [f.delta_weight for f in self.filters]
-
-    @property
-    def delta_bias(self):
-        return [f.delta_bias for f in self.filters]
-
-    @property
-    def params(self):
-        return self.weight + self.bias
-
-    @property
-    def grads(self):
-        return self.delta_weight + self.delta_bias
-
-    def call(self, pre_layer=None, *args, **kwargs):
-        self.connection(pre_layer)
-        return self
-
-    def connection(self, pre_layer):
-        if pre_layer is None:
-            if self.input_shape is None:
-                raise ValueError('input_shape must not be `None` as the first layer.')
-        else:
-            self.input_shape = pre_layer.output_shape
-            self.pre_layer = pre_layer
-            pre_layer.next_layer = self
-
-        assert len(self.input_shape) == 4
-
-        if self.output_shape is None:
-            self.output_shape = self._calc_output_shape(self.input_shape, self.kernel_size,
-                                                        self.stride, self.padding, self.channel_out)
-        self.filters = [Filter(list(self.kernel_size) + [self.input_shape[3]], self.initializer)
-                        for _ in range(self.channel_out)]
-
-    def forward(self, input, *args, **kwargs):
-
-        input = np.asarray(input)
-
-        self.input_shape = input.shape
-        self.output_shape[0] = input.shape[0]
-
-        logit = np.zeros(self.output_shape)
-
-        assert list(input.shape[1:]) == list(self.input_shape[1:])
-
-        self.padded_input = self.pad(input, self.padding)
-
-        x_pad = self.padded_input
-        H_hat, W_hat = self.output_shape[1], self.output_shape[2]
-        stride_h, stride_w = self.stride[0], self.stride[1]
-        kernel_h, kernel_w = self.kernel_size[0], self.kernel_size[1]
-        for _f, f in enumerate(self.filters):
-            for _h in range(H_hat):
-                for _w in range(W_hat):
-                    _h_begin, _w_begin = _h * stride_h, _w * stride_w
-                    _h_end, _w_end = _h_begin + kernel_h, _w_begin + kernel_w
-                    conv_sub = np.sum(x_pad[:, _h_begin:_h_end, _w_begin:_w_end, :] * f.weight, axis=(1, 2, 3)) + f.bias
-                    logit[:, _h, _w, _f] = conv_sub
-        self.logit = logit
-
-        return self.activation.forward(self.logit)
-
-    def backward(self, pre_delta, *args, **kwargs):
-
-        pre_delta = pre_delta * self.activation.backward(self.logit)
-
-        delta_pad = np.zeros_like(self.padded_input)
-        H_hat, W_hat = self.output_shape[1], self.output_shape[2]
-        stride_h, stride_w = self.stride[0], self.stride[1]
-        kernel_h, kernel_w = self.kernel_size[0], self.kernel_size[1]
-        x_pad = self.padded_input
-        for _f, f in enumerate(self.filters):
-            for _h in range(H_hat):
-                for _w in range(W_hat):
-                    _h_begin, _w_begin = _h * stride_h, _w * stride_w
-                    _h_end, _w_end = _h_begin + kernel_h, _w_begin + kernel_w
-
-                    volume = np.reshape(pre_delta[:, _h, _w, _f], (-1, 1, 1, 1))
-
-                    delta_pad[:, _h_begin:_h_end, _w_begin:_w_end, :] += f.weight * volume
-                    if _h and _w:
-                        f.delta_weight = np.zeros_like(f.delta_weight)
-                        f.delta_bias = np.zeros_like(f.delta_bias)
-                    f.delta_weight += np.sum(x_pad[:, _h_begin:_h_end, _w_begin:_w_end, :] * volume, axis=0)
-                    f.delta_bias += np.sum(volume)
-        padding_h, padding_w = self.padding
-        delta = delta_pad[:, padding_h:-padding_h, padding_w:-padding_w, :]
-        self.delta = delta
-
-        return self.delta
-
-    @staticmethod
-    def pad(inputs, padding):
-        inputs = np.asarray(inputs)
-        if isinstance(padding, int):
-            padding = (padding, padding)
-
-        if list(padding) == [0, 0]:
-            return inputs
-
-        if inputs.ndim == 3:
-            inputs = inputs[:, :, :, None]
-
-        if inputs.ndim == 4:
-            padded_input = np.pad(inputs, ((0, 0), (padding[0], padding[0]), (padding[1], padding[1]), (0, 0)))
-            return padded_input
-        else:
-            raise ValueError('Your input must be a 3-D or 4-D tensor.')
-
-    @staticmethod
-    def un_pad(inputs, padding):
-        inputs = np.asarray(inputs)
-        if isinstance(padding, int):
-            padding = (padding, padding)
-
-        if list(padding) == [0, 0]:
-            return inputs
-
-        if inputs.ndim == 3:
-            inputs = inputs[:, :, :, None]
-
-        if inputs.ndim == 4:
-            padded_input = inputs[:, padding[0]:-padding[0], padding[1]:-padding[1], :]
-            return padded_input
-        else:
-            raise ValueError('Your input must be a 3-D or 4-D tensor.')
-
-    @staticmethod
-    def _calc_output_size(input_spatial, kernel_size, stride, padding):
-        return (input_spatial + 2 * padding - kernel_size) // stride + 1
-
-    def _calc_output_shape(self, input_shape, kernel_size, stride, padding, channel_out):
-        """
-        计算output的shape，这个shape也是回传的误差的shape
-        """
-        output_height = self._calc_output_size(input_shape[1], kernel_size[0],
-                                               stride[0], padding[0])
-        output_width = self._calc_output_size(input_shape[2], kernel_size[1],
-                                              stride[1], padding[1])
-        output_channel = channel_out
-        return [input_shape[0], output_height, output_width, output_channel]
-
-    @staticmethod
-    def _check_convolution_layer(kernel_size, channel_out, stride, padding):
-        filter_height, filter_width = kernel_size
-        if not isinstance(filter_height, int):
-            raise ValueError('`filter_height` must be int')
-        if not isinstance(filter_width, int):
-            raise ValueError('`filter_width` must be int')
-        if not isinstance(channel_out, int):
-            raise ValueError('`filter_num` must be int')
-        if not isinstance(stride, (int, tuple, list)):
-            raise ValueError('`stride` must be tuple(list) or int')
-        if not isinstance(padding, (int, tuple, list)):
-            raise ValueError('`zero_padding` must be tuple(list) or int')
-
-
-class FastConv2d(Conv2d):
     def __init__(self, kernel_size, channel_out, input_shape=None,
                  padding=0, stride=1, activation='relu', initializer=xavier_uniform_initializer):
         super(Conv2d, self).__init__()
@@ -801,7 +556,7 @@ class FastConv2d(Conv2d):
 
     def _get_output_shape(self):
         _, H, W, channel_in = self.input_shape
-        p, s,  = self.padding, self.stride
+        p, s, = self.padding, self.stride
         kh, kw = self.kernel_size
         assert (H + 2 * p - kh) % s == 0, 'invalid (H, padding, kernel_size): (%d, %d, %d)' % (H, p, kh)
         assert (W + 2 * p - kw) % s == 0, 'invalid (W, padding, kernel_size): (%d, %d, %d)' % (W, p, kw)
@@ -825,17 +580,12 @@ class FastConv2d(Conv2d):
 
 
 class MaxPool2D(Layer):
-    def __init__(self, kernel_size, input_shape=None, stride=1, padding=0):
+    def __init__(self, kernel_size, input_shape=None, stride=1):
         super(MaxPool2D, self).__init__()
         self.input_shape = input_shape
-        if isinstance(padding, int):
-            padding = (padding, padding)
-        self.padding = padding
         if isinstance(kernel_size, int):
             kernel_size = (kernel_size, kernel_size)
         self.kernel_size = kernel_size
-        if isinstance(stride, int):
-            stride = (stride, stride)
         self.stride = stride
         self.__delta = None
         if self.input_shape is not None:
@@ -866,47 +616,15 @@ class MaxPool2D(Layer):
             self.pre_layer = pre_layer
             pre_layer.next_layer = self
 
-        output_height = (self.input_shape[1] + self.padding[0] * 2
-                         - self.kernel_size[0]) // self.stride[0] + 1
-        output_width = (self.input_shape[2] + self.padding[1] * 2
-                        - self.kernel_size[1]) // self.stride[1] + 1
-        self.output_shape = [self.input_shape[0], output_height,
-                             output_width, 1 if len(self.input_shape) == 3 else self.input_shape[3]]
+        self.output_shape = self._get_output_shape()
 
     def forward(self, inputs, *args, **kwargs):
-        inputs = np.asarray(inputs)
-        assert list(self.input_shape[1:]) == list(inputs.shape[1:])
-        self.input_shape = inputs.shape
-        self.output_shape[0] = self.input_shape[0]
-        if inputs.ndim == 3:
-            inputs = inputs[:, :, :, None]
-        if inputs.ndim == 4:
-            self.inputs = inputs
-        else:
-            raise ValueError('Your input must be a 2-D or 3-D tensor.')
+        self.assert_shape(self.input_shape, inputs.shape)
+        inputs = inputs.reshape(0, 3, 1, 2)
+        pool_param = {'pool_height': self.kernel_size[0],
+                      'pool_width': self.kernel_size[1],
+                      'stride': self.stride}
 
-        if len(self.output_shape) == 3:
-            output = np.zeros(list(self.output_shape) + [1, ])
-        else:
-            output = np.zeros(self.output_shape)
-
-        x = self.pad(self.inputs, self.padding)
-        H_hat, W_hat = self.output_shape[1], self.output_shape[2]
-        stride_h, stride_w = self.stride[0], self.stride[1]
-        kernel_h, kernel_w = self.kernel_size[0], self.kernel_size[1]
-        for _h in range(H_hat):
-            for _w in range(W_hat):
-                _h_begin, _w_begin = _h * stride_h, _w * stride_w
-                _h_end, _w_end = _h_begin + kernel_h, _w_begin + kernel_w
-                output_max_sub = np.max(x[:, _h_begin:_h_end, _w_begin:_w_end, :], axis=(1, 2))
-                output[:, _h, _w, :] = output_max_sub
-
-        self.output = output
-        self.inputs = x
-        if len(self.output_shape) == 3:
-            return output[:, :, :, 0]
-        else:
-            return output
 
     def backward(self, pre_delta, *args, **kwargs):
         if len(self.input_shape) == 3:
@@ -934,23 +652,15 @@ class MaxPool2D(Layer):
         else:
             return __delta
 
-    @staticmethod
-    def pad(inputs, padding):
-        inputs = np.asarray(inputs)
-        if list(padding) == [0, 0]:
-            return inputs
-
-        if inputs.ndim == 3:
-            inputs = inputs[:, :, :, None]
-
-        if inputs.ndim == 4:
-            _, input_height, input_width, input_channel = inputs.shape
-            padded_input = np.zeros([_, input_height + 2 * padding[0],
-                                     input_width + 2 * padding[1], input_channel])
-            padded_input[:, padding[0]:input_height + padding[0], padding[1]:input_width + padding[1], :] = inputs
-            return padded_input
-        else:
-            raise ValueError('Your input must be a 3-D or 4-D tensor.')
+    def _get_output_shape(self):
+        _, H, W, channel_in = self.input_shape
+        s = self.stride
+        kh, kw = self.kernel_size
+        assert (H - kh) % s == 0, 'invalid (H, kernel_size): (%d, %d)' % (H, kh)
+        assert (W - kw) % s == 0, 'invalid (W, kernel_size): (%d, %d)' % (W, kw)
+        H_hat = (H - kh) // s + 1
+        W_hat = (W - kw) // s + 1
+        return _, H_hat, W_hat, channel_in
 
 
 class AvgPool2D(Layer):
