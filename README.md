@@ -1,2 +1,2 @@
 # Simple ML Algorithm
-All basics algrorithms of Machine Learning in Python.
+All basics algorithms of Machine Learning in Python (Keras style).
