@@ -2,7 +2,7 @@ import numpy as np
 from .activation import get_activation
 from .regularizer import get_regularizer
 from .initializer import xavier_uniform_initializer
-from .utils import conv2D, im2col, col2im, split_by_strides
+from .utils import conv_forward_im2col, conv_backward_im2col
 
 __all__ = [
     'Input', 'FullyConnected', 'Linear', 'Dense',
@@ -691,8 +691,10 @@ class FastConv2d(Conv2d):
     def __init__(self, kernel_size, channel_out, input_shape=None,
                  padding=0, stride=1, activation='relu', initializer=xavier_uniform_initializer):
         super(Conv2d, self).__init__()
+        if not isinstance(kernel_size, (tuple, list)):
+            kernel_size = (kernel_size, kernel_size)
 
-        self._check_convolution_layer(kernel_size, channel_out, padding, stride)
+        self._check_parameter_setting(kernel_size, channel_out, padding, stride)
         self.input_shape = input_shape
         self.kernel_size = kernel_size
         self.channel_out = channel_out
@@ -764,103 +766,56 @@ class FastConv2d(Conv2d):
         assert len(self.input_shape) == 4
 
         if self.output_shape is None:
-            self.output_shape = self._calc_output_shape(self.input_shape, self.kernel_size,
-                                                        self.stride, self.padding, self.channel_out)
+            self.output_shape = self._get_output_shape()
 
-        _kh, _kw = self.kernel_size, self.kernel_size
+        _kh, _kw = self.kernel_size
         _cin, _cout = self.input_shape[3], self.channel_out
-        self.weight = self.initializer((_kh, _kw, _cin, _cout))
-        self.bias = np.zeros((1, 1, 1, _cout))
-        self.delta_weight = np.zeros((_kh, _kw, _cin, _cout))
-        self.delta_bias = np.zeros((1, 1, 1, _cout))
+        self.weight = self.initializer((_cout, _cin, _kh, _kw))
+        self.bias = np.zeros(_cout)
+        self.delta_weight = np.zeros((_cout, _cin, _kh, _kw))
+        self.delta_bias = np.zeros(_cout)
 
     def forward(self, input, *args, **kwargs):
-        # print('\nexpect forward: ', self.input_shape, self.output_shape)
         self.assert_shape(self.input_shape, input.shape)
-        self.input = input
         _kh, _kw, _cin, _ = self.weight.shape
-        s = self.stride
-        padded_input = self.pad(input, self.padding)
-        # print(padded_input.shape)
-        self.padded_input = padded_input
-        # input_split.shape: (batch_size, _oh, _ow, _kh, _kw, _cin)
-        input_split = split_by_strides(padded_input, _kh, _kw, s)
-        self.logit = np.tensordot(input_split, self.weight, axes=[(3, 4, 5), (0, 1, 2)]) + self.bias
-        self.assert_shape(self.output_shape, self.logit.shape)
-        # print('got forward: ', input.shape, self.logit.shape)
-        output = self.activation.forward(self.logit)
+        s, p = self.stride, self.padding
+        w, b = self.weight, self.bias
+        input = input.transpose(0, 3, 1, 2)
+        self.logits, self.cache = conv_forward_im2col(input, w, b, s, p)
+        self.logits = self.logits.transpose(0, 2, 3, 1)
+        self.assert_shape(self.output_shape, self.logits.shape)
+        output = self.activation.forward(self.logits)
         self.assert_shape(self.output_shape, output.shape)
         return output
 
-    @staticmethod
-    def transpose_weight(weight):
-        # _kh, _kw, _cin, _cout
-        return weight[::-1, ::-1, ...]
-
-    @staticmethod
-    def transpose_feature_map(input):
-        return input[:, ::-1, ::-1, :]
-
-    @staticmethod
-    def dilate_input(x, dilate=1):
-        if dilate == 1:
-            return x
-        b, h, w, c = x.shape
-        s = dilate
-        output = np.zeros((b, (h - 1) * s + 1, (w - 1) * s + 1, c), dtype=np.float32)
-        output[:, ::dilate, ::dilate, :] = x
-        return output
-
     def backward(self, pre_delta, *args, **kwargs):
-        # print('\nexpect backward: ', self.output_shape, self.input_shape)
-
         self.assert_shape(self.output_shape, pre_delta.shape)
-        pre_delta = pre_delta * self.activation.backward(self.logit)
+        pre_delta = pre_delta * self.activation.backward(self.logits)
         self.assert_shape(self.output_shape, pre_delta.shape)
-
-        _kh, _kw = self.kernel_size, self.kernel_size
-        H_hat, W_hat = self.output_shape[1], self.output_shape[2]
-        padded_input = self.padded_input
-        w = self.weight
-        p = self.padding
-        s = self.stride
-
-        self.delta_bias = np.sum(pre_delta, axis=(0, 1, 2), keepdims=True)
-        pre_delta_dilate = self.dilate_input(pre_delta, s)
-        # print('pre_delta_dilate', pre_delta_dilate.shape)
-        pre_delta_pad = self.pad(pre_delta_dilate, _kh - 1)
-        # print('pre_delta_pad', pre_delta_pad.shape)
-        pre_delta_split = split_by_strides(pre_delta_pad, _kh, _kw)
-        # print('pre_delta_split', pre_delta_split.shape)
-
-        # pre_delta_transpose = self.transpose_feature_map(pre_delta_split)
-        # print('pre_delta_transpose', pre_delta_transpose.shape)
-        # delta_pad = np.tensordot(pre_delta_transpose, w, axes=[(3, 4, 5), (0, 1, 3)])
-
-        delta_pad = np.tensordot(pre_delta_split, self.transpose_weight(w), axes=[(3, 4, 5), (0, 1, 3)])
-
-        # print('delta_pad', delta_pad.shape)
-        self.delta = self.un_pad(delta_pad, p)
-        # print('get backward: ', pre_delta.shape, self.delta.shape)
+        s, p = self.stride, self.padding
+        pre_delta = pre_delta.transpose(0, 3, 1, 2)
+        delta, self.delta_weight, self.delta_bias = conv_backward_im2col(pre_delta, self.cache, s, p)
+        self.delta = delta.transpose(0, 2, 3, 1)
         self.assert_shape(self.input_shape, self.delta.shape)
-
-        split_input = split_by_strides(padded_input, H_hat, W_hat, d=s, _h=_kh, _w=_kw)
-        # maybe a bug here.
-        # TODO, fix it
-        # self.delta_weight = np.tensordot(split_input, pre_delta, axes=[(0, 3, 4), (0, 1, 2)])
-        self.delta_weight = np.tensordot(split_input, pre_delta_dilate, axes=[(0, 3, 4), (0, 1, 2)])
-
         return self.delta
 
-    def _calc_output_shape(self, input_shape, kernel_size, stride, padding, channel_out):
-        output_spatial = self._calc_output_size(input_shape[1], kernel_size, stride, padding)
-        return [input_shape[0], output_spatial, output_spatial, channel_out]
+    def _get_output_shape(self):
+        _, H, W, channel_in = self.input_shape
+        p, s,  = self.padding, self.stride
+        kh, kw = self.kernel_size
+        assert (H + 2 * p - kh) % s == 0, 'invalid (H, padding, kernel_size): (%d, %d, %d)' % (H, p, kh)
+        assert (W + 2 * p - kw) % s == 0, 'invalid (W, padding, kernel_size): (%d, %d, %d)' % (W, p, kw)
+        H_hat = (H + 2 * p - kh) // s + 1
+        W_hat = (W + 2 * p - kw) // s + 1
+        return _, H_hat, W_hat, self.channel_out
 
     @staticmethod
-    def _check_convolution_layer(kernel_size, channel_out, stride, padding):
-
-        if not isinstance(kernel_size, int):
-            raise ValueError('`kernel_size` must be int')
+    def _check_parameter_setting(kernel_size, channel_out, stride, padding):
+        filter_height, filter_width = kernel_size
+        if not isinstance(filter_height, int):
+            raise ValueError('`filter_height` must be int')
+        if not isinstance(filter_width, int):
+            raise ValueError('`filter_width` must be int')
         if not isinstance(channel_out, int):
             raise ValueError('`filter_num` must be int')
         if not isinstance(stride, (int, tuple, list)):
