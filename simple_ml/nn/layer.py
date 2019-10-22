@@ -4,11 +4,13 @@ from .regularizer import get_regularizer
 from .initializer import xavier_uniform_initializer
 from .utils import conv_forward_im2col, conv_backward_im2col
 from .utils import max_pool_forward_fast, max_pool_backward_fast
+from .utils import avg_pool_forward_fast, avg_pool_backward_fast
 
 __all__ = [
     'Input', 'FullyConnected', 'Linear', 'Dense',
     'Softmax', 'Flatten', 'Dropout', 'Activation',
-    'Conv2d', 'AvgPooling2D', 'AvgPool2D',
+    'Conv2d',
+    'AvgPooling2D', 'AvgPool2D',
     'MaxPooling2D', 'MaxPool2D',
 ]
 
@@ -536,7 +538,8 @@ class Conv2d(Layer):
         s, p = self.stride, self.padding
         w, b = self.weight, self.bias
         input = input.transpose(0, 3, 1, 2)
-        self.logits, self.cache = conv_forward_im2col(input, w, b, s, p)
+        conv_param = {'stride': s, 'pad': p}
+        self.logits, self.cache = conv_forward_im2col(input, w, b, conv_param)
         self.logits = self.logits.transpose(0, 2, 3, 1)
         self.assert_shape(self.output_shape, self.logits.shape)
         output = self.activation.forward(self.logits)
@@ -547,9 +550,8 @@ class Conv2d(Layer):
         self.assert_shape(self.output_shape, pre_delta.shape)
         pre_delta = pre_delta * self.activation.backward(self.logits)
         self.assert_shape(self.output_shape, pre_delta.shape)
-        s, p = self.stride, self.padding
         pre_delta = pre_delta.transpose(0, 3, 1, 2)
-        delta, self.delta_weight, self.delta_bias = conv_backward_im2col(pre_delta, self.cache, s, p)
+        delta, self.delta_weight, self.delta_bias = conv_backward_im2col(pre_delta, self.cache)
         self.delta = delta.transpose(0, 2, 3, 1)
         self.assert_shape(self.input_shape, self.delta.shape)
         return self.delta
@@ -653,21 +655,13 @@ class MaxPool2D(Layer):
 
 
 class AvgPool2D(Layer):
-    def __init__(self, kernel_size, input_shape=None, stride=1, padding=0):
+    def __init__(self, kernel_size, input_shape=None, stride=1):
         super(AvgPool2D, self).__init__()
         self.input_shape = input_shape
-        if isinstance(padding, int):
-            padding = (padding, padding)
-        self.padding = padding
-
         if isinstance(kernel_size, int):
             kernel_size = (kernel_size, kernel_size)
         self.kernel_size = kernel_size
-
-        if isinstance(stride, int):
-            stride = (stride, stride)
         self.stride = stride
-
         self.__delta = None
         if self.input_shape is not None:
             self.connection(None)
@@ -675,6 +669,10 @@ class AvgPool2D(Layer):
     @property
     def delta(self):
         return self.__delta
+
+    @delta.setter
+    def delta(self, delta):
+        self.__delta = delta
 
     @property
     def params(self):
@@ -697,92 +695,36 @@ class AvgPool2D(Layer):
             self.pre_layer = pre_layer
             pre_layer.next_layer = self
 
-        output_height = (self.input_shape[1] + self.padding[0] * 2
-                         - self.kernel_size[0]) // self.stride[0] + 1
-        output_width = (self.input_shape[2] + self.padding[1] * 2
-                        - self.kernel_size[1]) // self.stride[1] + 1
-        self.output_shape = [self.input_shape[0], output_height,
-                             output_width, 1 if len(self.input_shape) == 3 else self.input_shape[3]]
+        self.output_shape = self._get_output_shape()
 
     def forward(self, inputs, *args, **kwargs):
-        inputs = np.asarray(inputs)
-
-        assert list(self.input_shape[1:]) == list(inputs.shape[1:])
-        self.input_shape = inputs.shape
-        self.output_shape[0] = self.input_shape[0]
-
-        if inputs.ndim == 3:
-            inputs = inputs[:, :, :, None]
-        if inputs.ndim == 4:
-            self.inputs = inputs
-        else:
-            raise ValueError('Your input must be a 3-D or 4-D tensor.')
-
-        if len(self.output_shape) == 3:
-            output = np.zeros(list(self.output_shape) + [1, ])
-        else:
-            output = np.zeros(self.output_shape)
-
-        x = self.pad(self.inputs, self.padding)
-        H_hat, W_hat = self.output_shape[1], self.output_shape[2]
-        stride_h, stride_w = self.stride[0], self.stride[1]
-        kernel_h, kernel_w = self.kernel_size[0], self.kernel_size[1]
-        for _h in range(H_hat):
-            for _w in range(W_hat):
-                _h_begin, _w_begin = _h * stride_h, _w * stride_w
-                _h_end, _w_end = _h_begin + kernel_h, _w_begin + kernel_w
-                output_avg_sub = np.mean(x[:, _h_begin:_h_end, _w_begin:_w_end, :], axis=(1, 2))
-                output[:, _h, _w, :] = output_avg_sub
-
-        if len(self.output_shape) == 3:
-            return output[:, :, :, 0]
-        else:
-            return output
+        self.assert_shape(self.input_shape, inputs.shape)
+        inputs = inputs.transpose(0, 3, 1, 2)
+        pool_param = {'pool_height': self.kernel_size[0],
+                      'pool_width': self.kernel_size[1],
+                      'stride': self.stride}
+        output, self.cache = avg_pool_forward_fast(inputs, pool_param)
+        output = output.transpose(0, 2, 3, 1)
+        self.assert_shape(self.output_shape, output.shape)
+        return output
 
     def backward(self, pre_delta, *args, **kwargs):
-        if len(self.input_shape) == 3:
-            __delta = np.zeros(tuple(self.input_shape) + (1,))
-        else:
-            __delta = np.zeros(self.inputs.shape)
-        H_hat, W_hat = self.output_shape[1], self.output_shape[2]
-        stride_h, stride_w = self.stride[0], self.stride[1]
-        kernel_h, kernel_w = self.kernel_size[0], self.kernel_size[1]
-        _cin = pre_delta.shape[3]
+        self.assert_shape(self.output_shape, pre_delta.shape)
+        pre_delta = pre_delta.transpose(0, 3, 1, 2)
+        delta = avg_pool_backward_fast(pre_delta, self.cache)
+        self.delta = delta.transpose(0, 2, 3, 1)
+        self.assert_shape(self.input_shape, self.delta.shape)
+        return self.delta
 
-        num_pixel = kernel_h * kernel_w
-        delta_avg_mask = np.ones((1, kernel_h, kernel_w, 1)) / num_pixel
-        for _h in range(H_hat):
-            for _w in range(W_hat):
-                _h_begin, _w_begin = _h * stride_h, _w * stride_w
-                _h_end, _w_end = _h_begin + kernel_h, _w_begin + kernel_w
-                # delta_avg_sub = np.reshape(pre_delta[:, _h, _w, :], (-1, 1, 1, _cin))
-                # __delta[:, _h_begin:_h_end, _w_begin:_w_end, :] += delta_avg_mask * delta_avg_sub
-                __delta[:, _h_begin:_h_end, _w_begin:_w_end, :] += delta_avg_mask
-
-        self.__delta = __delta
-        if len(self.input_shape) == 3:
-            return __delta[:, :, :, 0]
-        else:
-            return __delta
-
-    @staticmethod
-    def pad(inputs, padding):
-        inputs = np.asarray(inputs)
-        if list(padding) == [0, 0]:
-            return inputs
-
-        if inputs.ndim == 3:
-            inputs = inputs[:, :, :, None]
-
-        if inputs.ndim == 4:
-            _, input_height, input_width, input_channel = inputs.shape
-            padded_input = np.zeros([_, input_height + 2 * padding[0],
-                                     input_width + 2 * padding[1], input_channel])
-            padded_input[:, padding[0]:input_height + padding[0],
-            padding[1]:input_width + padding[1], :] = inputs
-            return padded_input
-        else:
-            raise ValueError('Your input must be a 3-D or 4-D tensor.')
+    def _get_output_shape(self):
+        _, H, W, channel_in = self.input_shape
+        s = self.stride
+        kh, kw = self.kernel_size
+        assert (H - kh) % s == 0, 'invalid (H, kernel_size): (%d, %d)' % (H, kh)
+        assert (W - kw) % s == 0, 'invalid (W, kernel_size): (%d, %d)' % (W, kw)
+        H_hat = (H - kh) // s + 1
+        W_hat = (W - kw) // s + 1
+        return _, H_hat, W_hat, channel_in
 
 
 # alias names
