@@ -595,6 +595,10 @@ class MaxPool2D(Layer):
     def delta(self):
         return self.__delta
 
+    @delta.setter
+    def delta(self, delta):
+        self.__delta = delta
+
     @property
     def params(self):
         return list()
@@ -620,37 +624,22 @@ class MaxPool2D(Layer):
 
     def forward(self, inputs, *args, **kwargs):
         self.assert_shape(self.input_shape, inputs.shape)
-        inputs = inputs.reshape(0, 3, 1, 2)
+        inputs = inputs.transpose(0, 3, 1, 2)
         pool_param = {'pool_height': self.kernel_size[0],
                       'pool_width': self.kernel_size[1],
                       'stride': self.stride}
-
+        output, self.cache = max_pool_forward_fast(inputs, pool_param)
+        output = output.transpose(0, 2, 3, 1)
+        self.assert_shape(self.output_shape, output.shape)
+        return output
 
     def backward(self, pre_delta, *args, **kwargs):
-        if len(self.input_shape) == 3:
-            __delta = np.zeros(tuple(self.input_shape) + (1,))
-        else:
-            __delta = np.zeros(self.inputs.shape)
-
-        x = self.inputs
-        H_hat, W_hat = self.output_shape[1], self.output_shape[2]
-        stride_h, stride_w = self.stride[0], self.stride[1]
-        kernel_h, kernel_w = self.kernel_size[0], self.kernel_size[1]
-        channel_size = self.output.shape[-1]
-        for _h in range(H_hat):
-            for _w in range(W_hat):
-                _h_begin, _w_begin = _h * stride_h, _w * stride_w
-                _h_end, _w_end = _h_begin + kernel_h, _w_begin + kernel_w
-                output_max_sub_mask = np.array(self.output[:, _h, _w, :] == x[:, _h_begin:_h_end, _w_begin:_w_end, :],
-                                               dtype=np.float)
-                __delta[:, _h_begin:_h_end, _w_begin:_w_end, :] += np.reshape(
-                    output_max_sub_mask * pre_delta[:, _h, _w, :], (-1, 1, 1, channel_size))
-
-        self.__delta = __delta
-        if len(self.input_shape) == 3:
-            return __delta[:, :, :, 0]
-        else:
-            return __delta
+        self.assert_shape(self.output_shape, pre_delta.shape)
+        pre_delta = pre_delta.transpose(0, 3, 1, 2)
+        delta = max_pool_backward_fast(pre_delta, self.cache)
+        self.delta = delta.transpose(0, 2, 3, 1)
+        self.assert_shape(self.input_shape, self.delta.shape)
+        return self.delta
 
     def _get_output_shape(self):
         _, H, W, channel_in = self.input_shape
