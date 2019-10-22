@@ -319,6 +319,7 @@ def avg_pool_backward_reshape(dout, cache):
     dx_reshaped = np.zeros_like(x_reshaped)
     dout_newaxis = dout[:, :, :, np.newaxis, :, np.newaxis]
     dout_broadcast, _ = np.broadcast_arrays(dout_newaxis, dx_reshaped)
+    # TODO the gradient maybe using mean instead of sum
     dx_reshaped = dx_reshaped + np.sum(dout_broadcast, axis=(3, 5), keepdims=True)
     dx = dx_reshaped.reshape(x.shape)
 
@@ -367,7 +368,8 @@ def avg_pool_backward_im2col(dout, cache):
 
     dout_reshaped = dout.transpose(2, 3, 0, 1).flatten()
     dx_cols = np.zeros_like(x_cols)
-    dx_cols = dx_cols + np.sum(dout_reshaped, axis=0, keepdims=True)
+    # dx_cols = dx_cols + np.sum(dout_reshaped, axis=0, keepdims=True)
+    dx_cols = dx_cols + np.mean(dout_reshaped, axis=0, keepdims=True)
     dx = col2im_indices(dx_cols, (N * C, 1, H, W), pool_height, pool_width,
                         padding=0, stride=stride)
     dx = dx.reshape(x.shape)
