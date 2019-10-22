@@ -193,7 +193,6 @@ def max_pool_backward_reshape(dout, cache):
     dout_broadcast, _ = np.broadcast_arrays(dout_newaxis, dx_reshaped)
     dx_reshaped[mask] = dout_broadcast[mask]
     dx_reshaped /= np.sum(mask, axis=(3, 5), keepdims=True)
-    print(np.sum(mask, axis=(3, 5), keepdims=True).shape)
     dx = dx_reshaped.reshape(x.shape)
 
     return dx
@@ -222,7 +221,6 @@ def max_pool_forward_im2col(x, pool_param):
     x_cols_argmax = np.argmax(x_cols, axis=0)
     x_cols_max = x_cols[x_cols_argmax, np.arange(x_cols.shape[1])]
     out = x_cols_max.reshape(out_height, out_width, N, C).transpose(2, 3, 0, 1)
-
     cache = (x, x_cols, x_cols_argmax, pool_param)
     return out, cache
 
@@ -238,7 +236,6 @@ def max_pool_backward_im2col(dout, cache):
     N, C, H, W = x.shape
     pool_height, pool_width = pool_param['pool_height'], pool_param['pool_width']
     stride = pool_param['stride']
-
     dout_reshaped = dout.transpose(2, 3, 0, 1).flatten()
     dx_cols = np.zeros_like(x_cols)
     dx_cols[x_cols_argmax, np.arange(dx_cols.shape[1])] = dout_reshaped
@@ -321,10 +318,10 @@ def avg_pool_backward_reshape(dout, cache):
     """
     x, x_reshaped, out = cache
 
-    dx_reshaped = np.ones_like(x_reshaped)
+    dx_reshaped = np.zeros_like(x_reshaped)
     dout_newaxis = dout[:, :, :, np.newaxis, :, np.newaxis]
     dout_broadcast, _ = np.broadcast_arrays(dout_newaxis, dx_reshaped)
-    dx_reshaped = dx_reshaped * np.sum(dout_broadcast, axis=(3, 5), keepdims=True)
+    dx_reshaped = dx_reshaped + np.sum(dout_broadcast, axis=(3, 5), keepdims=True)
     dx = dx_reshaped.reshape(x.shape)
 
     return dx
@@ -371,8 +368,8 @@ def avg_pool_backward_im2col(dout, cache):
     stride = pool_param['stride']
 
     dout_reshaped = dout.transpose(2, 3, 0, 1).flatten()
-    # dx_cols = np.zeros_like(x_cols)
-    dx_cols = np.sum(dout_reshaped, axis=0)
+    dx_cols = np.zeros_like(x_cols)
+    dx_cols = dx_cols + np.sum(dout_reshaped, axis=0, keepdims=True)
     dx = col2im_indices(dx_cols, (N * C, 1, H, W), pool_height, pool_width,
                         padding=0, stride=stride)
     dx = dx.reshape(x.shape)

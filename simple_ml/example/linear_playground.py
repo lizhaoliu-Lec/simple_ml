@@ -1,7 +1,8 @@
 import numpy as np
 
 from simple_ml.nn.model import Model, Sequential
-from simple_ml.nn.layer import Dense, Softmax, Input, Dropout, Activation, MaxPooling2D, AvgPool2D, AvgPooling2D, Flatten
+from simple_ml.nn.layer import Dense, Softmax, Input, Dropout, Activation, MaxPooling2D, AvgPool2D, AvgPooling2D, \
+    Flatten
 from simple_ml.nn.layer import Conv2d
 from simple_ml.nn.optimizer import SGD, Momentum, Adam
 from simple_ml.nn.initializer import zeros
@@ -152,24 +153,25 @@ def seq_cnn_mnist():
 
     model = Sequential()
     model.add(Input(batch_input_shape=(None, 28, 28, 1)))
-    model.add(Conv2d(3, 16, stride=1, padding=0, activation='relu'))
-    # model.add(MaxPooling2D(2, stride=2))
-    model.add(AvgPooling2D(2, stride=2))
+    model.add(Conv2d(3, 16, stride=1, padding=2, activation='relu'))
+    model.add(MaxPooling2D(4, stride=2))
+    # model.add(AvgPooling2D(4, stride=2))
     model.add(Conv2d(2, 32, stride=1, padding=0, activation='relu'))
-    # model.add(MaxPooling2D(2, stride=2))
-    model.add(AvgPooling2D(2, stride=2))
-    model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
-    # model.add(MaxPooling2D(2, stride=2))
-    model.add(AvgPooling2D(2, stride=2))
+    model.add(MaxPooling2D(3, stride=2))
+    # model.add(AvgPooling2D(3, stride=2))
+    model.add(Conv2d(1, 64, stride=1, padding=0, activation='relu'))
+    # model.add(MaxPooling2D(3, stride=3))
+    # model.add(AvgPooling2D(3, stride=3))
+
     model.add(Flatten())
     model.add(Softmax(label_size))
-    model.compile('CE', optimizer=SGD(lr=1e-3))
+    model.compile('CE', optimizer=Adam(lr=1e-3))
     # model.fit(training_data, training_label, validation_data=(valid_data, valid_label),
     #           batch_size=256, verbose=1, epochs=2, metric='Accuracy', peek_type='single-cls')
-    # model.fit(training_data[:1000], training_label[:1000], validation_data=(valid_data[:1000], valid_label[:1000]),
-    #           batch_size=256, verbose=1, epochs=10, metric='Accuracy', peek_type='single-cls')
-    model.fit(training_data[:100], training_label[:100], validation_data=(valid_data[:50], valid_label[:50]),
-              batch_size=256, verbose=10, epochs=40, metric='Accuracy', peek_type='single-cls')
+    model.fit(training_data[:1000], training_label[:1000], validation_data=(valid_data[:1000], valid_label[:1000]),
+              batch_size=256, verbose=1, epochs=10, metric='Accuracy', peek_type='single-cls')
+    # model.fit(training_data[:100], training_label[:100], validation_data=(valid_data[:50], valid_label[:50]),
+    #           batch_size=256, verbose=10, epochs=100, metric='Accuracy', peek_type='single-cls')
     plt.subplot(211)
     plt.plot(model.train_losses, label='train_losses')
     plt.plot(model.validation_losses, label='valid_losses')
