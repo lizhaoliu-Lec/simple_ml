@@ -15,9 +15,9 @@ def binary_accuracy(outputs, targets):
     # print('y_predicts', y_predicts)
     # print(y_predicts.shape, 'y_predicts')
     # print(targets.shape, 'targets')
-    # print(np.sum(acc, axis=0).shape, 'np.sum(acc, axis=0)')
+    # print(np.sum(acc, axis=0).squeeze().shape, 'np.sum(acc, axis=0)')
     # print(acc.shape, 'np.sum(acc, axis=0)')
-    return np.sum(acc, axis=0)
+    return np.sum(acc, axis=0).squeeze()
 
 
 def svm_binary_accuracy(outputs, targets):
