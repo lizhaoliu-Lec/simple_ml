@@ -12,7 +12,7 @@ from simple_ml.nn.layer import Dense, Softmax, Input, Dropout, Activation, MaxPo
     Flatten
 from simple_ml.nn.layer import Conv2d
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
-from simple_ml.nn.initializer import zeros
+from simple_ml.nn.initializer import zeros, ones
 from simple_ml.utils.metric import accuracy, mean_absolute_error
 
 
@@ -59,9 +59,10 @@ def read_data(data_path='tmp\\exp3', size=32, val_split=0.1, test_split=0.2, see
         total_size = X.shape[0]
         train_size = int(total_size * (1 - val_split - test_split))
         val_size = train_size + int(total_size * val_split)
-        X_train, y_train = X[:train_size], y[:train_size]
-        X_val, y_val = X[train_size:val_size], y[train_size:val_size]
-        X_test, y_test = X[val_size:], y[val_size:]
+        X_mean = np.mean(X[:train_size], axis=(0, 1, 2), keepdims=True)
+        X_train, y_train = (X[:train_size] - X_mean) / 255.0, y[:train_size]
+        X_val, y_val = (X[train_size:val_size] - X_mean) / 255.0, y[train_size:val_size]
+        X_test, y_test = (X[val_size:] - X_mean) / 255.0, y[val_size:]
         pickle.dump([X_train, y_train, X_val, y_val, X_test, y_test],
                     file=open(all_Xy_data_path, mode='wb'))
     else:
@@ -73,25 +74,30 @@ def read_data(data_path='tmp\\exp3', size=32, val_split=0.1, test_split=0.2, see
 
 
 def seq_cnn_face():
-    X_train, y_train, X_val, y_val, X_test, y_test = read_data()
-    print('train set positive class portion: %.2f (%d / %d)' % (np.mean(y_train), int(np.sum(y_train)), y_train.shape[0]))
+    X_train, y_train, X_val, y_val, X_test, y_test = read_data(size=64)
+    print(
+        'train set positive class portion: %.2f (%d / %d)' % (np.mean(y_train), int(np.sum(y_train)), y_train.shape[0]))
     print('val set positive class portion: %.2f (%d / %d)' % (np.mean(y_val), int(np.sum(y_val)), y_val.shape[0]))
     print('test set positive class portion: %.2f (%d / %d)' % (np.mean(y_test), int(np.sum(y_test)), y_test.shape[0]))
 
     model = Sequential()
     model.add(Input(batch_input_shape=(None, *X_train.shape[1:])))
-    model.add(Conv2d(3, 16, stride=1, padding=1, activation='relu'))
-    model.add(MaxPooling2D(2, stride=2))
-    model.add(Conv2d(3, 32, stride=1, padding=1, activation='relu'))
-    model.add(MaxPooling2D(2, stride=2))
-    model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
-    model.add(MaxPooling2D(2, stride=2))
+    # model.add(Conv2d(3, 16, stride=1, padding=1, activation='relu'))
+    # model.add(MaxPooling2D(2, stride=2))
+    # model.add(Conv2d(3, 32, stride=1, padding=1, activation='relu'))
+    # model.add(MaxPooling2D(2, stride=2))
+    # model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
+    # model.add(MaxPooling2D(2, stride=2))
+    # model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
+    # model.add(MaxPooling2D(2, stride=2))
+    # model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
+    # model.add(MaxPooling2D(2, stride=2))
 
     model.add(Flatten())
     model.add(Softmax(2))
-    model.compile('CE', optimizer=RMSProp(lr=1e-4))
+    model.compile('CE', optimizer=SGD(lr=1e-4))
     model.fit(X_train, y_train, validation_data=(X_val, y_val),
-              batch_size=256, verbose=1, epochs=10,
+              batch_size=64, verbose=1, epochs=1000,
               shuffle=True,
               metric='Accuracy', peek_type='single-cls')
     plt.subplot(211)
