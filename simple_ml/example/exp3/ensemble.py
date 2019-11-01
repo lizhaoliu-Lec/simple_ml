@@ -38,8 +38,10 @@ class AdaBoostClassifier:
             y_pred = self.classifiers[idx].predict(X)
             error_rate = np.sum(ws * (y != y_pred).float()) + eps
             # (3) compute the coefficient of the idx classifier
-
-
+            alpha_idx = 0.5 * np.log((1 - error_rate) / error_rate)
+            # (4) update weights
+            z_idx = None
+            #TODO
 
     def predict_scores(self, X):
         """Calculate the weighted sum score of the whole base classifiers for given samples.
