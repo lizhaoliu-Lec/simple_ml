@@ -22,7 +22,7 @@ class AdaBoostClassifier:
         """Optional"""
         pass
 
-    def fit(self, X, y):
+    def fit(self, X, y, eps=1e-8):
         """Build a boosted classifier from the training set (X, y).
 
         Args:
@@ -30,9 +30,16 @@ class AdaBoostClassifier:
             y: An ndarray indicating the ground-truth labels correspond to X, which shape should be (n_samples,1).
         """
         N = X.shape[0]
-        ws = np.ones((N)) / N
+        ws = np.ones(N) / N
         for idx in range(self.n_weakers_limit):
-            pass
+            # (1) fit weak classifier
+            self.classifiers[idx].fit(X, y)
+            # (2) compute error rate
+            y_pred = self.classifiers[idx].predict(X)
+            error_rate = np.sum(ws * (y != y_pred).float()) + eps
+            # (3) compute the coefficient of the idx classifier
+
+
 
     def predict_scores(self, X):
         """Calculate the weighted sum score of the whole base classifiers for given samples.
