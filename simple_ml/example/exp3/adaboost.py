@@ -77,8 +77,8 @@ def convert_data_to_npd_feats(data_path='..\\tmp\\exp3', size=24, val_split=0.1,
 if __name__ == '__main__':
     X_train, y_train, X_val, y_val, X_test, y_test = convert_data_to_npd_feats()
     weak = DecisionTreeClassifier(max_depth=1)
-    ad = AdaBoostClassifier(weak, 10)
-    ad.fit(X_train, y_train, X_val, y_val, early_stop=False)
+    ad = AdaBoostClassifier(weak, 20)
+    ad.fit(X_train, y_train, X_val, y_val, early_stop=True)
     y_pred = ad.predict(X_train)
     y_pred_val = ad.predict(X_val)
     y_pred_test = ad.predict(X_test)

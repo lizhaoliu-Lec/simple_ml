@@ -7,18 +7,20 @@ import numpy as np
 class AdaBoostClassifier:
     """A simple AdaBoost Classifier."""
 
-    def __init__(self, weak_classifier, n_weakers_limit):
+    def __init__(self, weak_classifier, n_weakers_limit, patience=5):
         """Initialize AdaBoostClassifier
 
         Args:
             weak_classifier: The class of weak classifier, which is recommend to be sklearn.tree.DecisionTreeClassifier.
             n_weakers_limit: The maximum number of weak classifier the model can use.
+            patience: How many 'patience' we should wait before early stopping.
         """
         self.n_weakers_limit = n_weakers_limit
         self.classifiers = [copy.deepcopy(weak_classifier) for _ in range(n_weakers_limit)]
         self.best_n_weakers_limit = n_weakers_limit
         self.alphas = None
         self.performance_history = []
+        self.patience = patience
 
     def _is_good_enough(self, X_val, y_val, m_step, threshold):
         """Optional"""
@@ -39,7 +41,12 @@ class AdaBoostClassifier:
             return False
         else:
             if self.performance_history[-1] > acc:
-                return True
+                if self.patience == 0:
+                    return True
+                else:
+                    self.performance_history.append(acc)
+                    self.patience = self.patience - 1
+                    return False
             else:
                 self.performance_history.append(acc)
                 return False
