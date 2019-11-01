@@ -6,7 +6,9 @@ import numpy as np
 from tqdm import tqdm
 from PIL import Image
 
-from simple_ml.example.exp3.feature import NPDFeature
+from sklearn.tree import DecisionTreeClassifier
+from simple_ml.preprocessing import NPDFeature
+from simple_ml.ensemble import AdaBoostClassifier
 
 
 def convert_data_to_npd_feats(data_path='..\\tmp\\exp3', size=24, val_split=0.1, test_split=0.2, seed=1234):
@@ -46,7 +48,7 @@ def convert_data_to_npd_feats(data_path='..\\tmp\\exp3', size=24, val_split=0.1,
             im = npd.extract()
             non_imgs.append(im)
         non_arrays = np.array(non_imgs)
-        non_labels = np.zeros((non_arrays.shape[0], 1))
+        non_labels = -1 * np.ones((non_arrays.shape[0], 1))
 
         X = np.concatenate([face_arrays, non_arrays], axis=0)
         y = np.concatenate([face_labels, non_labels], axis=0)
@@ -73,4 +75,14 @@ def convert_data_to_npd_feats(data_path='..\\tmp\\exp3', size=24, val_split=0.1,
 
 
 if __name__ == '__main__':
-    convert_data_to_npd_feats()
+    X_train, y_train, X_val, y_val, X_test, y_test = convert_data_to_npd_feats()
+    weak = DecisionTreeClassifier(max_depth=1)
+    ad = AdaBoostClassifier(weak, 1)
+    ad.fit(X_train, y_train, X_val, y_val, early_stop=False)
+    y_pred = ad.predict(X_train)
+    y_pred_val = ad.predict(X_val)
+    y_pred_test = ad.predict(X_test)
+
+    print('Train acc: ', np.mean(y_train == y_pred))
+    print('Val acc: ', np.mean(y_val == y_pred_val))
+    print('Test acc: ', np.mean(y_test == y_pred_test))
