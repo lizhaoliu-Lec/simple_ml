@@ -74,7 +74,7 @@ def read_data(data_path='tmp\\exp3', size=32, val_split=0.1, test_split=0.2, see
 
 
 def seq_cnn_face():
-    X_train, y_train, X_val, y_val, X_test, y_test = read_data(size=64)
+    X_train, y_train, X_val, y_val, X_test, y_test = read_data(size=24)
     print(
         'train set positive class portion: %.2f (%d / %d)' % (np.mean(y_train), int(np.sum(y_train)), y_train.shape[0]))
     print('val set positive class portion: %.2f (%d / %d)' % (np.mean(y_val), int(np.sum(y_val)), y_val.shape[0]))
