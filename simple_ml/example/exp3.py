@@ -1,4 +1,3 @@
-import cv2
 import os
 import random
 import pickle
@@ -82,22 +81,22 @@ def seq_cnn_face():
 
     model = Sequential()
     model.add(Input(batch_input_shape=(None, *X_train.shape[1:])))
-    # model.add(Conv2d(3, 16, stride=1, padding=1, activation='relu'))
-    # model.add(MaxPooling2D(2, stride=2))
-    # model.add(Conv2d(3, 32, stride=1, padding=1, activation='relu'))
-    # model.add(MaxPooling2D(2, stride=2))
-    # model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
-    # model.add(MaxPooling2D(2, stride=2))
-    # model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
-    # model.add(MaxPooling2D(2, stride=2))
-    # model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
-    # model.add(MaxPooling2D(2, stride=2))
+    model.add(Conv2d(3, 16, stride=1, padding=1, activation='relu'))
+    model.add(MaxPooling2D(2, stride=2))
+    model.add(Conv2d(3, 32, stride=1, padding=1, activation='relu'))
+    model.add(MaxPooling2D(2, stride=2))
+    model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
+    model.add(MaxPooling2D(2, stride=2))
+    model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
+    model.add(MaxPooling2D(2, stride=2))
+    model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
+    model.add(MaxPooling2D(2, stride=2))
 
     model.add(Flatten())
     model.add(Softmax(2))
     model.compile('CE', optimizer=SGD(lr=1e-4))
     model.fit(X_train, y_train, validation_data=(X_val, y_val),
-              batch_size=64, verbose=1, epochs=1000,
+              batch_size=64, verbose=1, epochs=100,
               shuffle=True,
               metric='Accuracy', peek_type='single-cls')
     plt.subplot(211)

@@ -167,7 +167,7 @@ def seq_cnn_mnist():
     model.add(Softmax(label_size))
     model.compile('CE', optimizer=Adam(lr=1e-3))
     model.fit(training_data, training_label, validation_data=(valid_data, valid_label),
-              batch_size=256, verbose=1, epochs=2, metric='Accuracy', peek_type='single-cls')
+              batch_size=256, verbose=1, epochs=5, metric='Accuracy', peek_type='single-cls')
     # model.fit(training_data[:1000], training_label[:1000], validation_data=(valid_data[:1000], valid_label[:1000]),
     #           batch_size=256, verbose=1, epochs=10, metric='Accuracy', peek_type='single-cls')
     # model.fit(training_data[:100], training_label[:100], validation_data=(valid_data[:50], valid_label[:50]),
