@@ -187,7 +187,7 @@ class Module(object):
 
             all_data = [d for d in self.data_loader(train_X, train_y, batch_size, shuffle)]
             tqdm_gen = tqdm(iterable=all_data)
-            tqdm_gen.set_description('Epoch {}, Loss={:.4f}'.format(iter_idx, 0))
+            tqdm_gen.set_description('Epoch: {} | Loss: {:.4f}'.format(iter_idx, 0))
             for x_batch, y_batch in tqdm_gen:
                 # forward propagation
                 y_pred = self.forward(x_batch, is_training=True)
@@ -203,13 +203,13 @@ class Module(object):
                 train_losses += batch_losses
                 per_loss = batch_losses / y_pred.shape[0]
 
-                description = 'Epoch {}, Loss={:.4f}'.format(iter_idx, per_loss)
+                description = 'Epoch: {} | Loss: {:.4f}'.format(iter_idx, per_loss)
 
                 if metric is not None:
                     batch_metrics = metric(y_pred, y_batch)
                     train_matrices += batch_metrics
                     per_metric = batch_metrics / y_pred.shape[0]
-                    description = 'Epoch {}, Loss={:.4f} Metric={:.4f}'.format(iter_idx, per_loss, per_metric)
+                    description = 'Epoch: {} | Loss: {:.4f} | Metric: {:.4f}'.format(iter_idx, per_loss, per_metric)
                 tqdm_gen.set_description(description)
 
             train_losses = train_losses / train_size + self.regularizer_loss()
