@@ -97,19 +97,20 @@ def model_mlp_random_cls():
     """
     input_size = 600
     input_dim = 20
-    label_size = 10
+    label_size = 2
     train_X = np.random.random((input_size, input_dim))
-    train_y = np.zeros((input_size, label_size))
-    for _ in range(input_size):
-        train_y[_, np.random.randint(0, label_size)] = 1
+    # train_y = np.zeros((input_size, label_size))
+    train_y = np.random.randint(0, label_size, (input_size, 1))
+    # for _ in range(input_size):
+    #     train_y[_, np.random.randint(0, label_size)] = 1
 
     Inputs = Input(input_shape=input_dim)
     X = Dense(100, activation='relu')(Inputs)
     X = Softmax(label_size)(X)
     model = Model(Inputs, X)
     model.compile('CE')
-    model.fit(train_X, train_y,
-              verbose=100, epochs=5000,
+    model.fit(train_X, train_y, batch_size=256,
+              verbose=20, epochs=100,
               metric='Accuracy', peek_type='single-cls')
 
 
@@ -166,12 +167,12 @@ def seq_cnn_mnist():
     model.add(Flatten())
     model.add(Softmax(label_size))
     model.compile('CE', optimizer=Adam(lr=1e-3))
-    model.fit(training_data, training_label, validation_data=(valid_data, valid_label),
-              batch_size=256, verbose=1, epochs=5, metric='Accuracy', peek_type='single-cls')
+    # model.fit(training_data, training_label, validation_data=(valid_data, valid_label),
+    #           batch_size=256, verbose=1, epochs=5, metric='Accuracy', peek_type='single-cls')
     # model.fit(training_data[:1000], training_label[:1000], validation_data=(valid_data[:1000], valid_label[:1000]),
     #           batch_size=256, verbose=1, epochs=10, metric='Accuracy', peek_type='single-cls')
-    # model.fit(training_data[:100], training_label[:100], validation_data=(valid_data[:50], valid_label[:50]),
-    #           batch_size=256, verbose=10, epochs=100, metric='Accuracy', peek_type='single-cls')
+    model.fit(training_data[:100], training_label[:100], validation_data=(valid_data[:50], valid_label[:50]),
+              batch_size=256, verbose=10, epochs=100, metric='Accuracy', peek_type='single-cls')
     plt.subplot(211)
     plt.plot(model.train_losses, label='train_losses')
     plt.plot(model.validation_losses, label='valid_losses')
@@ -187,6 +188,6 @@ if __name__ == '__main__':
     # seq_mlp_random_cls()
     # model_mlp_random_reg()
     # seq_mlp_mnist()
-    # model_mlp_random_cls()
+    model_mlp_random_cls()
     # model_mlp_mnist()
-    seq_cnn_mnist()
+    # seq_cnn_mnist()

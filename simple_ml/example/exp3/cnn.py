@@ -15,7 +15,7 @@ from simple_ml.nn.initializer import zeros, ones
 from simple_ml.utils.metric import accuracy, mean_absolute_error
 
 
-def read_data(data_path='tmp\\exp3', size=32, val_split=0.1, test_split=0.2, seed=1234):
+def read_data(data_path='..\\tmp\\exp3', size=32, val_split=0.1, test_split=0.2, seed=1234):
     face_img_root = os.path.join(data_path, 'face')
     non_img_root = os.path.join(data_path, 'nonface')
     faces_img_paths = os.listdir(face_img_root)
@@ -73,7 +73,7 @@ def read_data(data_path='tmp\\exp3', size=32, val_split=0.1, test_split=0.2, see
 
 
 def seq_cnn_face():
-    X_train, y_train, X_val, y_val, X_test, y_test = read_data(size=24)
+    X_train, y_train, X_val, y_val, X_test, y_test = read_data(size=28)
     print(
         'train set positive class portion: %.2f (%d / %d)' % (np.mean(y_train), int(np.sum(y_train)), y_train.shape[0]))
     print('val set positive class portion: %.2f (%d / %d)' % (np.mean(y_val), int(np.sum(y_val)), y_val.shape[0]))
@@ -81,22 +81,19 @@ def seq_cnn_face():
 
     model = Sequential()
     model.add(Input(batch_input_shape=(None, *X_train.shape[1:])))
-    model.add(Conv2d(3, 16, stride=1, padding=1, activation='relu'))
-    model.add(MaxPooling2D(2, stride=2))
-    model.add(Conv2d(3, 32, stride=1, padding=1, activation='relu'))
-    model.add(MaxPooling2D(2, stride=2))
-    model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
-    model.add(MaxPooling2D(2, stride=2))
-    model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
-    model.add(MaxPooling2D(2, stride=2))
-    model.add(Conv2d(3, 64, stride=1, padding=1, activation='relu'))
-    model.add(MaxPooling2D(2, stride=2))
+    model.add(Conv2d(3, 16, stride=1, padding=2, activation='swish'))
+    # model.add(MaxPooling2D(4, stride=2))
+    # model.add(AvgPooling2D(4, stride=2))
+    model.add(Conv2d(2, 32, stride=1, padding=0, activation='swish'))
+    # model.add(MaxPooling2D(3, stride=2))
+    # model.add(AvgPooling2D(3, stride=2))
+    model.add(Conv2d(1, 64, stride=1, padding=0, activation='swish'))
 
     model.add(Flatten())
     model.add(Softmax(2))
-    model.compile('CE', optimizer=SGD(lr=1e-4))
+    model.compile('CE', optimizer=Adam(lr=1e-3))
     model.fit(X_train, y_train, validation_data=(X_val, y_val),
-              batch_size=64, verbose=1, epochs=100,
+              batch_size=256, verbose=1, epochs=100,
               shuffle=True,
               metric='Accuracy', peek_type='single-cls')
     plt.subplot(211)
