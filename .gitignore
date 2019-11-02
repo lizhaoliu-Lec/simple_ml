@@ -3,3 +3,8 @@
 .vscode/
 
 # filter py cache
+
+# filter setup file
+build/
+dist/
+pip_setup.egg-info/
