@@ -2,7 +2,7 @@ import numpy as np
 
 __all__ = [
     'get_metric',
-    'accuracy', 'mean_absolute_error', 'mean_square_error',
+    'accuracy', 'absolute_error', 'square_error',
     'binary_accuracy', 'svm_binary_accuracy',
 ]
 
@@ -46,7 +46,7 @@ def accuracy(outputs, targets):
     return np.sum(acc, axis=0)
 
 
-def mean_square_error(outputs, targets):
+def square_error(outputs, targets):
     batch_size = outputs.shape[0]
     outputs = np.reshape(outputs, (batch_size, -1))
     targets = np.reshape(targets, (batch_size, -1))
@@ -54,7 +54,7 @@ def mean_square_error(outputs, targets):
     return np.sum(np.mean(0.5 * (outputs - targets) ** 2, axis=1), axis=0)
 
 
-def mean_absolute_error(outputs, targets):
+def absolute_error(outputs, targets):
     batch_size = outputs.shape[0]
     outputs = np.reshape(outputs, (batch_size, -1))
     targets = np.reshape(targets, (batch_size, -1))
@@ -63,8 +63,8 @@ def mean_absolute_error(outputs, targets):
 
 
 _metric_map = {
-    'mae': mean_absolute_error,
-    'mse': mean_square_error,
+    'mae': absolute_error,
+    'mse': square_error,
     'accuracy': accuracy,
     'binary_accuracy': binary_accuracy,
     'binaryaccuracy': binary_accuracy,

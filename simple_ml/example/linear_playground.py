@@ -6,7 +6,7 @@ from simple_ml.nn.layer import Dense, Softmax, Input, Dropout, Activation, MaxPo
 from simple_ml.nn.layer import Conv2d
 from simple_ml.nn.optimizer import SGD, Momentum, Adam
 from simple_ml.nn.initializer import zeros
-from simple_ml.utils.metric import accuracy, mean_absolute_error
+from simple_ml.utils.metric import accuracy, absolute_error
 
 import matplotlib.pyplot as plt
 

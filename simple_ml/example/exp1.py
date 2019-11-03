@@ -10,7 +10,7 @@ from simple_ml.nn.layer import Input, Linear, Dropout
 from simple_ml.nn.model import Model
 from simple_ml.nn.initializer import zeros, ones
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
-from simple_ml.utils.metric import accuracy, mean_absolute_error, mean_square_error
+from simple_ml.utils.metric import accuracy, absolute_error, square_error
 
 import matplotlib.pyplot as plt
 
@@ -41,8 +41,8 @@ def lr():
     test_y_hat = linear_regression.predict(X_test)
     train_y_hat = linear_regression.predict(X_train)
 
-    training_error = mean_absolute_error(y_train, train_y_hat) / y_train.shape[0]
-    test_error = mean_absolute_error(y_test, test_y_hat) / y_test.shape[0]
+    training_error = absolute_error(y_train, train_y_hat) / y_train.shape[0]
+    test_error = absolute_error(y_test, test_y_hat) / y_test.shape[0]
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)
@@ -61,8 +61,8 @@ def rlr():
     test_y_hat = ridge_regression.predict(X_test)
     train_y_hat = ridge_regression.predict(X_train)
 
-    training_error = mean_absolute_error(y_train, train_y_hat) / y_train.shape[0]
-    test_error = mean_absolute_error(y_test, test_y_hat) / y_test.shape[0]
+    training_error = absolute_error(y_train, train_y_hat) / y_train.shape[0]
+    test_error = absolute_error(y_test, test_y_hat) / y_test.shape[0]
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)
@@ -101,8 +101,8 @@ def dlr():
 
     train_y_hat = model.forward(X_train)
     test_y_hat = model.forward(X_test)
-    training_error = mean_absolute_error(y_train, train_y_hat) / y_train.shape[0]
-    test_error = mean_absolute_error(y_test, test_y_hat) / y_test.shape[0]
+    training_error = absolute_error(y_train, train_y_hat) / y_train.shape[0]
+    test_error = absolute_error(y_test, test_y_hat) / y_test.shape[0]
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)

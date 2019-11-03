@@ -12,7 +12,7 @@ from simple_ml.nn.layer import Dense, Softmax, Input, Dropout, Activation, MaxPo
 from simple_ml.nn.layer import Conv2d
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
 from simple_ml.nn.initializer import zeros, ones
-from simple_ml.utils.metric import accuracy, mean_absolute_error
+from simple_ml.utils.metric import accuracy, absolute_error
 
 
 def read_data(data_path='..\\tmp\\exp3', size=32, val_split=0.1, test_split=0.2, seed=1234):

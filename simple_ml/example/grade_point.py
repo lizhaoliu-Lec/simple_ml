@@ -13,7 +13,7 @@ from simple_ml.nn.model import Model
 from simple_ml.nn.initializer import zeros, ones
 from simple_ml.nn.regularizer import L2_Regularizer
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
-from simple_ml.utils.metric import accuracy, mean_absolute_error, mean_square_error
+from simple_ml.utils.metric import accuracy, absolute_error, square_error
 
 
 def read_csv_to_xy(filepath, x_cols, y_col):
@@ -74,8 +74,8 @@ def lr():
     test_y_hat = linear_regression.predict(test_x)
     train_y_hat = linear_regression.predict(train_x)
 
-    training_error = mean_absolute_error(train_y, train_y_hat) / train_y.shape[0]
-    test_error = mean_absolute_error(test_y, test_y_hat) / test_y.shape[0]
+    training_error = absolute_error(train_y, train_y_hat) / train_y.shape[0]
+    test_error = absolute_error(test_y, test_y_hat) / test_y.shape[0]
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)
@@ -93,8 +93,8 @@ def rlr():
     test_y_hat = ridge_regression.predict(test_x)
     train_y_hat = ridge_regression.predict(train_x)
 
-    training_error = mean_absolute_error(train_y, train_y_hat) / train_y.shape[0]
-    test_error = mean_absolute_error(test_y, test_y_hat) / test_y.shape[0]
+    training_error = absolute_error(train_y, train_y_hat) / train_y.shape[0]
+    test_error = absolute_error(test_y, test_y_hat) / test_y.shape[0]
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)
@@ -141,8 +141,8 @@ def dlr():
     plt.show()
     train_y_hat = model.forward(train_x)
     test_y_hat = model.forward(test_x)
-    training_error = mean_absolute_error(train_y, train_y_hat) / train_y.shape[0]
-    test_error = mean_absolute_error(test_y, test_y_hat) / test_y.shape[0]
+    training_error = absolute_error(train_y, train_y_hat) / train_y.shape[0]
+    test_error = absolute_error(test_y, test_y_hat) / test_y.shape[0]
 
     print('Training error: ', training_error)
     print('Test error: ', test_error)

@@ -10,7 +10,7 @@ from simple_ml.nn.model import Model
 from simple_ml.nn.initializer import zeros, ones
 from simple_ml.nn.regularizer import L2_Regularizer, L1_Regularizer, L1L2_Regularizer
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
-from simple_ml.utils.metric import accuracy, mean_absolute_error, mean_square_error
+from simple_ml.utils.metric import accuracy, absolute_error, square_error
 
 import matplotlib.pyplot as plt
 
