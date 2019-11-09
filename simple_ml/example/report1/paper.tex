@@ -104,7 +104,16 @@
                         % http://www.ctan.org/tex-archive/macros/latex/required/amslatex/math/
 
 
-
+\makeatletter
+\newif\if@restonecol
+\makeatother
+\let\algorithm\relax
+\let\endalgorithm\relax
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}%[ruled,vlined]{
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}  % Use Input in the format of Algorithm
+\renewcommand{\algorithmicensure}{\textbf{Output:}} % Use Output in the format of Algorithm 
 % Other popular packages for formatting tables and equations include:
 
 %\usepackage{array}
@@ -212,9 +221,9 @@ Undergraduate
 
 % Write abstract here
 \begin{abstract}
-In this report, we solve the Housing Dataset by using Linear Regression, Ridge Regression by closed form solution, and even optimize Linear Regression by Using Gradient Descen and its variants e.g. Stochastic Gradient Descent and Mini Batch Gradient Descent. \\
+In this report, we solve the house price prediction problem in Housing Dataset by using Linear Regression, Ridge Regression by closed form solution, and even Linear Regression optimized by using Gradient Descent and its variants e.g. Stochastic Gradient Descent and Mini Batch Gradient Descent. \\
 We perform experiments on four aspects: \\
-1. Different lambdas in Ridge Regression \\
+1. Comparing the magnitude of $W$ between linear regression and ridge regression optimized by closed form solution. \\
 2. Comparision between Gradient Descent and its variants in terms of convergence and time-cost. \\
 3. Tuning learning rate of Mini-Batch Gradient Descent. \\
 4. Comparing the magnitude of $W$ between linear regression optimized by closed form solution, ridge regression and linear regression optimized by mini-batch Gradient Descent. \\
@@ -223,62 +232,190 @@ We perform experiments on four aspects: \\
 % Each section begins with a \section{title} command
 \section{Introduction}
 	% \PARstart{}{} creates a tall first letter for this first paragraph
-\PARstart{T}{his} section introduces the problem to solved and leads the reader on to the main part. Detailed motivation is necessary. What's more, you can show your expected results and contributions.
+\PARstart{L}{inear} Regression is the core of machine learning. Based on Linear Regression, many machine learning algorithm, such as Ridge Regression, Logistics Regression, SVM are developed. Even in many deep learning model, such as Covolutional Neural Network(CNN), Long Short Term Memory(LSTM), Gated Recurrent Unit(GRU), linear regression(or Linear Layer) is the basic component. So it is very important to fully exploit the insight of Linear Regression. To achieve that goal, In this experiment, we conduct many experiments on linear regression optimized by closed form solution and gradient descent, ridge regression by solving the house price predicting problem.
 
 % Main Part
 \section{Methods and Theory}
-In this section, you are asked to give a complete introduction to the experiment. For instance, the chosen methods, the related theories, the related equations(loss function), the derivation process(taking the gradient) and so on.
+In this part, we first define the Linear Regression, Mean Squared Error(MES) Loss function. Then we solve the closed form solution of Linear Regression and its variant Ridge Regression. At last we define gradient descent algorithm, and its variants schocastic gradient descent and mini batch gradient descent.
+\subsection{Linear Regression}
+Given dataset $ D=\{x_{i}, y_{i}\}_{i=1}^{m}$, where $x_{i} \in \mathbf{R}^{n}$ and $y_{i} \in \mathbf{R}$.
+Liner Regression Model is parameterized by $(W, b)$, where $W \in \mathbf{R}^{n}$ and $b \in \mathbf{R}$ and the form of it is:
+ \begin{center}
+ 	\begin{equation}
+ 	y_{i} = x_{i}^{T}W + b
+ 	\end{equation}
+ \end{center} 
+We can write it in vertorized form:
+ \begin{center}
+	\begin{equation}
+	y = X^{T}W
+	\end{equation}
+\end{center} 
+where \\
+$\mathbf {y} ={\begin{pmatrix}y_{1}\\y_{2}\\\vdots \\y_{m}\end{pmatrix}},\quad 
+{\displaystyle X={\begin{pmatrix}1&\mathbf{x} _{1}^{\mathsf {T}}\\1&\mathbf {x} _{2}^{\mathsf {T}}\\\vdots&\vdots \\1&\mathbf {x} _{m}^{\mathsf {T}}\end{pmatrix}}={\begin{pmatrix}1&x_{11}&\cdots &x_{1n}\\1&x_{21}&\cdots &x_{2n}\\\vdots &\vdots &\ddots &\vdots \\1&x_{m1}&\cdots &x_{mn}\end{pmatrix}},} \\
+{\displaystyle {\boldsymbol {W }}={\begin{pmatrix}b \\W_{1}\\W_{2}\\\vdots \\W_{n}\end{pmatrix}}.}$
+\subsection{Mean Squared Error}
+Given the prediction of Linear Model $\hat{y} = X^{T}W $ and the Ground truth $y$, the MSE loss function is:
+ \begin{center}
+	\begin{equation}
+	L(\hat{y}, y) = \frac{1}{2m} \Sigma_{i=1}^{m}(\hat{y}_i, y_i) 
+				= \frac{1}{2m}(\hat{y} - y)^{T}(\hat{y} - y)
+	\end{equation}
+\end{center} 
+\subsection{Closed form Solution}
+The best parameter $W^{*}$ can be obtained by \\
+\begin{equation}
+ W^{*} = \arg\min_{W}L(X^{T}W, y)  
+\end{equation}
+So, we set 
+\begin{equation}
+\frac{\partial L(\hat{y}, y)}{\partial W} = 0 \\
+\end{equation}
+We can get 
+\begin{equation}
+W^{*} = (X^{T}X)^{-1}X^{T}y
+\end{equation}
+\subsection{Ridge Regression}
+In equation 6, when $m > n$, $X^{T}X$ is not invertible. Ridge Regression tackle this problem by adding a small term. So the closed form solution for Ridge Regression is
+\begin{equation}
+W_{ridge}^{*} = (X^{T}X + \lambda \mathbf{I})^{-1}X^{T}y
+\end{equation}
+In this way, the loss function for Ridge Regression is
+\begin{equation}
+L_{ridge}(\hat{y}, y) = \frac{1}{2m}(\hat{y} - y)^{T}(\hat{y} - y)  + \frac{1}{2} W^{T} W
+\end{equation}
+In another point of view, Ridge Regression can be seen as a regularized form of Linear Regression.
+\subsection{Gradient Descent}
+Not all problem can be derived a closed form solution, which is often the case in machine learning. So instead of getting the best parameters $W^{*}$ immedeatly, we can update it incremently until $W$ gets closed enough to $W^{*}$. That is the basic idea of Gradient Descent Algorithm. Gradient Descent Algorithm can be found in Algorithm~\ref{alg: Gradient_Descent}. 
+\begin{algorithm}
+
+	\label{alg: Gradient_Descent}
+	\caption{Gradient Descent}
+	\KwIn{Training Dataset $ D=\{x_{i}, y_{i}\}_{i=1}^{m}$, learning rate $\eta $, max iteration $ N$, parameter $W$}
+	\KwOut{Optimized parameter $\hat{W}$}
+	$t \gets 1$ \\
+	\For{$t < N $}
+	{
+		$\hat{y} \gets X^{T}W $ \\
+		$ L(\hat{y}, y) \gets \frac{1}{2m}(\hat{y} - y)^{T}(\hat{y} - y)$ \\
+		$\Delta{W} \gets \frac{\partial L}{\partial W}$ \\
+		$W \gets W - \eta * \Delta{W}$ \\
+	}
+	$\hat{W} = W$ \\
+	return $\hat{W}$
+\end{algorithm}
+
+\subsection{Stochastic Gradient Descent}
+Different from gradient descent which updates after it computes the gradient of parameter over all example, stochastic gradient descent updates immediately once it computes parameter's gradient from only one example. Stochastic Gradient Descent Algorithm can be found in Algorithm~\ref{alg: Stochastic_Gradient_Descent}. It can be seen in the algorithm that, there is another for loop inside the for loop of gradient descent algorithm.
+\begin{algorithm}
+		\label{alg: Stochastic_Gradient_Descent}
+	\caption{Stochastic Gradient Descent}
+	\KwIn{Training Dataset $ D=\{x_{i}, y_{i}\}_{i=1}^{m}$, learning rate $\eta $, max iteration $ N$, parameter $W$}
+	\KwOut{Optimized parameter $\hat{W}$}
+	$t \gets 1$ \\
+	\For{$t < N $}
+	{
+		$ i \gets 0 $ \\
+		\For{$ i < m $}
+		{
+			$\hat{y}_{i} \gets X^{T}_{i}W $ \\
+			$ L(\hat{y}_{i}, y_{i}) \gets \frac{1}{2}(\hat{y}_{i} - y_{i})^{T}(\hat{y}_{i} - y_{i})$ \\
+			$\Delta{W} \gets \frac{\partial L}{\partial W}$ \\
+			$W \gets W - \eta * \Delta{W}$ \\
+		}
+	}
+	$\hat{W} = W$ \\
+	return $\hat{W}$
+\end{algorithm}
+
+\subsection{Mini Batch Gradient Descent}
+Due to the fact that stochastic gradient descent updates the parameter based on only one examples, which it is time-comsuming, mini batch gradient descent updates the parameter based on a batch of examples, typically the batch size is bigger than 1 and smaller than the number of whole examples, e.g. 8, 16, 32... Mini Batch Gradient Descent Algorithm can be found in Algorithm~\ref{alg: Mini_Batch_Gradient_Descent}.
+\begin{algorithm}
+	\label{alg: Mini_Batch_Gradient_Descent}
+	\caption{Mini Batch Gradient Descent}
+	\KwIn{Training Dataset $ D=\{x_{i}, y_{i}\}_{i=1}^{m}$, learning rate $\eta $, max iteration $ N$, parameter $W$}
+	\KwOut{Optimized parameter $\hat{W}$}
+	$t \gets 1$ \\
+	\For{$t < N $}
+	{
+		$ i \gets 0 $ \\
+		\For{$ X_{batch}, y_{batch} $ in $D$}
+		{
+			$\hat{y}_{batch} \gets X^{T}_{batch}W $ \\
+			$ L(\hat{y}_{batch}, y_{batch}) \gets \frac{1}{2}(\hat{y}_{batch} - y_{batch})^{T}(\hat{y}_{batch} - y_{batch})$ \\
+			$\Delta{W} \gets \frac{\partial L}{\partial W}$ \\
+			$W \gets W - \eta * \Delta{W}$ \\
+		}
+	}
+	$\hat{W} = W$ \\
+	return $\hat{W}$
+\end{algorithm}
+
 
 \section{Experiments}
 \subsection{Dataset}
-This section represents the related information of datasets, such as the content, the number of data, the training set, the validation set and so on.
+We conduct all the experiments on housing dataset, which has total 506 examples and each example's form is $(x, y)$, where $x \in \mathbf{R}^{13}$ and $y \in \mathbf{R}$. We split the dataset into three part: 272 training examples, 67 validation examples and 167 test examples. $X$ is already scaled between $-1$ and $1$. And we normalized the $X_{train}, X_{validation}, X_{test} $ by using the mean and variance of $X_{train}$. 
 
 \subsection{Implementation}
-All detailed implementation in your experiment: initialization, process, results, all kinds of parameters. In a word, describe clearly What you do and how you do.\par
+We implement the Linear Regression, Ridge Regression and Gradien Descent Algorithm using python and mainly rely on the numpy package.
 
-	% You can reference tables and figure by using the \ref{label} command. Each table and figure needs to have a UNIQUE label.
-	Figures and tables should be labeled and numbered, such as in Table~\ref{tab:simParameters} and Fig.~\ref{fig:tf_plot}.
-
-	% This is how you define a table: the [!hbt] means that LaTeX is forced (by the !) to place the table exactly here (by h), or if that doesnt work because of a pagebreak or so, it tries to place the table to the bottom of the page (by b) or the top (by t).
-	\begin{table}[!hbt]
-		% Center the table
-		\begin{center}
+\subsection{Linear Regression and Ridge Regression}
+In this section, we conduct the experiment of serveral magtitude of $\lambda$, which leads to serveral $W_{ridge}$. We use $L_2{norm}$ to represent the magtitude of a vector. And we evaluate the performance on housing data's test set. Given $v \in \mathbf{R}^{n}$
+\begin{equation}
+	L_2norm(v) = \sqrt{\Sigma_{i=1}^{n} v_{i}}
+\end{equation} \par
+From Table~\ref{tab:Ridge_Regression}, we can see that: \par
+First, as the magtitude of lambda becomes bigger, both $MSE_{train}$ and $MSE_{val}$ become bigger. \par
+Second, as the magtitude of lambda becomes bigger, the magtitude of $W_{ridge}$ become smaller. \par
+The first observation is not often the cases. But the second observation can be explained that as the regularizer $\lambda$ become bigger, the $W$ is regularized, so that it is smaller. \par
+By comparing Table~\ref{tab:Ridge_Regression} and Table~\ref{tab:Linear_Regression}, we can see that, the performance and the weight magtitude is almost the same as the $\lambda$ is small, but the difference become larger as $\lambda$ grows.
+\begin{table}[!hbt]
+	% Center the table
+	\begin{center}
 		% Title of the table
-		\caption{Simulation Parameters}
-		\label{tab:simParameters}
+		\caption{Different lambdas' impact in terms of error and $W$ magtitude.}
+		\label{tab:Ridge_Regression}
 		% Table itself: here we have two columns which are centered and have lines to the left, right and in the middle: |c|c|
-		\begin{tabular}{|c|c|}
+		\begin{tabular}{|c|c|c|c|c|c|c|c|}
 			% To create a horizontal line, type \hline
 			\hline
 			% To end a column type &
 			% For a linebreak type \\
-			Information message length & $k=16000$ bit \\
+			$log_{10}^{\lambda}$ & -2 & -1 & 0 & 1 & 2 & 3 \\
 			\hline
-			Radio segment size & $b=160$ bit \\
+			$MSE_{train}$   & 10.23 & 10.23 & 10.24 & 10.63 & 30.37 & 181.35   \\
 			\hline
-			Rate of component codes & $R_{cc}=1/3$\\
+			$MSE_{val}$  & 17.08 & 17.09 & 17.16 & 18.20 & 43.92 & 214.55   \\
 			\hline
-			Polynomial of component encoders & $[1 , 33/37 , 25/37]_8$\\
+			$L_2norm(W_{ridge})$  & 0.83 & 0.82 & 0.81 & 0.72 & 0.50 & 0.38 \\
 			\hline
 		\end{tabular}
-		\end{center}
-	\end{table}
+	\end{center}
+\end{table}
 
-	% If you have questions about how to write mathematical formulas in LaTeX, please read a LaTeX book or the 'Not So Short Introduction to LaTeX': tobi.oetiker.ch/lshort/lshort.pdf
+\begin{table}[!hbt]
+	% Center the table
+	\begin{center}
+		% Title of the table
+		\caption{Linear Regression Error and $W$ magtitude.}
+		\label{tab:Linear_Regression}
+		% Table itself: here we have two columns which are centered and have lines to the left, right and in the middle: |c|c|
+		\begin{tabular}{|c|c|}
+			% To create a horizontal line, type \hline
+			\hline
+			$MSE_{train}$ & 10.23    \\
+			\hline
+			$MSE_{val}$ & 17.08    \\
+			\hline
+			$L_2norm(W)$ & 0.83  \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
 
-	% This is how you include a eps figure in your document. LaTeX only accepts EPS or TIFF files.
-	\begin{figure}[!hbt]
-		% Center the figure.
-		\begin{center}
-		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
-		\includegraphics[width=\columnwidth]{plot_tf}
-		% Create a subtitle for the figure.
-		\caption{Simulation results on the AWGN channel. Average throughput $k/n$ vs $E_s/N_0$.}
-		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
-		\label{fig:tf_plot}
-		\end{center}
-	\end{figure}
-
+\subsection{Gradient Descent, Stochastic Gradient Descent and Mini Batch Gradient Descent}
+In this section, we conduct experiments on optimizing the linear regression model by using three gradient descent algorrithms, and compare them in terms of convergence and time cost.
 
 \section{Conclusion}
 	This section summarizes the paper. In our experiments, you can also write your gains and inspirations in here.
@@ -286,4 +423,6 @@ All detailed implementation in your experiment: initialization, process, results
 
 
 % Your document ends here!
+
+
 \end{document}
