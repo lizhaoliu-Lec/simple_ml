@@ -221,7 +221,7 @@ Undergraduate
 
 % Write abstract here
 \begin{abstract}
-In this report, we solve the house price prediction problem in Housing Dataset by using closed form solution(CFS) optimized linear regression(LR), CSF optimized ridge regression(RR), and LR optimized by Gradient Descent(GD) and its variants e.g. Stochastic Gradient Descent(SGD) and Mini Batch Gradient Descent(MBGD). \\
+In this report, we solve the house price prediction problem in Housing Dataset by using closed form solution (CFS) optimized linear regression (LR), CSF optimized ridge regression (RR), and LR optimized by Gradient Descent (GD) and its variants e.g. Stochastic Gradient Descent (SGD) and Mini Batch Gradient Descent (MBGD). \\
 We perform experiments on four aspects: \\
 1. Comparision between CFS optimized LR and CFS optimized RR. \\
 2. Comparision between GD, SGD, MBGD in terms of convergence and time-cost. \\
@@ -232,11 +232,11 @@ We perform experiments on four aspects: \\
 % Each section begins with a \section{title} command
 \section{Introduction}
 	% \PARstart{}{} creates a tall first letter for this first paragraph
-\PARstart{L}{inear} Regression is the core of machine learning. Based on it, many machine learning algorithm, such as RR, Logistics Regression, SVM are developed. Even in many deep learning model, such as Covolutional Neural Network(CNN), Long Short Term Memory(LSTM), Gated Recurrent Unit(GRU), LR(or Linear Layer) is the basic component. So it is very important to fully exploit the insight of LR. To achieve that goal, In this experiment, we conduct many experiments on CSF optimized LR, CSF optimized RR, MBGD optimized LR by solving the house price predicting problem.
+\PARstart{L}{inear} Regression is the core of machine learning. Based on it, many machine learning algorithms, such as RR, Logistics Regression, SVM are developed. Even in many deep learning models, such as Covolutional Neural Network (CNN), Long Short Term Memory (LSTM), Gated Recurrent Unit (GRU), LR (or Linear Layer) is the basic component. So it is very important to fully exploit the insight of LR. To achieve that goal, In this experiment, we conduct many experiments on CSF optimized LR, CSF optimized RR, MBGD optimized LR by solving the house price predicting problem.
 
 % Main Part
 \section{Methods and Theory}
-In this part, we first define the Linear Regression, Mean Squared Error(MES) Loss function. Then we solve the closed form solution of Linear Regression and its variant Ridge Regression. At last we define gradient descent algorithm, and its variants schocastic gradient descent and mini batch gradient descent.
+In this part, we first define the LR, Mean Squared Error (MES) loss function. Then we solve the closed form solution for LR and its variant RR. At last we define GD algorithm, and its variants SGD and MBGD.
 \subsection{Linear Regression}
 Given dataset $ D=\{x_{i}, y_{i}\}_{i=1}^{m}$, where $x_{i} \in \mathbf{R}^{n}$ and $y_{i} \in \mathbf{R}$.
 Liner Regression Model is parameterized by $(W, b)$, where $W \in \mathbf{R}^{n}$ and $b \in \mathbf{R}$ and the form of it is:
@@ -279,7 +279,7 @@ We can get
 W^{*} = (X^{T}X)^{-1}X^{T}y
 \end{equation}
 \subsection{Ridge Regression}
-In Equation~\ref{eq:cfs}, when $m > n$, $X^{T}X$ is not invertible. Ridge Regression tackle this problem by adding a small term. So the closed form solution for Ridge Regression is
+In Equation~\ref{eq:cfs}, when $n > m$, $X^{T}X$ is not invertible. Ridge Regression tackle this problem by adding a small term. So the CFS for RR is
 \begin{equation}
 W_{ridge}^{*} = (X^{T}X + \lambda \mathbf{I})^{-1}X^{T}y
 \end{equation} \par
@@ -287,10 +287,10 @@ Where $\mathbf{I}$ is identity matrix. \par
 In this way, the loss function for Ridge Regression is
 \begin{equation}
 L_{ridge}(\hat{y}, y) = \frac{1}{2m}(\hat{y} - y)^{T}(\hat{y} - y)  + \frac{1}{2} W^{T} W
-\end{equation}
-In another point of view, Ridge Regression can be seen as a regularized form of Linear Regression.
+\end{equation} \par
+In another point of view, RR can be seen as a regularized version of LR.
 \subsection{Gradient Descent}
-Not all problem can be derived a closed form solution, which is often the case in machine learning. So instead of getting the best parameters $W^{*}$ immedeatly, we can update it incremently until $W$ gets closed enough to $W^{*}$. That is the basic idea of Gradient Descent Algorithm. Gradient Descent Algorithm can be found in Algorithm~\ref{alg: Gradient_Descent}. 
+Not all problem can be derived a CFS, which is often the case in machine learning. So instead of getting the best parameters $W^{*}$ immedeatly, we can update it incremently until $W$ gets close enough to $W^{*}$. That is the basic idea of GD algorithm. GD algorithm can be found in Algorithm~\ref{alg: Gradient_Descent}. 
 \begin{algorithm}
 
 	\label{alg: Gradient_Descent}
@@ -310,7 +310,7 @@ Not all problem can be derived a closed form solution, which is often the case i
 \end{algorithm}
 
 \subsection{Stochastic Gradient Descent}
-Different from SD which updates after it computes the gradient of parameter over all examples, stochastic gradient descent updates immediately once it computes parameter's gradient from only one example. SGD Algorithm can be found in Algorithm~\ref{alg: Stochastic_Gradient_Descent}. It can be seen in the algorithm that, there is another for loop inside the for loop of gradient descent algorithm.
+Different from GD which updates after it computes the gradient of parameters over all examples, stochastic gradient descent updates immediately once it computes parameters' gradient from only one example. SGD algorithm can be found in Algorithm~\ref{alg: Stochastic_Gradient_Descent}. It can be seen in the algorithm that, there is another for loop inside the for loop of GD algorithm, which leads to time un-efficiency.
 \begin{algorithm}
 		\label{alg: Stochastic_Gradient_Descent}
 	\caption{Stochastic Gradient Descent}
@@ -333,7 +333,7 @@ Different from SD which updates after it computes the gradient of parameter over
 \end{algorithm}
 
 \subsection{Mini Batch Gradient Descent}
-Due to the fact that SGD updates the parameter based on only one examples, which it is time-comsuming, mini batch gradient descent updates the parameter based on a batch of examples, typically the batch size is bigger than 1 and smaller than the number of whole examples, e.g. 8, 16, 32... MBGD Algorithm can be found in Algorithm~\ref{alg: Mini_Batch_Gradient_Descent}.
+Due to the fact that SGD updates the parameters based on only one examples, which it is time-comsuming, mini batch gradient descent updates the parameter based on a batch of examples, typically the batch size is bigger than 1 and smaller than the number of whole examples, e.g. 8, 16, 32... MBGD Algorithm can be found in Algorithm~\ref{alg: Mini_Batch_Gradient_Descent}.
 \begin{algorithm}
 	\label{alg: Mini_Batch_Gradient_Descent}
 	\caption{Mini Batch Gradient Descent}
@@ -358,13 +358,13 @@ Due to the fact that SGD updates the parameter based on only one examples, which
 
 \section{Experiments}
 \subsection{Dataset}
-We conduct all the experiments on housing dataset, which has total 506 examples and each example's form is $(x, y)$, where $x \in \mathbf{R}^{13}$ and $y \in \mathbf{R}$. We split the dataset into three part: 272 training examples, 67 validation examples and 167 test examples. $X$ is already scaled between $-1$ and $1$. And we normalized the $X_{train}, X_{validation}, X_{test} $ by using the mean and variance of $X_{train}$. 
+We conduct all the experiments on housing dataset, which has total 506 examples and each example's form is $(x, y)$, where $x \in \mathbf{R}^{13}$ and $y \in \mathbf{R}$. We split the dataset into three part: 272 training examples, 67 validation examples and 167 test examples. $X$ is already scaled between $-1$ and $1$. And we normalized the $X_{train}, X_{val}, X_{test} $ by using the mean and variance of $X_{train}$. 
 
 \subsection{Implementation}
-We implement the Linear Regression, Ridge Regression and Gradien Descent Algorithm using python and mainly rely on the numpy package.
+We implement the LR, RR and GD, GD, MBGD algorithm using python and mainly rely on the numpy package.
 
 \subsection{Linear Regression and Ridge Regression}
-In this section, we conduct the experiment of serveral magnitude of $\lambda$, which leads to serveral $W_{ridge}$. We use $L_2{norm}$ to represent the magnitude of a vector. Given $v \in \mathbf{R}^{n}$
+In this section, we conduct the experiment of serveral magnitude of $\lambda$ of RR in training set, which leads to serveral $W_{ridge}$. We use $L_2{norm}$ to represent the magnitude of a vector. Given $v \in \mathbf{R}^{n}$
 \begin{equation}
 	L_2norm(v) = \sqrt{\Sigma_{i=1}^{n} v_{i}}
 \end{equation} \par
@@ -373,12 +373,12 @@ First, as the magnitude of lambda becomes bigger, both $MSE_{train}$ and $MSE_{v
 Second, as the magnitude of lambda becomes bigger, the magnitude of $W_{ridge}$ become smaller. \par
 The first observation is not often the cases. But the second observation can be explained that as the regularizer $\lambda$ become bigger, the $W$ is regularized, so that it is smaller. \par
 By comparing Table~\ref{tab:Ridge_Regression} and Table~\ref{tab:Linear_Regression}, we can see that, the performance and the weight magnitude is almost the same as the $\lambda$ is small, but the difference become larger as $\lambda$ grows. \par
-We also explore the weight mantitude between linear regression and ridge regression under different $\lambda$ magnitude setting. Specifically, we set $log_{10}^{\lambda}$ in range from -7 to 3. We can see from Fig~\ref{fig:ridge_w}, as the magnitude of $\lambda$ growing, the weight magnitude of ridge regression become much smaller than linear regression. \par
+We also explore the weight mantitude between LR and RR under different $\lambda$ magnitude setting. Specifically, we set $log_{10}^{\lambda}$ in range from -7 to 3. We can see from Fig~\ref{fig:ridge_w}, as the magnitude of $\lambda$ growing, the weight magnitude of ridge regression become much smaller than linear regression. \par
 \begin{table}[!hbt]
 	% Center the table
 	\begin{center}
 		% Title of the table
-		\caption{Different lambdas' impact in terms of error and $W$ magnitude.}
+		\caption{Different lambdas' impact in terms of error and $W$ magnitude. Best result are in bold.}
 		\label{tab:Ridge_Regression}
 		% Table itself: here we have two columns which are centered and have lines to the left, right and in the middle: |c|c|
 		\begin{tabular}{|c|c|c|c|c|c|c|c|}
@@ -388,9 +388,9 @@ We also explore the weight mantitude between linear regression and ridge regress
 			% For a linebreak type \\
 			$log_{10}^{\lambda}$ & -2 & -1 & 0 & 1 & 2 & 3 \\
 			\hline
-			$MSE_{train}$   & 10.23 & 10.23 & 10.24 & 10.63 & 30.37 & 181.35   \\
+			$MSE_{train}$   & \textbf{10.23} & \textbf{10.23} & 10.24 & 10.63 & 30.37 & 181.35   \\
 			\hline
-			$MSE_{val}$  & 17.08 & 17.09 & 17.16 & 18.20 & 43.92 & 214.55   \\
+			$MSE_{val}$  & \textbf{17.08} & 17.09 & 17.16 & 18.20 & 43.92 & 214.55   \\
 			\hline
 			$L_2norm(W_{ridge})$  & 0.83 & 0.82 & 0.81 & 0.72 & 0.50 & 0.38 \\
 			\hline
@@ -431,11 +431,11 @@ We also explore the weight mantitude between linear regression and ridge regress
 \end{figure} 
 
 \subsection{Gradient Descent, Stochastic Gradient Descent and Mini Batch Gradient Descent}
-In this section, we conduct experiments on optimizing the linear regression model by using three gradient descent algorrithms, and compare them in terms of convergence and time cost. \par
-We first evaluate the convergence of three algorithm, specificlly we set batch size in a range from 1 to number of full examples in training set. When the batch size is one, mini batch gradient descent becomes stochastic gradient descent and when the batch size equals to number of full examples, mini batch gradient descent becomes gradient descent. All experiments are with the same learning rate 0.01.\par
+In this section, we conduct experiments on optimizing the LR model by using GD, SGD, MBGD  algorrithms, and compare them in terms of convergence and time cost. \par
+We first evaluate the convergence of three algorithms, specificlly we set batch size in a range from 1 to number of full examples in training set. When the batch size is one, mini batch gradient descent becomes stochastic gradient descent and when the batch size equals to number of full examples, mini batch gradient descent becomes gradient descent. All experiments are with the same learning rate 0.01.\par
 As we can see from Fig~\ref{fig:batch_size_train} and Fig~\ref{fig:batch_size_val}, as the batch size become larger, the convergence of the linear regression model bocome slower. The reason is that, in each epoch, the smaller the batch size, the model have more update steps, so the convergence is faster. Especially, the stochastic gradient descent converges within 10 steps, while gradient descent requires nearly 400 steps, there is a 400x margin.\par
-We then mesure the time cost for each batch size. \par 
-As illustrated in Fig~\ref{fig:time_cost}, the smaller the batch size, more time cost is required, because of the explicit for loop in the Stochastic gradient descent and mini batch gradient descent. Especially, the gradient descent requires nearly 1 seconds in one step, while stochastic gradient descent require 60 seconds, there exist a 60x margin.  
+We then measure the time cost for each batch size. \par 
+As illustrated in Fig~\ref{fig:time_cost}, the smaller the batch size, more time cost is required, because of the explicit for loop in the SGD and MBGD. Especially, the GD requires only about 1 seconds in one step, while SGD requires 60 seconds, there exist a 60x margin.  \par
 % This is how you include a eps figure in your document. LaTeX only accepts EPS or TIFF files.
 \begin{figure}[!hbt]
 	% Center the figure.
@@ -474,8 +474,8 @@ As illustrated in Fig~\ref{fig:time_cost}, the smaller the batch size, more time
 \end{figure} 
 
 \subsection{Impact of learning rate}
-In this section, we evaluate the impact of learning rate in mini batch gradient descent, we set batch size to 64 and epochs to 200. We set learning rate in a range e.g. 1e-4, 1e-3, 1e-2, 1e-1, 1. \par
-As presented in Fig~\ref{fig:lr_train} and Fig~\ref{fig:lr_val}, small learning rate tend to make the convergence smoothly, but need to get more epoches to fully converge. However, big learning rate make the convergence very fast, but will not guarateee that the convergence will be near the optimal(or local optimal). And big learning rate make the $MSE$ shaking around after a specific epoch.  \par
+In this section, we evaluate the impact of learning rate in MBGD, we set batch size to 64 and epochs to 200. We set learning rate in a range e.g. 1e-4, 1e-3, 1e-2, 1e-1, 1. \par
+As presented in Fig~\ref{fig:lr_train} and Fig~\ref{fig:lr_val}, small learning rate tends to make the convergence smoothly, but needs more epoches to fully converge. However, big learning rate make the convergence very fast, but will not guarateee that the convergence will be near the optimal(or local optimal) and makes the $MSE$ shaking around after a specific epoch.  \par
 
 \begin{figure}[!hbt]
 	% Center the figure.
@@ -504,8 +504,7 @@ As presented in Fig~\ref{fig:lr_train} and Fig~\ref{fig:lr_val}, small learning 
 \subsection{Weight magnitude between CSF and MBGD}
 In this section, we explore the weight magnitude($L_2norm$) between CSF and MBGD optimized weight of linear regression. \par
 
-Then, we experiment on comparing the weight magnitude of linear regression by closed form solution(CFS) and mini batch gradient descent(MBGD). In MBGD, we set learning rate to 0.01 and batch size to 64. We can see that MBGD optimized weight's magnitude is stable after some epoches. But MBGD optimized weight's magnitude has a large margin(e.g. about 0.6) to CFS optimized weight. The reason is still unclear. 
-
+Then, we experiments on comparing the weight magnitude of CFS and MBGD optimized LR. In MBGD, we set learning rate to 0.01 and batch size to 64. We can see that MBGD optimized LR's weight magnitude is stable after some epoches. But MBGD optimized weight's magnitude has a large margin(e.g. about 0.6) to CFS optimized weight. The reason is still unclear. \par
 
 \begin{figure}[!hbt]
 	% Center the figure.
@@ -519,8 +518,35 @@ Then, we experiment on comparing the weight magnitude of linear regression by cl
 	\end{center}
 \end{figure} 
 
+\subsection{Performance} 
+In this section, we report the performance on CFS optimized LR, RR and MBGD optimized LR in training set, validation set and test set. The $\lambda$ is set to 1e-7 after validation. And batch size is set to 64 in MBGD, learing rate set to 0.01 and epoch set to 200 by validation. \par
+From Table~\ref{tab:Performance}, we can see that alougth MBGD optimized LR's $MSE_{train}$ and $MSE_{val}$ are not the best, but its result in $MSE_{test}$ is outstanding. The reason remains unclear, maybe the same reason that the magnitude between CFS optimized LR and MBGD optimized LR has a large margin. \par
+\begin{table}[!hbt]
+	% Center the table
+	\begin{center}
+		% Title of the table
+		\caption{Final Performance of CFS optimized LR, RR and MBGD optimized LR, best result are in bold.}
+		\label{tab:Performance}
+		% Table itself: here we have two columns which are centered and have lines to the left, right and in the middle: |c|c|
+		\begin{tabular}{|c|c|c|c|}
+			% To create a horizontal line, type \hline
+			\hline
+			% To end a column type &
+			% For a linebreak type \\
+			& LR & RR & MBGD \\
+			\hline
+			$MSE_{train}$   & \textbf{10.23} & \textbf{10.23} & 11.37   \\
+			\hline
+			$MSE_{val}$  & \textbf{17.08} & \textbf{17.08} & 19.04   \\
+			\hline
+			$MSE_{test}$  & 10.20 &  10.20 & \textbf{10.14}  \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
 \section{Conclusion}
-In this report, we explore the 
+In this report, we explore the CFS optimized LR, CFS optimized RR and MBGD optimized LR. We conduct the experiments on the CFS optimized LR and RR in terms of performance and weight magnitude. We also explore GD, SGD, MBGD in terms of convergence and time efficiency. Moreover, we tuning the hyper-parameter learning rate in MBGD. We also compare the weight magnitude between CFS optimized LR and MBGD optimized LR. Finally, we report the performance in CFS optimized LR, RR and MBGD LR. After a series of experiments, we now get more insight of LR, RR and GD and its variants SGD and MBGD. \par
 
 
 
