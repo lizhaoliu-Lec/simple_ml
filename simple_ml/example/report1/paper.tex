@@ -221,18 +221,18 @@ Undergraduate
 
 % Write abstract here
 \begin{abstract}
-In this report, we solve the house price prediction problem in Housing Dataset by using Linear Regression, Ridge Regression by closed form solution, and even Linear Regression optimized by using Gradient Descent and its variants e.g. Stochastic Gradient Descent and Mini Batch Gradient Descent. \\
+In this report, we solve the house price prediction problem in Housing Dataset by using closed form solution(CFS) optimized linear regression(LR), CSF optimized ridge regression(RR), and LR optimized by Gradient Descent(GD) and its variants e.g. Stochastic Gradient Descent(SGD) and Mini Batch Gradient Descent(MBGD). \\
 We perform experiments on four aspects: \\
-1. Comparing the magnitude of $W$ between linear regression and ridge regression optimized by closed form solution. \\
-2. Comparision between Gradient Descent and its variants in terms of convergence and time-cost. \\
-3. Tuning learning rate of Mini-Batch Gradient Descent. \\
-4. Comparing the magnitude of $W$ between linear regression optimized by closed form solution, ridge regression and linear regression optimized by mini-batch Gradient Descent. \\
+1. Comparision between CFS optimized LR and CFS optimized RR. \\
+2. Comparision between GD, SGD, MBGD in terms of convergence and time-cost. \\
+3. Tuning learning rate in MBGD. \\
+4. Comparision between CFS optimized and MBGD optimized LR. \\
 \end{abstract}
 
 % Each section begins with a \section{title} command
 \section{Introduction}
 	% \PARstart{}{} creates a tall first letter for this first paragraph
-\PARstart{L}{inear} Regression is the core of machine learning. Based on Linear Regression, many machine learning algorithm, such as Ridge Regression, Logistics Regression, SVM are developed. Even in many deep learning model, such as Covolutional Neural Network(CNN), Long Short Term Memory(LSTM), Gated Recurrent Unit(GRU), linear regression(or Linear Layer) is the basic component. So it is very important to fully exploit the insight of Linear Regression. To achieve that goal, In this experiment, we conduct many experiments on linear regression optimized by closed form solution and gradient descent, ridge regression by solving the house price predicting problem.
+\PARstart{L}{inear} Regression is the core of machine learning. Based on it, many machine learning algorithm, such as RR, Logistics Regression, SVM are developed. Even in many deep learning model, such as Covolutional Neural Network(CNN), Long Short Term Memory(LSTM), Gated Recurrent Unit(GRU), LR(or Linear Layer) is the basic component. So it is very important to fully exploit the insight of LR. To achieve that goal, In this experiment, we conduct many experiments on CSF optimized LR, CSF optimized RR, MBGD optimized LR by solving the house price predicting problem.
 
 % Main Part
 \section{Methods and Theory}
@@ -253,8 +253,9 @@ We can write it in vertorized form:
 \end{center} 
 where \\
 $\mathbf {y} ={\begin{pmatrix}y_{1}\\y_{2}\\\vdots \\y_{m}\end{pmatrix}},\quad 
-{\displaystyle X={\begin{pmatrix}1&\mathbf{x} _{1}^{\mathsf {T}}\\1&\mathbf {x} _{2}^{\mathsf {T}}\\\vdots&\vdots \\1&\mathbf {x} _{m}^{\mathsf {T}}\end{pmatrix}}={\begin{pmatrix}1&x_{11}&\cdots &x_{1n}\\1&x_{21}&\cdots &x_{2n}\\\vdots &\vdots &\ddots &\vdots \\1&x_{m1}&\cdots &x_{mn}\end{pmatrix}},} \\
-{\displaystyle {\boldsymbol {W }}={\begin{pmatrix}b \\W_{1}\\W_{2}\\\vdots \\W_{n}\end{pmatrix}}.}$
+{\displaystyle {\boldsymbol {W }}={\begin{pmatrix}b \\W_{1}\\W_{2}\\\vdots \\W_{n}\end{pmatrix}},} \\
+{\displaystyle X={\begin{pmatrix}1&\mathbf{x} _{1}^{\mathsf {T}}\\1&\mathbf {x} _{2}^{\mathsf {T}}\\\vdots&\vdots \\1&\mathbf {x} _{m}^{\mathsf {T}}\end{pmatrix}}={\begin{pmatrix}1&x_{11}&\cdots &x_{1n}\\1&x_{21}&\cdots &x_{2n}\\\vdots &\vdots &\ddots &\vdots \\1&x_{m1}&\cdots &x_{mn}\end{pmatrix}}.} \\
+$
 \subsection{Mean Squared Error}
 Given the prediction of Linear Model $\hat{y} = X^{T}W $ and the Ground truth $y$, the MSE loss function is:
  \begin{center}
@@ -267,20 +268,22 @@ Given the prediction of Linear Model $\hat{y} = X^{T}W $ and the Ground truth $y
 The best parameter $W^{*}$ can be obtained by \\
 \begin{equation}
  W^{*} = \arg\min_{W}L(X^{T}W, y)  
-\end{equation}
+\end{equation} \par
 So, we set 
 \begin{equation}
 \frac{\partial L(\hat{y}, y)}{\partial W} = 0 \\
-\end{equation}
+\end{equation} \par
 We can get 
 \begin{equation}
+\label{eq:cfs}
 W^{*} = (X^{T}X)^{-1}X^{T}y
 \end{equation}
 \subsection{Ridge Regression}
-In equation 6, when $m > n$, $X^{T}X$ is not invertible. Ridge Regression tackle this problem by adding a small term. So the closed form solution for Ridge Regression is
+In Equation~\ref{eq:cfs}, when $m > n$, $X^{T}X$ is not invertible. Ridge Regression tackle this problem by adding a small term. So the closed form solution for Ridge Regression is
 \begin{equation}
 W_{ridge}^{*} = (X^{T}X + \lambda \mathbf{I})^{-1}X^{T}y
-\end{equation}
+\end{equation} \par
+Where $\mathbf{I}$ is identity matrix. \par
 In this way, the loss function for Ridge Regression is
 \begin{equation}
 L_{ridge}(\hat{y}, y) = \frac{1}{2m}(\hat{y} - y)^{T}(\hat{y} - y)  + \frac{1}{2} W^{T} W
@@ -302,12 +305,12 @@ Not all problem can be derived a closed form solution, which is often the case i
 		$\Delta{W} \gets \frac{\partial L}{\partial W}$ \\
 		$W \gets W - \eta * \Delta{W}$ \\
 	}
-	$\hat{W} = W$ \\
+	$\hat{W} \gets W$ \\
 	return $\hat{W}$
 \end{algorithm}
 
 \subsection{Stochastic Gradient Descent}
-Different from gradient descent which updates after it computes the gradient of parameter over all example, stochastic gradient descent updates immediately once it computes parameter's gradient from only one example. Stochastic Gradient Descent Algorithm can be found in Algorithm~\ref{alg: Stochastic_Gradient_Descent}. It can be seen in the algorithm that, there is another for loop inside the for loop of gradient descent algorithm.
+Different from SD which updates after it computes the gradient of parameter over all examples, stochastic gradient descent updates immediately once it computes parameter's gradient from only one example. SGD Algorithm can be found in Algorithm~\ref{alg: Stochastic_Gradient_Descent}. It can be seen in the algorithm that, there is another for loop inside the for loop of gradient descent algorithm.
 \begin{algorithm}
 		\label{alg: Stochastic_Gradient_Descent}
 	\caption{Stochastic Gradient Descent}
@@ -325,12 +328,12 @@ Different from gradient descent which updates after it computes the gradient of 
 			$W \gets W - \eta * \Delta{W}$ \\
 		}
 	}
-	$\hat{W} = W$ \\
+	$\hat{W} \gets W$ \\
 	return $\hat{W}$
 \end{algorithm}
 
 \subsection{Mini Batch Gradient Descent}
-Due to the fact that stochastic gradient descent updates the parameter based on only one examples, which it is time-comsuming, mini batch gradient descent updates the parameter based on a batch of examples, typically the batch size is bigger than 1 and smaller than the number of whole examples, e.g. 8, 16, 32... Mini Batch Gradient Descent Algorithm can be found in Algorithm~\ref{alg: Mini_Batch_Gradient_Descent}.
+Due to the fact that SGD updates the parameter based on only one examples, which it is time-comsuming, mini batch gradient descent updates the parameter based on a batch of examples, typically the batch size is bigger than 1 and smaller than the number of whole examples, e.g. 8, 16, 32... MBGD Algorithm can be found in Algorithm~\ref{alg: Mini_Batch_Gradient_Descent}.
 \begin{algorithm}
 	\label{alg: Mini_Batch_Gradient_Descent}
 	\caption{Mini Batch Gradient Descent}
@@ -348,7 +351,7 @@ Due to the fact that stochastic gradient descent updates the parameter based on 
 			$W \gets W - \eta * \Delta{W}$ \\
 		}
 	}
-	$\hat{W} = W$ \\
+	$\hat{W} \gets W$ \\
 	return $\hat{W}$
 \end{algorithm}
 
@@ -361,20 +364,21 @@ We conduct all the experiments on housing dataset, which has total 506 examples 
 We implement the Linear Regression, Ridge Regression and Gradien Descent Algorithm using python and mainly rely on the numpy package.
 
 \subsection{Linear Regression and Ridge Regression}
-In this section, we conduct the experiment of serveral magtitude of $\lambda$, which leads to serveral $W_{ridge}$. We use $L_2{norm}$ to represent the magtitude of a vector. And we evaluate the performance on housing data's test set. Given $v \in \mathbf{R}^{n}$
+In this section, we conduct the experiment of serveral magnitude of $\lambda$, which leads to serveral $W_{ridge}$. We use $L_2{norm}$ to represent the magnitude of a vector. Given $v \in \mathbf{R}^{n}$
 \begin{equation}
 	L_2norm(v) = \sqrt{\Sigma_{i=1}^{n} v_{i}}
 \end{equation} \par
 From Table~\ref{tab:Ridge_Regression}, we can see that: \par
-First, as the magtitude of lambda becomes bigger, both $MSE_{train}$ and $MSE_{val}$ become bigger. \par
-Second, as the magtitude of lambda becomes bigger, the magtitude of $W_{ridge}$ become smaller. \par
+First, as the magnitude of lambda becomes bigger, both $MSE_{train}$ and $MSE_{val}$ become bigger. \par
+Second, as the magnitude of lambda becomes bigger, the magnitude of $W_{ridge}$ become smaller. \par
 The first observation is not often the cases. But the second observation can be explained that as the regularizer $\lambda$ become bigger, the $W$ is regularized, so that it is smaller. \par
-By comparing Table~\ref{tab:Ridge_Regression} and Table~\ref{tab:Linear_Regression}, we can see that, the performance and the weight magtitude is almost the same as the $\lambda$ is small, but the difference become larger as $\lambda$ grows.
+By comparing Table~\ref{tab:Ridge_Regression} and Table~\ref{tab:Linear_Regression}, we can see that, the performance and the weight magnitude is almost the same as the $\lambda$ is small, but the difference become larger as $\lambda$ grows. \par
+We also explore the weight mantitude between linear regression and ridge regression under different $\lambda$ magnitude setting. Specifically, we set $log_{10}^{\lambda}$ in range from -7 to 3. We can see from Fig~\ref{fig:ridge_w}, as the magnitude of $\lambda$ growing, the weight magnitude of ridge regression become much smaller than linear regression. \par
 \begin{table}[!hbt]
 	% Center the table
 	\begin{center}
 		% Title of the table
-		\caption{Different lambdas' impact in terms of error and $W$ magtitude.}
+		\caption{Different lambdas' impact in terms of error and $W$ magnitude.}
 		\label{tab:Ridge_Regression}
 		% Table itself: here we have two columns which are centered and have lines to the left, right and in the middle: |c|c|
 		\begin{tabular}{|c|c|c|c|c|c|c|c|}
@@ -398,7 +402,7 @@ By comparing Table~\ref{tab:Ridge_Regression} and Table~\ref{tab:Linear_Regressi
 	% Center the table
 	\begin{center}
 		% Title of the table
-		\caption{Linear Regression Error and $W$ magtitude.}
+		\caption{Linear Regression Error and $W$ magnitude.}
 		\label{tab:Linear_Regression}
 		% Table itself: here we have two columns which are centered and have lines to the left, right and in the middle: |c|c|
 		\begin{tabular}{|c|c|}
@@ -414,11 +418,109 @@ By comparing Table~\ref{tab:Ridge_Regression} and Table~\ref{tab:Linear_Regressi
 	\end{center}
 \end{table}
 
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{ridge_w}
+		% Create a subtitle for the figure.
+		\caption{The magnitude of $W_{ridge}$ under different lambda mgnitude.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:ridge_w}
+	\end{center}
+\end{figure} 
+
 \subsection{Gradient Descent, Stochastic Gradient Descent and Mini Batch Gradient Descent}
-In this section, we conduct experiments on optimizing the linear regression model by using three gradient descent algorrithms, and compare them in terms of convergence and time cost.
+In this section, we conduct experiments on optimizing the linear regression model by using three gradient descent algorrithms, and compare them in terms of convergence and time cost. \par
+We first evaluate the convergence of three algorithm, specificlly we set batch size in a range from 1 to number of full examples in training set. When the batch size is one, mini batch gradient descent becomes stochastic gradient descent and when the batch size equals to number of full examples, mini batch gradient descent becomes gradient descent. All experiments are with the same learning rate 0.01.\par
+As we can see from Fig~\ref{fig:batch_size_train} and Fig~\ref{fig:batch_size_val}, as the batch size become larger, the convergence of the linear regression model bocome slower. The reason is that, in each epoch, the smaller the batch size, the model have more update steps, so the convergence is faster. Especially, the stochastic gradient descent converges within 10 steps, while gradient descent requires nearly 400 steps, there is a 400x margin.\par
+We then mesure the time cost for each batch size. \par 
+As illustrated in Fig~\ref{fig:time_cost}, the smaller the batch size, more time cost is required, because of the explicit for loop in the Stochastic gradient descent and mini batch gradient descent. Especially, the gradient descent requires nearly 1 seconds in one step, while stochastic gradient descent require 60 seconds, there exist a 60x margin.  
+% This is how you include a eps figure in your document. LaTeX only accepts EPS or TIFF files.
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{batch_size_train}
+		% Create a subtitle for the figure.
+		\caption{The $MSE$ of training set under different batch size.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:batch_size_train}
+	\end{center}
+\end{figure} 
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{batch_size_val}
+		% Create a subtitle for the figure.
+		\caption{The $MSE$ of validation set under different batch size.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:batch_size_val}
+	\end{center}
+\end{figure} 
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{time_cost}
+		% Create a subtitle for the figure.
+		\caption{The time cost of 100 epoches under different batch size.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:time_cost}
+	\end{center}
+\end{figure} 
+
+\subsection{Impact of learning rate}
+In this section, we evaluate the impact of learning rate in mini batch gradient descent, we set batch size to 64 and epochs to 200. We set learning rate in a range e.g. 1e-4, 1e-3, 1e-2, 1e-1, 1. \par
+As presented in Fig~\ref{fig:lr_train} and Fig~\ref{fig:lr_val}, small learning rate tend to make the convergence smoothly, but need to get more epoches to fully converge. However, big learning rate make the convergence very fast, but will not guarateee that the convergence will be near the optimal(or local optimal). And big learning rate make the $MSE$ shaking around after a specific epoch.  \par
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{lr_train}
+		% Create a subtitle for the figure.
+		\caption{The $MSE$ in training set under different learning rate.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:lr_train}
+	\end{center}
+\end{figure} 
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{lr_val}
+		% Create a subtitle for the figure.
+		\caption{The $MSE$ in validation set under different learning rate.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:lr_val}
+	\end{center}
+\end{figure} 
+
+\subsection{Weight magnitude between CSF and MBGD}
+In this section, we explore the weight magnitude($L_2norm$) between CSF and MBGD optimized weight of linear regression. \par
+
+Then, we experiment on comparing the weight magnitude of linear regression by closed form solution(CFS) and mini batch gradient descent(MBGD). In MBGD, we set learning rate to 0.01 and batch size to 64. We can see that MBGD optimized weight's magnitude is stable after some epoches. But MBGD optimized weight's magnitude has a large margin(e.g. about 0.6) to CFS optimized weight. The reason is still unclear. 
+
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{mbgd_w}
+		% Create a subtitle for the figure.
+		\caption{The magnitude of $W_{mbgd}$ under different epoches..}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:mbgd_w}
+	\end{center}
+\end{figure} 
 
 \section{Conclusion}
-	This section summarizes the paper. In our experiments, you can also write your gains and inspirations in here.
+In this report, we explore the 
 
 
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7200 64-bit) (preloaded format=pdflatex 2019.11.8)  9 NOV 2019 21:47
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7200 64-bit) (preloaded format=pdflatex 2019.11.8)  10 NOV 2019 12:10
 entering extended mode
 **./paper.tex
 (paper.tex
@@ -14,7 +14,7 @@ Document Class: IEEEtran 2007/03/05 V1.7a by Michael Shell
 \@IEEEtrantmptoksA=\toks14
 LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 3
 66.
-("E:\MiKTeX 2.9\tex/latex/psnfss\ot1ptm.fd"
+("D:\MiKTeX 2.9\tex/latex/psnfss\ot1ptm.fd"
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 -- Using 210mm x 297mm (a4) paper.
@@ -87,52 +87,52 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <24> not available
 \@IEEEtmpitemindent=\dimen116
 \c@IEEEbiography=\count91
 \@IEEEtranrubishbin=\box27
-) ("E:\MiKTeX 2.9\tex/latex/graphics\graphicx.sty"
+) ("D:\MiKTeX 2.9\tex/latex/graphics\graphicx.sty"
 Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
 
-("E:\MiKTeX 2.9\tex/latex/graphics\keyval.sty"
+("D:\MiKTeX 2.9\tex/latex/graphics\keyval.sty"
 Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
 \KV@toks@=\toks15
 )
-("E:\MiKTeX 2.9\tex/latex/graphics\graphics.sty"
+("D:\MiKTeX 2.9\tex/latex/graphics\graphics.sty"
 Package: graphics 2019/07/20 v1.3b Standard LaTeX Graphics (DPC,SPQR)
 
-("E:\MiKTeX 2.9\tex/latex/graphics\trig.sty"
+("D:\MiKTeX 2.9\tex/latex/graphics\trig.sty"
 Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
 )
-("E:\MiKTeX 2.9\tex/latex/graphics-cfg\graphics.cfg"
+("D:\MiKTeX 2.9\tex/latex/graphics-cfg\graphics.cfg"
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: pdftex.def on input line 105.
 
-("E:\MiKTeX 2.9\tex/latex/graphics-def\pdftex.def"
+("D:\MiKTeX 2.9\tex/latex/graphics-def\pdftex.def"
 File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
 ))
 \Gin@req@height=\dimen117
 \Gin@req@width=\dimen118
 )
-("E:\MiKTeX 2.9\tex/latex/url\url.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/url\url.sty
 \Urlmuskip=\muskip10
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-("E:\MiKTeX 2.9\tex/latex/amsmath\amsmath.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amsmath.sty"
 Package: amsmath 2019/04/01 v2.17c AMS math features
 \@mathmargin=\skip44
 
 For additional information on amsmath, use the `?' option.
-("E:\MiKTeX 2.9\tex/latex/amsmath\amstext.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amstext.sty"
 Package: amstext 2000/06/29 v2.01 AMS text
 
-("E:\MiKTeX 2.9\tex/latex/amsmath\amsgen.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amsgen.sty"
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks16
 \ex@=\dimen119
 ))
-("E:\MiKTeX 2.9\tex/latex/amsmath\amsbsy.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amsbsy.sty"
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 \pmbraise@=\dimen120
 )
-("E:\MiKTeX 2.9\tex/latex/amsmath\amsopn.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amsopn.sty"
 Package: amsopn 2016/03/08 v2.02 operator names
 )
 \inf@bad=\count92
@@ -173,23 +173,23 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
 LaTeX Info: Redefining \[ on input line 2855.
 LaTeX Info: Redefining \] on input line 2856.
 )
-("E:\MiKTeX 2.9\tex/latex/algorithm2e\algorithm2e.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/algorithm2e\algorithm2e.st
+y
 Package: algorithm2e 2017/07/18 v5.2 algorithms environments
 \c@AlgoLine=\count104
-
-("E:\MiKTeX 2.9\tex/latex/base\ifthen.sty"
+ ("D:\MiKTeX 2.9\tex/latex/base\ifthen.sty"
 Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
 )
 \algocf@hangindent=\skip47
 
-("E:\MiKTeX 2.9\tex/latex/ifoddpage\ifoddpage.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/ifoddpage\ifoddpage.sty
 Package: ifoddpage 2016/04/23 v1.1 Conditionals for odd/even page detection
 \c@checkoddpage=\count105
 )
-("E:\MiKTeX 2.9\tex/latex/tools\xspace.sty"
+("D:\MiKTeX 2.9\tex/latex/tools\xspace.sty"
 Package: xspace 2014/10/28 v1.13 Space after command names (DPC,MH)
 )
-("E:\MiKTeX 2.9\tex/latex/relsize\relsize.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/relsize\relsize.sty
 Package: relsize 2013/03/29 ver 4.1
 )
 \skiptotal=\skip48
@@ -228,10 +228,12 @@ Package: relsize 2013/03/29 ver 4.1
 \algocf@algoframe=\box36
 \algocf@algobox=\box37
 )
-("E:\MiKTeX 2.9\tex/latex/algorithmicx\algpseudocode.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/algorithmicx\algpseudocode
+.sty
 Package: algpseudocode 
 
-("E:\MiKTeX 2.9\tex/latex/algorithmicx\algorithmicx.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/algorithmicx\algorithmicx.
+sty
 Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
 
 Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
@@ -262,7 +264,8 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 140.
 LaTeX Font Info:    ... okay on input line 140.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 140.
 LaTeX Font Info:    ... okay on input line 140.
- ("E:\MiKTeX 2.9\tex/context/base/mkii\supp-pdf.mkii"
+
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/context/base/mkii\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count116
 \scratchdimen=\dimen134
@@ -275,39 +278,39 @@ LaTeX Font Info:    ... okay on input line 140.
 \MPnumerator=\count120
 \makeMPintoPDFobject=\count121
 \everyMPtoPDFconversion=\toks22
-) ("E:\MiKTeX 2.9\tex/latex/oberdiek\epstopdf-base.sty"
+) ("D:\MiKTeX 2.9\tex/latex/oberdiek\epstopdf-base.sty"
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\infwarerr.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\infwarerr.sty"
 Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
 )
-("E:\MiKTeX 2.9\tex/latex/oberdiek\grfext.sty"
+("D:\MiKTeX 2.9\tex/latex/oberdiek\grfext.sty"
 Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\kvdefinekeys.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\kvdefinekeys.sty"
 Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\ltxcmds.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\ltxcmds.sty"
 Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
 )))
-("E:\MiKTeX 2.9\tex/latex/oberdiek\kvoptions.sty"
+("D:\MiKTeX 2.9\tex/latex/oberdiek\kvoptions.sty"
 Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\kvsetkeys.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\kvsetkeys.sty"
 Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\etexcmds.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\etexcmds.sty"
 Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\ifluatex.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\ifluatex.sty"
 Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
 Package ifluatex Info: LuaTeX not detected.
 ))))
-("E:\MiKTeX 2.9\tex/generic/oberdiek\pdftexcmds.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\pdftexcmds.sty"
 Package: pdftexcmds 2019/07/25 v0.30 Utility functions of pdfTeX for LuaTeX (HO
 )
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\ifpdf.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\ifpdf.sty"
 Package: ifpdf 2018/09/07 v3.3 Provides the ifpdf switch
 )
 Package pdftexcmds Info: LuaTeX not detected.
@@ -332,7 +335,8 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/sc' in size <17> not available
  [0
 
 
-{C:/Users/Lec/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map} <./SCUT.png>]
+{C:/Users/86136/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map} <./SCUT.png>
+]
 
 LaTeX Warning: No \author given.
 
@@ -341,7 +345,12 @@ LaTeX Warning: No \author given.
 
 ** ATTENTION: \PARstart is deprecated (line 235). Use \IEEEPARstart instead.
 
-Underfull \hbox (badness 10000) in paragraph at lines 267--268
+Underfull \hbox (badness 10000) in paragraph at lines 254--259
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 268--269
 
  []
 
@@ -349,38 +358,74 @@ Underfull \hbox (badness 10000) in paragraph at lines 267--268
 
 
 ]
-Overfull \hbox (7.53224pt too wide) in paragraph at lines 380--394
+Overfull \hbox (7.53224pt too wide) in paragraph at lines 384--398
  [][] 
  []
 
-[2] [3
-
-] (paper.aux) ) 
+<ridge_w.png, id=23, 433.62pt x 289.08pt>
+File: ridge_w.png Graphic file (type png)
+<use ridge_w.png>
+Package pdftex.def Info: ridge_w.png  used on input line 425.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
+[2]
+<batch_size_train.png, id=28, 433.62pt x 289.08pt>
+File: batch_size_train.png Graphic file (type png)
+<use batch_size_train.png>
+Package pdftex.def Info: batch_size_train.png  used on input line 444.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
+<batch_size_val.png, id=29, 433.62pt x 289.08pt>
+File: batch_size_val.png Graphic file (type png)
+<use batch_size_val.png>
+Package pdftex.def Info: batch_size_val.png  used on input line 456.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
+<time_cost.png, id=30, 433.62pt x 289.08pt>
+File: time_cost.png Graphic file (type png)
+<use time_cost.png>
+Package pdftex.def Info: time_cost.png  used on input line 468.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
+ [3 <./ridge_w.png> <./batch_size_train.png> <./batch_size_val.png> <./time_cos
+t.png>]
+<lr_train.png, id=42, 433.62pt x 289.08pt>
+File: lr_train.png Graphic file (type png)
+<use lr_train.png>
+Package pdftex.def Info: lr_train.png  used on input line 484.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
+<lr_val.png, id=43, 433.62pt x 289.08pt>
+File: lr_val.png Graphic file (type png)
+<use lr_val.png>
+Package pdftex.def Info: lr_val.png  used on input line 496.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
+<mbgd_w.png, id=44, 433.62pt x 289.08pt>
+File: mbgd_w.png Graphic file (type png)
+<use mbgd_w.png>
+Package pdftex.def Info: mbgd_w.png  used on input line 514.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
+ [4 <./lr_train.png> <./lr_val.png> <./mbgd_w.png>] (paper.aux) ) 
 Here is how much of TeX's memory you used:
- 4342 strings out of 492452
- 64071 string characters out of 3136310
- 159493 words of memory out of 3000000
- 8627 multiletter control sequences out of 15000+200000
- 57929 words of font info for 109 fonts, out of 3000000 for 9000
+ 4391 strings out of 492452
+ 65508 string characters out of 3136304
+ 159557 words of memory out of 3000000
+ 8680 multiletter control sequences out of 15000+200000
+ 56792 words of font info for 105 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 46i,15n,30p,699b,419s stack positions out of 5000i,500n,10000p,200000b,50000s
-{E:/MiKTeX 2.9/fonts/enc/dvips/base/8r.enc}<E:/MiKTeX 2.9/fonts/
-type1/public/amsfonts/cm/cmbx10.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/
-cm/cmex10.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><E:/MiKT
-eX 2.9/fonts/type1/public/amsfonts/cm/cmmi6.pfb><E:/MiKTeX 2.9/fonts/type1/publ
-ic/amsfonts/cm/cmmi7.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pf
-b><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi9.pfb><E:/MiKTeX 2.9/fonts/
-type1/public/amsfonts/cm/cmmib10.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts
-/cm/cmr10.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><E:/MiKTeX
- 2.9/fonts/type1/public/amsfonts/cm/cmr7.pfb><E:/MiKTeX 2.9/fonts/type1/public/
-amsfonts/cm/cmr8.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmss8.pfb><E
-:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><E:/MiKTeX 2.9/fonts/typ
-e1/public/amsfonts/cm/cmsy7.pfb><E:/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb
-><E:/MiKTeX 2.9/fonts/type1/urw/times/utmbi8a.pfb><E:/MiKTeX 2.9/fonts/type1/ur
-w/times/utmr8a.pfb><E:/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (4 pages, 511292 bytes).
+ 46i,15n,30p,603b,419s stack positions out of 5000i,500n,10000p,200000b,50000s
+{D:/MiKTeX 2.9
+/fonts/enc/dvips/base/8r.enc}<D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx
+10.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><D:/MiKTeX 2.9/
+fonts/type1/public/amsfonts/cm/cmmi10.pfb><D:/MiKTeX 2.9/fonts/type1/public/ams
+fonts/cm/cmmi6.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi7.pfb><D:/
+MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><D:/MiKTeX 2.9/fonts/type1/
+public/amsfonts/cm/cmmib10.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cm
+r10.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><D:/MiKTeX 2.9/f
+onts/type1/public/amsfonts/cm/cmr7.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfon
+ts/cm/cmr8.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmss8.pfb><D:/MiKT
+eX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><D:/MiKTeX 2.9/fonts/type1/pub
+lic/amsfonts/cm/cmsy7.pfb><D:/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><D:/M
+iKTeX 2.9/fonts/type1/urw/times/utmbi8a.pfb><D:/MiKTeX 2.9/fonts/type1/urw/time
+s/utmr8a.pfb><D:/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb>
+Output written on paper.pdf (5 pages, 1309256 bytes).
 PDF statistics:
- 93 PDF objects out of 1000 (max. 8388607)
+ 107 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 41 words of extra memory for PDF output out of 10000 (max. 10000000)
 
