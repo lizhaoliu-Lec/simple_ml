@@ -4,42 +4,45 @@
 \@writefile{toc}{\contentsline {section}{\numberline {II}Methods and Theory}{1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Logistic Regression}{1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Binary Cross Entrophy}{1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Ridge Regression}{1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Gradient Descent}{1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-E}}Stochastic Gradient Descent}{1}\protected@file@percent }
-\newlabel{alg: Gradient_Descent}{{1}{2}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Gradient Descent}}{2}\protected@file@percent }
-\newlabel{alg: Stochastic_Gradient_Descent}{{2}{2}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces Stochastic Gradient Descent}}{2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-F}}Mini Batch Gradient Descent}{2}\protected@file@percent }
-\newlabel{alg: Mini_Batch_Gradient_Descent}{{3}{2}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {3}{\ignorespaces Mini Batch Gradient Descent}}{2}\protected@file@percent }
+\newlabel{eqa: NLL}{{6}{1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}SVM and Hinge Loss}{1}\protected@file@percent }
+\newlabel{eqa:svm_two}{{7}{1}}
+\newlabel{eqa:margin}{{9}{1}}
+\newlabel{eqa:svm_optimization}{{11}{1}}
+\newlabel{eqa:svm_soft_optimization}{{12}{2}}
+\newlabel{eqa:xi}{{13}{2}}
+\newlabel{eqa:hinge_loss}{{14}{2}}
+\newlabel{eqa:svm_final_optimization}{{15}{2}}
 \@writefile{toc}{\contentsline {section}{\numberline {III}Experiments}{2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Dataset}{2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Implementation}{2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Linear Regression and Ridge Regression}{2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Different lambdas' impact in terms of error and $W$ magnitude. Best result are in bold.}}{2}\protected@file@percent }
-\newlabel{tab:Ridge_Regression}{{I}{2}}
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Linear Regression Error and $W$ magnitude.}}{2}\protected@file@percent }
-\newlabel{tab:Linear_Regression}{{II}{2}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The magnitude of $W_{ridge}$ under different lambda mgnitude.}}{3}\protected@file@percent }
-\newlabel{fig:ridge_w}{{1}{3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Gradient Descent, Stochastic Gradient Descent and Mini Batch Gradient Descent}{3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Impact of learning rate}{3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Weight magnitude between CSF and MBGD}{3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The $MSE$ of training set under different batch size.}}{3}\protected@file@percent }
-\newlabel{fig:batch_size_train}{{2}{3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The $MSE$ of validation set under different batch size.}}{3}\protected@file@percent }
-\newlabel{fig:batch_size_val}{{3}{3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The time cost of 100 epoches under different batch size.}}{3}\protected@file@percent }
-\newlabel{fig:time_cost}{{4}{3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces The $MSE$ in training set under different learning rate.}}{4}\protected@file@percent }
-\newlabel{fig:lr_train}{{5}{4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces The $MSE$ in validation set under different learning rate.}}{4}\protected@file@percent }
-\newlabel{fig:lr_val}{{6}{4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces The magnitude of $W_{mbgd}$ under different epoches..}}{4}\protected@file@percent }
-\newlabel{fig:mbgd_w}{{7}{4}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-G}}Performance}{4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Final Performance of CFS optimized LR, RR and MBGD optimized LR, best result are in bold.}}{4}\protected@file@percent }
-\newlabel{tab:Performance}{{III}{4}}
-\@writefile{toc}{\contentsline {section}{\numberline {IV}Conclusion}{4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Hyper-parameter C in SVM}{2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Best Result in Validation set under different C's settings. Best result are in bold.}}{2}\protected@file@percent }
+\newlabel{tab:C_performance}{{I}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Loss function comparision in SVM}{2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Initilizer comparision in both LR and SVM}{2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces  $Loss_{train}\nobreakspace  {}and\nobreakspace  {}Loss_{val}$ under different $C$. }}{3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {$Loss_{train}$ under different $C$.}}}{3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {$Loss_{val}$ under different $C$.}}}{3}\protected@file@percent }
+\newlabel{fig:C_loss}{{1}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  $Accuracy_{train}\nobreakspace  {}and\nobreakspace  {}Accuracy_{val}$ under different $C$. }}{3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {$Accuracy_{train}$ under different $C$.}}}{3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {$Accuracy_{val}$ under different $C$.}}}{3}\protected@file@percent }
+\newlabel{fig:C_acc}{{2}{3}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Conclusion}{3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The magnitude of $W$ under different $C$.}}{4}\protected@file@percent }
+\newlabel{fig:c_mag}{{3}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The plot of HL and EL.}}{4}\protected@file@percent }
+\newlabel{fig:loss_fn}{{4}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces $loss_{val}$ under different loss function.}}{4}\protected@file@percent }
+\newlabel{fig:l_val_loss}{{5}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces $Accuracy_{val}$ under different loss function.}}{4}\protected@file@percent }
+\newlabel{fig:l_val_acc}{{6}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces LR's $BCE_{val}$ under different initilizer.}}{4}\protected@file@percent }
+\newlabel{fig:lr_init_val_loss}{{7}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces LR's $Accuracy_{val}$ under different initilizer.}}{5}\protected@file@percent }
+\newlabel{fig:lr_init_val_acc}{{8}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces SVM's $HL_{val}$ under different initilizer.}}{5}\protected@file@percent }
+\newlabel{fig:svm_init_val_loss}{{9}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces SVM's $Accuracy_{val}$ under different initilizer.}}{5}\protected@file@percent }
+\newlabel{fig:svm_init_val_acc}{{10}{5}}

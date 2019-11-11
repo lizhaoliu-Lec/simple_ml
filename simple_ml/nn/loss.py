@@ -155,7 +155,7 @@ class HingeLoss(Loss):
 
 class ExponentialLoss(Loss):
     """
-    A proximation to hinge loss.
+    A approximation to hinge loss.
     # for now, it is not stable.
     """
 
@@ -182,7 +182,7 @@ hl = HL = HingeLoss
 el = EL = ExponentialLoss
 
 cut_off = 1e-12
-chop_off = 5
+chop_off = 3
 
 
 def _cut_off(z):

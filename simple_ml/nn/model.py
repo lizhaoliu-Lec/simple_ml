@@ -62,6 +62,40 @@ class Module(object):
             return []
         return self.valid_metrics[self.metric]
 
+    def best_performance(self):
+        performance = {}
+        key = 'train_set'
+        tr_metrics = np.array(self.training_metrics[self.metric])
+        best_epoch = tr_metrics.argmax()
+        best_metric = tr_metrics[best_epoch]
+        best_loss = self.training_losses[best_epoch]
+        performance[key] = {
+            'best_epoch': best_epoch,
+            'best_metric': best_metric,
+            'best_loss': best_loss,
+        }
+
+        key = 'val_set'
+        if len(self.validation_metrics) == 0:
+            performance[key] = {
+                'best_epoch': None,
+                'best_metric': None,
+                'best_loss': None,
+            }
+
+        else:
+            val_metrics = np.array(self.valid_metrics[self.metric])
+            best_epoch = val_metrics.argmax()
+            best_metric = val_metrics[best_epoch]
+            best_loss = self.valid_losses[best_epoch]
+            performance[key] = {
+                'best_epoch': best_epoch,
+                'best_metric': best_metric,
+                'best_loss': best_loss,
+            }
+
+        return performance
+
     def compile(self, loss, optimizer='sgd'):
         """Configures the model for training.
         # Arguments
@@ -77,10 +111,16 @@ class Module(object):
             ValueError: In case of invalid arguments for
                 `optimizer`, `loss`.
         """
+        self.set_loss(loss)
+        self.set_optimizer(optimizer)
+
+    def set_loss(self, loss):
         loss = loss or None
+        self.loss = get_loss(loss)
+
+    def set_optimizer(self, optimizer):
         optimizer = optimizer or None
         self.optimizer = get_optimizer(optimizer)
-        self.loss = get_loss(loss)
 
     def peak(self, X, y, peek_type, set_type, num_show=5):
         allow_set_types = ['train', 'valid']

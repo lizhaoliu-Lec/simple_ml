@@ -7,7 +7,7 @@ from simple_ml.utils.distance import euclidean
 from simple_ml.preprocessing.general import Standardizer
 from simple_ml.nn.layer import Input, Linear, Dropout, Softmax
 from simple_ml.nn.model import Model
-from simple_ml.nn.initializer import zeros, ones
+from simple_ml.nn.initializer import zeros, ones, default_weight_initializer
 from simple_ml.nn.regularizer import L2_Regularizer, L1_Regularizer, L1L2_Regularizer
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
 from simple_ml.utils.metric import accuracy, absolute_error, square_error
@@ -109,6 +109,8 @@ def svm():
     #            # regularizer=L1L2_Regularizer(l2=1),
     #            activation='swish')(X)
     X = Linear(output_dim=1,
+               # initializer='default_weight_initializer',
+               initializer=default_weight_initializer,
                regularizer=L2_Regularizer(1e-5),
                # regularizer=L1_Regularizer(1e-2),
                # regularizer=L1L2_Regularizer(l2=1),
@@ -117,7 +119,7 @@ def svm():
     # model.compile('HL', optimizer=SGD(lr=0.001))
     model.compile('HL', optimizer=Adam(lr=0.001))
     model.fit(X_train, y_train,
-              verbose=10, epochs=1000,
+              verbose=10, epochs=100,
               validation_data=(X_test, y_test),
               batch_size=64, metric='svm_binary_accuracy',
               shuffle=True,

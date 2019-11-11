@@ -25,7 +25,9 @@ glorot_uniform_initializer = xavier_uniform_initializer
 
 
 def default_weight_initializer(shape):
-    return np.random.randn(shape) / np.sqrt(shape[1])
+    m = shape[0]
+    n = shape[1] if len(shape) > 1 else shape[0]
+    return np.random.randn(m, n) / np.sqrt(n)
 
 
 def zeros(shape):
@@ -42,6 +44,7 @@ _initializer_map = {
     'default_weight_initializer': default_weight_initializer,
     'zeros': zeros,
     'ones': ones,
+    'random': default_weight_initializer,
 }
 
 

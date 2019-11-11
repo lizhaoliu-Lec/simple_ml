@@ -1,6 +1,7 @@
 import numpy as np
 from .activation import get_activation
 from .regularizer import get_regularizer
+from .initializer import get_initializer
 from .initializer import xavier_uniform_initializer
 from .utils import conv_forward_im2col, conv_backward_im2col
 from .utils import max_pool_forward_fast, max_pool_backward_fast
@@ -176,7 +177,7 @@ class Linear(Layer):
         self.output_dim = output_dim
         self.regularizer = get_regularizer(regularizer)
         self.activation = get_activation(activation)
-        self.initializer = initializer
+        self.initializer = get_initializer(initializer)
         self.input_shape = None
         self.output_shape = None
         if self.input_dim is not None:
@@ -466,7 +467,7 @@ class Conv2d(Layer):
         self.output_shape = None
         self.padding = padding
         self.activation = get_activation(activation)
-        self.initializer = initializer
+        self.initializer = get_initializer(initializer)
         self.stride = stride
         if self.input_shape is not None:
             self.connection(None)
