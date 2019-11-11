@@ -359,27 +359,34 @@ We conduct all the experiments on a9a dataset, which has total 48842 examples an
 We implement the LR, SVM, optimizers, initilizers and loss functions using python and mainly rely on the numpy package.
 
 \subsection{Hyper-parameter C in SVM}
-In this section, we explore the influence of C in SVM. We set $log_{10}^{C}$ in a coarse-grained range e.g. -2, -1, 0, 1, 2, 3, 4, and compare $loss_{train}$, $loss_{val}$, $accuracy_{train}$, $accuracy_{train}$ and $l_2norm$ of $w$, where $loss =  \frac{w^Tw}{2} + \frac{C}{m}\Sigma_{i=1}^m \max(0, 1 - y_i(w^Tx_i + b))$ and $ l_2norm(w) = \sqrt{\Sigma_{i=1}^n w_i}$. We zero initilize $w$ and $b$, use SGD as optimizer with learning rate 0.001, set epoch to 200 and batch size to 64. \par
+In this section, we explore the influence of C in SVM. We set $log_{10}^{C}$ in a coarse-grained range e.g. -2, -1, 0, 1, 2, 3, 4, and compare $loss_{val}$,  $accuracy_{val}$ and $l_2norm$ of $w$, where $loss =  \frac{w^Tw}{2} + \frac{C}{m}\Sigma_{i=1}^m \max(0, 1 - y_i(w^Tx_i + b))$ and $ l_2norm(w) = \sqrt{\Sigma_{i=1}^n w_i}$. We zero initilize $w$ and $b$, use SGD as optimizer with learning rate 0.001, set epoch to 200 and batch size to 64. \par
 From Fig~\ref{fig:C_loss}, we can see that, when $C$ is very small, e.g. smaller than 1, the gradient descent process is very unstable and the loss is higher than other. As $C$ goes up, the loss decreases, e.g. from 1 to 10. But when $C$ gets larger than 10, the loss become slightly bigger, but still better than small $C$, like 0.01 and 0.1. So, we can draw the conclusion that, bigger $C$ usually better than small $C$, and the best C is in the middle, which is not very big but also not very small. As we can see from Fig~\ref{fig:C_loss}, $C = 10$ gets the lowest loss.   \par
 From Fig~\ref{fig:C_acc}, we can see that, when $C$ is very small, e.g. 0.01, the accracy in both training set and validation set is much lower than others. Small $C$ like 0.01 and 0.1 get worse performance comparing with others. In training set, the accracy is very similar when $C$ bigger than 1. In validation set, $C = 10$ gets slightly better performance comparing with others. Best validation performance under each $C$ setting can be found in Table~\ref{tab:C_performance}. \par
-From Fig~\ref{fig:c_mag}, we can see that, as $C$ goes up, $l_2norm(w)$ goes up except $C = 100$. As said above, $\frac{1}{2C}$ can be viewed as regurilizer, so when $C$ is bigger, the smaller of its impact on regurization, so the weight maginitude goes up. 
-\begin{figure*}[!hbt]
-	\centering
-	\subfigure[$Loss_{train}$ under different $C$.] {\includegraphics[width=\columnwidth]{c_train_loss}}
-	\subfigure[$Loss_{val}$ under different $C$.] {\includegraphics[width=\columnwidth]{c_val_loss}}
-	\caption{ $Loss_{train}~and~Loss_{val}$ under different $C$. }
-	\centering
-	\label{fig:C_loss}
-\end{figure*} \par
+From Fig~\ref{fig:c_mag}, we can see that, as $C$ goes up, $l_2norm(w)$ goes up except $C = 100$. As said above, $\frac{1}{2C}$ can be viewed as regurilizer, so when $C$ is bigger, the smaller of its impact on regurization, so the weight maginitude goes up. \par
 
-\begin{figure*}[!hbt]
-	\centering
-	\subfigure[$Accuracy_{train}$ under different $C$.] {\includegraphics[width=\columnwidth]{c_train_acc}}
-	\subfigure[$Accuracy_{val}$ under different $C$.] {\includegraphics[width=\columnwidth]{c_val_acc}}
-	\caption{ $Accuracy_{train}~and~Accuracy_{val}$ under different $C$. }
-	\centering
-	\label{fig:C_acc}
-\end{figure*} \par
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{c_val_loss}
+		% Create a subtitle for the figure.
+		\caption{$Loss_{val}$ under different $C$.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:C_loss}
+	\end{center}
+\end{figure} \par
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{c_val_acc}
+		% Create a subtitle for the figure.
+		\caption{$Accuracy_{val}$ under different $C$.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:C_acc}
+	\end{center}
+\end{figure} \par
 
 \begin{figure}[!hbt]
 	% Center the figure.
@@ -413,7 +420,7 @@ From Fig~\ref{fig:c_mag}, we can see that, as $C$ goes up, $l_2norm(w)$ goes up 
 			\hline
 		\end{tabular}
 	\end{center}
-\end{table}
+\end{table} \par
 
 
 \subsection{Loss function comparision in SVM}
@@ -508,6 +515,58 @@ From Fig~\ref{fig:svm_init_val_loss} and Fig~\ref{fig:svm_init_val_acc}, we can 
 	\end{center}
 \end{figure} \par
 
+\subsection{Optimizer comparision in both LR and SVM}
+In this section, we compare the performance of LR and SVM with different optimizers. We explore over Stochastic Gradient Descent (SGD), Momentum, Adam and RMSProp. We use xavier uniform initializer, set learning rate to 0.001 epoch to 200, batch size to 64 and C to 10 in SVM. We use HL as SVM's loss function and BCE as LR's loss function.\par
+From Fig~\ref{fig:lr_optim_val_loss} and Fig~\ref{fig:lr_optim_val_acc}, we can see that LR's performance is affected by the optimizer. Typically SGD converges very slowly; Momentum converges faster than SGD, but not as good as SGD's performance; both Adam and RMSProp converge very fast and get to the best performance.\par
+From Fig~\ref{fig:svm_optim_val_loss} and Fig~\ref{fig:svm_optim_val_acc}, we can see that SVM is very robust to the optimizer too, different optimizer didn't disturb the performance except Momentum which converges slower and get worse performance comparing with other optimizers. \par
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{lr_optim_val_loss}
+		% Create a subtitle for the figure.
+		\caption{LR's $BCE_{val}$ under different optimizer.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:lr_optim_val_loss}
+	\end{center}
+\end{figure} \par
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{lr_optim_val_acc}
+		% Create a subtitle for the figure.
+		\caption{LR's $Accuracy_{val}$ under different optimizer.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:lr_optim_val_acc}
+	\end{center}
+\end{figure} \par
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{svm_optim_val_loss}
+		% Create a subtitle for the figure.
+		\caption{SVM's $HL_{val}$ under different optimizer.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:svm_optim_val_loss}
+	\end{center}
+\end{figure} \par
+
+\begin{figure}[!hbt]
+	% Center the figure.
+	\begin{center}
+		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
+		\includegraphics[width=\columnwidth]{svm_optim_val_acc}
+		% Create a subtitle for the figure.
+		\caption{SVM's $Accuracy_{val}$ under different optimizer.}
+		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
+		\label{fig:svm_optim_val_acc}
+	\end{center}
+\end{figure} \par
 
 
 \section{Conclusion}
