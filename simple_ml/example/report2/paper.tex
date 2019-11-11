@@ -222,7 +222,7 @@ Undergraduate
 % Write abstract here
 \begin{abstract}
 In this report, we solve the binary classification problem in a9a dataset by Logistic Regression (LR) and Support Vector Machine (SVM). \\
-We perform experiments on three aspects: \\
+We perform experiments on four aspects: \\
 1. Loss function comparision in SVM. \\
 2. Hyper-parameter tuning in SVM. \\
 3. Initilizer comparision in both LR and SVM. \\
@@ -232,52 +232,41 @@ We perform experiments on three aspects: \\
 % Each section begins with a \section{title} command
 \section{Introduction}
 	% \PARstart{}{} creates a tall first letter for this first paragraph
-\PARstart{L}{inear} Regression is the core of machine learning. Based on it, many machine learning algorithms, such as RR, Logistics Regression, SVM are developed. Even in many deep learning models, such as Covolutional Neural Network (CNN), Long Short Term Memory (LSTM), Gated Recurrent Unit (GRU), LR (or Linear Layer) is the basic component. So it is very important to fully exploit the insight of LR. To achieve that goal, In this experiment, we conduct many experiments on CSF optimized LR, CSF optimized RR, MBGD optimized LR by solving the house price predicting problem.
+\PARstart{L}{ogistic} Regression(LR) is an extension of linear regression, which use $\sigma$ function as activation to map the output of linear regression into a interval (0, 1). So that LR can output the probability in binary classification. SVM is also an extension of linear regression. Based on the idea "large margin classification", SVM can perform very well in many classification task. Even now, LR and SVM are widely used in academic and industry community. These two algorithms are classic, so we fully explore them by solving a9a binary classification task. Beyond that, we will explore the initilizer and optimizer selection in both LR and SVM. 
 
 % Main Part
 \section{Methods and Theory}
-In this part, we first define the LR, Mean Squared Error (MES) loss function. Then we solve the closed form solution for LR and its variant RR. At last we define GD algorithm, and its variants SGD and MBGD.
-\subsection{Linear Regression}
-Given dataset $ D=\{x_{i}, y_{i}\}_{i=1}^{m}$, where $x_{i} \in \mathbf{R}^{n}$ and $y_{i} \in \mathbf{R}$.
-Liner Regression Model is parameterized by $(W, b)$, where $W \in \mathbf{R}^{n}$ and $b \in \mathbf{R}$ and the form of it is:
- \begin{center}
- 	\begin{equation}
- 	y_{i} = x_{i}^{T}W + b
- 	\end{equation}
- \end{center} 
-We can write it in vertorized form:
+In this part, we first define logistic regression and SVM. Then we define LR's loss function Binary Cross Entrophy (BCE) and SVM's loss function Hinge Loss (HL). Mean Squared Error (MES) loss function. Then we solve the closed form solution for LR and its variant RR. At last we define GD algorithm, and its variants SGD and MBGD.
+\subsection{Logistic Regression}
+Given dataset $ D=\{x_{i}, y_{i}\}_{i=1}^{m}$, where $x_{i} \in \mathbf{R}^{n}$ and $y_{i} \in {0, 1}$. Mathematically, for a single training datapoint $(x, y)$, LR assumes: \par
  \begin{center}
 	\begin{equation}
-	y = X^{T}W
+	P(Y = 1|X = x) = \sigma(z) 
 	\end{equation}
-\end{center} 
-where \\
-$\mathbf {y} ={\begin{pmatrix}y_{1}\\y_{2}\\\vdots \\y_{m}\end{pmatrix}},\quad 
-{\displaystyle {\boldsymbol {W }}={\begin{pmatrix}b \\W_{1}\\W_{2}\\\vdots \\W_{n}\end{pmatrix}},} \\
-{\displaystyle X={\begin{pmatrix}1&\mathbf{x} _{1}^{\mathsf {T}}\\1&\mathbf {x} _{2}^{\mathsf {T}}\\\vdots&\vdots \\1&\mathbf {x} _{m}^{\mathsf {T}}\end{pmatrix}}={\begin{pmatrix}1&x_{11}&\cdots &x_{1n}\\1&x_{21}&\cdots &x_{2n}\\\vdots &\vdots &\ddots &\vdots \\1&x_{m1}&\cdots &x_{mn}\end{pmatrix}}.} \\
-$
-\subsection{Mean Squared Error}
-Given the prediction of Linear Model $\hat{y} = X^{T}W $ and the Ground truth $y$, the MSE loss function is:
- \begin{center}
 	\begin{equation}
-	L(\hat{y}, y) = \frac{1}{2m} \Sigma_{i=1}^{m}(\hat{y}_i, y_i) 
-				= \frac{1}{2m}(\hat{y} - y)^{T}(\hat{y} - y)
+	P(Y = 0|X = x) = 1 - \sigma(z)
 	\end{equation}
-\end{center} 
-\subsection{Closed form Solution}
-The best parameter $W^{*}$ can be obtained by \\
+	\begin{equation}
+	z = F(x; W)
+	\end{equation}
+\end{center} \par
+where $F(x; W)$ is linear regression parameterized by $W$ and $\sigma(.)$ is sigmoid function, where $\sigma(z) = \frac{1}{1 + e^{-z}} \in (0, 1)$.
+\subsection{Binary Cross Entrophy}
+Logistic regression assume each datapoint is independent, so the likelihood of all data is: \par
 \begin{equation}
- W^{*} = \arg\min_{W}L(X^{T}W, y)  
+	\begin{aligned}
+	L(W) &= \prod_{i=1}^m P(Y = y_i | X = x_i) \\ &= \prod_{i=1}^m \sigma(z)^{y_i} (1 - \sigma(z)^{1 - y_i} )
+	\end{aligned}
 \end{equation} \par
-So, we set 
+
+So our goal is to maximize the likelihood of data, in practice we maximize the log likelihood. \par
 \begin{equation}
-\frac{\partial L(\hat{y}, y)}{\partial W} = 0 \\
+\begin{aligned}
+LL(W) &= log\prod_{i=1}^m \sigma(z)^{y_i} (1 - \sigma(z)^{1 - y_i} ) \\ &= \Sigma_{i=1}^{m} y_i \sigma(z) + (1 - y_i)(1 - \sigma(z))
+\end{aligned}
 \end{equation} \par
-We can get 
-\begin{equation}
-\label{eq:cfs}
-W^{*} = (X^{T}X)^{-1}X^{T}y
-\end{equation}
+
+
 \subsection{Ridge Regression}
 In Equation~\ref{eq:cfs}, when $n > m$, $X^{T}X$ is not invertible. Ridge Regression tackle this problem by adding a small term. So the CFS for RR is
 \begin{equation}
