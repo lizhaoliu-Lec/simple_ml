@@ -72,7 +72,7 @@ class AdaBoostClassifier:
             # (2) compute error rate
             y_pred = self.classifiers[m].predict(X)
             y_pred = np.reshape(y_pred, (-1, 1))
-            error_rate = np.sum(wm * (y != y_pred)).clip(min=eps)
+            error_rate = np.sum(wm * (y != y_pred)).clip(min=eps, max=1-eps)
             # if the classifier is not good enough, we ignore it
             if error_rate > 0.5:
                 continue
@@ -101,6 +101,9 @@ class AdaBoostClassifier:
         if np.sum(self.alphas) == 0.0:
             raise ValueError('All the weak learner are ignored during training, perhaps change a weak learner.')
         for m in range(self.best_n_weakers_limit):
+            print(self.alphas[m])
+            # self.alphas[m] = 1 / self.best_n_weakers_limit
+            # print(self.alphas[m])
             ym = self.alphas[m] * self.classifiers[m].predict(X)
             ym = np.reshape(ym, (-1, 1))
             if scores is None:

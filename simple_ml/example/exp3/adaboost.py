@@ -1,3 +1,6 @@
+import sys
+
+sys.path.append('./')
 import os
 import random
 import pickle
@@ -11,7 +14,14 @@ from simple_ml.preprocessing import NPDFeature
 from simple_ml.ensemble import AdaBoostClassifier
 
 
-def convert_data_to_npd_feats(data_path='..\\tmp\\exp3', size=24, val_split=0.1, test_split=0.2, seed=1234):
+def accuracy(y_t, y_pred):
+    y_pred = y_pred.reshape((-1, 1))
+    return np.mean(y_t == y_pred)
+
+
+# data_path='..\\tmp\\exp3'
+def convert_data_to_npd_feats(data_path='simple_ml/example/tmp/exp3', size=24, val_split=0.1, test_split=0.2,
+                              seed=1234):
     face_img_root = os.path.join(data_path, 'face')
     non_img_root = os.path.join(data_path, 'nonface')
     faces_img_paths = os.listdir(face_img_root)
@@ -77,12 +87,14 @@ def convert_data_to_npd_feats(data_path='..\\tmp\\exp3', size=24, val_split=0.1,
 if __name__ == '__main__':
     X_train, y_train, X_val, y_val, X_test, y_test = convert_data_to_npd_feats()
     weak = DecisionTreeClassifier(max_depth=1)
-    ad = AdaBoostClassifier(weak, 20)
+    ad = AdaBoostClassifier(weak, 1)
     ad.fit(X_train, y_train, X_val, y_val, early_stop=True)
+    # ad = weak
+    ad.fit(X_train, y_train)
     y_pred = ad.predict(X_train)
     y_pred_val = ad.predict(X_val)
     y_pred_test = ad.predict(X_test)
 
-    print('Train acc: ', np.mean(y_train == y_pred))
-    print('Val acc: ', np.mean(y_val == y_pred_val))
-    print('Test acc: ', np.mean(y_test == y_pred_test))
+    print('Train acc: ', accuracy(y_train, y_pred))
+    print('Val acc: ', accuracy(y_val, y_pred_val))
+    print('Test acc: ', accuracy(y_test, y_pred_test))
