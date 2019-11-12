@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7200 64-bit) (preloaded format=pdflatex 2019.11.8)  12 NOV 2019 00:47
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7200 64-bit) (preloaded format=pdflatex 2019.11.8)  12 NOV 2019 10:13
 entering extended mode
 **./paper.tex
 (paper.tex
@@ -446,17 +446,17 @@ File: svm_optim_val_acc.png Graphic file (type png)
 Package pdftex.def Info: svm_optim_val_acc.png  used on input line 563.
 (pdftex.def)             Requested size: 252.0pt x 168.00174pt.
  [4 <./l_val_acc.png> <./lr_init_val_loss.png> <./lr_init_val_acc.png> <./svm_i
-nit_val_loss.png> <./svm_init_val_acc.png> <./lr_optim_val_loss.png>] [5 <./lr_
+nit_val_loss.png> <./svm_init_val_acc.png>] [5 <./lr_optim_val_loss.png> <./lr_
 optim_val_acc.png> <./svm_optim_val_loss.png> <./svm_optim_val_acc.png>] (paper
 .aux) ) 
 Here is how much of TeX's memory you used:
- 4591 strings out of 492452
- 69002 string characters out of 3136304
- 157175 words of memory out of 3000000
- 8883 multiletter control sequences out of 15000+200000
+ 4592 strings out of 492452
+ 69025 string characters out of 3136304
+ 157184 words of memory out of 3000000
+ 8884 multiletter control sequences out of 15000+200000
  52350 words of font info for 93 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 46i,9n,30p,687b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 46i,9n,30p,770b,290s stack positions out of 5000i,500n,10000p,200000b,50000s
 {D:/MiKTeX 2.9/fonts/enc/dvips/base/8r.enc}<D:/MiKTeX 2.9/fonts/type1/pu
 blic/amsfonts/cm/cmbx10.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex1
 0.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><D:/MiKTeX 2.9/f
@@ -470,7 +470,7 @@ cm/cmsy5.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy7.pfb><D:/MiKTeX
  2.9/fonts/type1/urw/times/utmb8a.pfb><D:/MiKTeX 2.9/fonts/type1/urw/times/utmb
 i8a.pfb><D:/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><D:/MiKTeX 2.9/fonts/ty
 pe1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (6 pages, 2782694 bytes).
+Output written on paper.pdf (6 pages, 2784939 bytes).
 PDF statistics:
  120 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

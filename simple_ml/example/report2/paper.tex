@@ -225,14 +225,14 @@ In this report, we solve the binary classification problem in a9a dataset by Log
 We perform experiments on four aspects: \\
 1. Hyper-parameter tuning in SVM. \\
 2. Loss function comparision in SVM. \\
-3. Initilizer comparision in both LR and SVM. \\
+3. initializer comparision in both LR and SVM. \\
 4. Optimizer comparision in both LR and SVM. \\
 \end{abstract}
 
 % Each section begins with a \section{title} command
 \section{Introduction}
 	% \PARstart{}{} creates a tall first letter for this first paragraph
-\PARstart{L}{ogistic} Regression(LR) is an extension of linear regression, which use $\sigma$ function as activation to map the output of linear regression into a interval (0, 1). So that LR can output the probability in binary classification. SVM is also an extension of linear regression. Based on the idea "large margin classification", SVM can perform very well in many classification task. Even now, LR and SVM are widely used in academic and industry community. These two algorithms are classic, so we fully explore them by solving a9a binary classification task. Beyond that, we will explore the initilizer and optimizer selection in both LR and SVM. 
+\PARstart{L}{ogistic} Regression(LR) is an extension of linear regression, which use $\sigma$ function as activation to map the output of linear regression into a interval (0, 1). So that LR can output the probability in binary classification. SVM is also an extension of linear regression. Based on the idea "large margin classification", SVM can perform very well in many classification task. Even now, LR and SVM are widely used in academic and industry community. These two algorithms are classic, so we fully explore them by solving a9a binary classification task. Beyond that, we will explore the initializer and optimizer selection in both LR and SVM. 
 
 % Main Part
 \section{Methods and Theory}
@@ -356,7 +356,7 @@ Here, we can see that $\lambda$ e.g. $\frac{1}{2C}$ is the regularizer, like Rid
 We conduct all the experiments on a9a dataset, which has total 48842 examples and each example's form is $(x, y)$, where $x \in \mathbf{R}^{123}$ and $y \in \{0, 1\}~(in~LR)~and~\{-1, +1\}~(in~SVM)$. We split the dataset into three part: 26049 training examples, 6512 validation examples and 16281 test examples. We normalized the $X_{train}, X_{val}, X_{test} $ by using the mean and variance of $X_{train}$.
 
 \subsection{Implementation}
-We implement the LR, SVM, optimizers, initilizers and loss functions using python and mainly rely on the numpy package.
+We implement the LR, SVM, optimizers, initializers and loss functions using python and mainly rely on the numpy package.
 
 \subsection{Hyper-parameter C in SVM}
 In this section, we explore the influence of C in SVM. We set $log_{10}^{C}$ in a coarse-grained range e.g. -2, -1, 0, 1, 2, 3, 4, and compare $loss_{val}$,  $accuracy_{val}$ and $l_2norm$ of $w$, where $loss =  \frac{w^Tw}{2} + \frac{C}{m}\Sigma_{i=1}^m \max(0, 1 - y_i(w^Tx_i + b))$ and $ l_2norm(w) = \sqrt{\Sigma_{i=1}^n w_i}$. We zero initilize $w$ and $b$, use SGD as optimizer with learning rate 0.001, set epoch to 200 and batch size to 64. \par
@@ -462,10 +462,10 @@ From Fig~\ref{fig:l_val_loss} and Fig~\ref{fig:l_val_acc}, we can see that the p
 	\end{center}
 \end{figure} \par
 
-\subsection{Initilizer comparision in both LR and SVM}
-In this section, we compare the performance of LR and SVM under different initilizers. We explore over ones, zeros, xavier uniform and random initializer. Ones initilizers makes the initial $w$ to all one and Zeros initilizers makes the initial $w$ to all zero. Xavier uniform initializer uniformally initial $w$, but bounded to interval $[-n, n]$, where $n$ is $W$'s dimension. Random initializer initial $w$ from standard normal distribution. We use SGD as optimizer with learning rate 0.001, set epoch to 200, batch size to 64 and C to 10 in SVM. We use HL as SVM's loss function and BCE as LR's loss function.\par
-From Fig~\ref{fig:lr_init_val_loss} and Fig~\ref{fig:lr_init_val_acc}, we can see that LR's performance is affected by the initilizer. Typically Ones initilizer brings the worst performance and Xavier uniform initializer bring the best performance. \par
-From Fig~\ref{fig:svm_init_val_loss} and Fig~\ref{fig:svm_init_val_acc}, we can see that SVM is very robust to the initilizer, different initilizer didn't disturb the performance. \par
+\subsection{initializer comparision in both LR and SVM}
+In this section, we compare the performance of LR and SVM under different initializers. We explore over ones, zeros, xavier uniform and random initializer. Ones initializers makes the initial $w$ to all one and Zeros initializers makes the initial $w$ to all zero. Xavier uniform initializer uniformally initial $w$, but bounded to interval $[-n, n]$, where $n$ is $W$'s dimension. Random initializer initial $w$ from standard normal distribution. We use SGD as optimizer with learning rate 0.001, set epoch to 200, batch size to 64 and C to 10 in SVM. We use HL as SVM's loss function and BCE as LR's loss function.\par
+From Fig~\ref{fig:lr_init_val_loss} and Fig~\ref{fig:lr_init_val_acc}, we can see that LR's performance is affected by the initializer. Typically Ones initializer brings the worst performance and Xavier uniform initializer bring the best performance. \par
+From Fig~\ref{fig:svm_init_val_loss} and Fig~\ref{fig:svm_init_val_acc}, we can see that SVM is very robust to the initializer, different initializer doesn't disturb the performance. \par
 
 \begin{figure}[!hbt]
 	% Center the figure.
@@ -473,7 +473,7 @@ From Fig~\ref{fig:svm_init_val_loss} and Fig~\ref{fig:svm_init_val_acc}, we can 
 		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
 		\includegraphics[width=\columnwidth]{lr_init_val_loss}
 		% Create a subtitle for the figure.
-		\caption{LR's $BCE_{val}$ under different initilizer.}
+		\caption{LR's $BCE_{val}$ under different initializer.}
 		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
 		\label{fig:lr_init_val_loss}
 	\end{center}
@@ -485,7 +485,7 @@ From Fig~\ref{fig:svm_init_val_loss} and Fig~\ref{fig:svm_init_val_acc}, we can 
 		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
 		\includegraphics[width=\columnwidth]{lr_init_val_acc}
 		% Create a subtitle for the figure.
-		\caption{LR's $Accuracy_{val}$ under different initilizer.}
+		\caption{LR's $Accuracy_{val}$ under different initializer.}
 		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
 		\label{fig:lr_init_val_acc}
 	\end{center}
@@ -497,7 +497,7 @@ From Fig~\ref{fig:svm_init_val_loss} and Fig~\ref{fig:svm_init_val_acc}, we can 
 		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
 		\includegraphics[width=\columnwidth]{svm_init_val_loss}
 		% Create a subtitle for the figure.
-		\caption{SVM's $HL_{val}$ under different initilizer.}
+		\caption{SVM's $HL_{val}$ under different initializer.}
 		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
 		\label{fig:svm_init_val_loss}
 	\end{center}
@@ -509,7 +509,7 @@ From Fig~\ref{fig:svm_init_val_loss} and Fig~\ref{fig:svm_init_val_acc}, we can 
 		% Include the eps file, scale it such that it's width equals the column width. You can also put width=8cm for example...
 		\includegraphics[width=\columnwidth]{svm_init_val_acc}
 		% Create a subtitle for the figure.
-		\caption{SVM's $Accuracy_{val}$ under different initilizer.}
+		\caption{SVM's $Accuracy_{val}$ under different initializer.}
 		% Define the label of the figure. It's good to use 'fig:title', so you know that the label belongs to a figure.
 		\label{fig:svm_init_val_acc}
 	\end{center}
@@ -568,10 +568,36 @@ From Fig~\ref{fig:svm_optim_val_loss} and Fig~\ref{fig:svm_optim_val_acc}, we ca
 	\end{center}
 \end{figure} \par
 
+\subsection{Performance on validation set and test set.}
+Now we report the final performance of LR and SVM on test set. For LR, we set optimizer to Adam with learning rate 0.001, batch size to 64, initializer to Xavir uniform intitializer, epoch to 200. For SVM, we set optimizer to Adam with learning rate 0.001, batch size to 64, initializer to Xavir uniform initializer, $C$ to 10, epoch to 200. \par
+Although LR is very sensitive to initializer and optimizer, but using the best initializer Xavir uniform initializer and optimizer Adam, it outperform SVM by a little under the same experiment settings and enjoys faster convergence. \par
+
+\begin{table}[!hbt]
+	% Center the table
+	\begin{center}
+		% Title of the table
+		\caption{Result on a9a validation set and test set. Best result are in bold.}
+		\label{tab:final_performance}
+		% Table itself: here we have two columns which are centered and have lines to the left, right and in the middle: |c|c|
+		\begin{tabular}{|c|c|c|}
+			% To create a horizontal line, type \hline
+			\hline
+			% To end a column type &
+			% For a linebreak type \\
+			& LR & SVM \\
+			\hline
+			$Accuracy_{val}$   & \textbf{84.66} & 84.44   \\
+			\hline
+			$Accuracy_{test}$   & \textbf{84.98} & 84.88   \\
+			\hline
+			$Epoch$  & \textbf{37} & 107   \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table} \par
 
 \section{Conclusion}
-In this report, we explore the CFS optimized LR, CFS optimized RR and MBGD optimized LR. We conduct the experiments on the CFS optimized LR and RR in terms of performance and weight magnitude. We also explore GD, SGD, MBGD in terms of convergence and time efficiency. Moreover, we tuning the hyper-parameter learning rate in MBGD. We also compare the weight magnitude between CFS optimized LR and MBGD optimized LR. Finally, we report the performance in CFS optimized LR, RR and MBGD LR. After a series of experiments, we now get more insight of LR, RR and GD and its variants SGD and MBGD. \par
-
+In this report, we explore SVM and logistic regression. Specifically, we explore the hyper-parameter $C$ and loss function comparision in SVM, we draw the conclusion that best $C$ is something in the middle (not too small and too big) and hinge loss is better than exponential loss. Besides that, we also compare different initializers and optimizers in logistic regression. We oberseve that SVM is more robust than logistic regression under differen initializer and optimizer settings; Adam and RMSProp both obtain very good performance in logistic regression and SVM. Finally, we report te performance of LR and SVM under each best settings and get their performance on test set, suprisingly LR outperform SVM in a little performance.\par
 
 
 % Your document ends here!
