@@ -101,9 +101,6 @@ class AdaBoostClassifier:
         if np.sum(self.alphas) == 0.0:
             raise ValueError('All the weak learner are ignored during training, perhaps change a weak learner.')
         for m in range(self.best_n_weakers_limit):
-            print(self.alphas[m])
-            # self.alphas[m] = 1 / self.best_n_weakers_limit
-            # print(self.alphas[m])
             ym = self.alphas[m] * self.classifiers[m].predict(X)
             ym = np.reshape(ym, (-1, 1))
             if scores is None:

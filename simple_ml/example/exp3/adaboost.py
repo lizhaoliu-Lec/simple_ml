@@ -20,7 +20,8 @@ def accuracy(y_t, y_pred):
 
 
 # data_path='..\\tmp\\exp3'
-def convert_data_to_npd_feats(data_path='simple_ml/example/tmp/exp3', size=24, val_split=0.1, test_split=0.2,
+# data_path='simple_ml/example/tmp/exp3'
+def convert_data_to_npd_feats(data_path='..\\tmp\\exp3', size=24, val_split=0.1, test_split=0.2,
                               seed=1234):
     face_img_root = os.path.join(data_path, 'face')
     non_img_root = os.path.join(data_path, 'nonface')
@@ -89,7 +90,7 @@ if __name__ == '__main__':
     weak = DecisionTreeClassifier(max_depth=1)
     ad = AdaBoostClassifier(weak, 1)
     ad.fit(X_train, y_train, X_val, y_val, early_stop=True)
-    # ad = weak
+    ad = weak
     ad.fit(X_train, y_train)
     y_pred = ad.predict(X_train)
     y_pred_val = ad.predict(X_val)

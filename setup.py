@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='pip_setup',
-    version='0.1.2',
+    name='simple_machine_learning',
+    version='0.1.4',
     description='simple: simple machine learning framework.',
     classifiers=[
         'License :: OSI Approved :: MIT License',

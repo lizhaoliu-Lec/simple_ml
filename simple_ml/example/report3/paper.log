@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7200 64-bit) (preloaded format=pdflatex 2019.11.8)  12 NOV 2019 19:42
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7200 64-bit) (preloaded format=pdflatex 2019.11.8)  14 NOV 2019 19:28
 entering extended mode
 **./paper.tex
 (paper.tex
@@ -14,7 +14,7 @@ Document Class: IEEEtran 2007/03/05 V1.7a by Michael Shell
 \@IEEEtrantmptoksA=\toks14
 LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 3
 66.
-("E:\MiKTeX 2.9\tex/latex/psnfss\ot1ptm.fd"
+("D:\MiKTeX 2.9\tex/latex/psnfss\ot1ptm.fd"
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 -- Using 210mm x 297mm (a4) paper.
@@ -87,31 +87,31 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <24> not available
 \@IEEEtmpitemindent=\dimen116
 \c@IEEEbiography=\count91
 \@IEEEtranrubishbin=\box27
-) ("E:\MiKTeX 2.9\tex/latex/graphics\graphicx.sty"
+) ("D:\MiKTeX 2.9\tex/latex/graphics\graphicx.sty"
 Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
 
-("E:\MiKTeX 2.9\tex/latex/graphics\keyval.sty"
+("D:\MiKTeX 2.9\tex/latex/graphics\keyval.sty"
 Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
 \KV@toks@=\toks15
 )
-("E:\MiKTeX 2.9\tex/latex/graphics\graphics.sty"
+("D:\MiKTeX 2.9\tex/latex/graphics\graphics.sty"
 Package: graphics 2019/07/20 v1.3b Standard LaTeX Graphics (DPC,SPQR)
 
-("E:\MiKTeX 2.9\tex/latex/graphics\trig.sty"
+("D:\MiKTeX 2.9\tex/latex/graphics\trig.sty"
 Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
 )
-("E:\MiKTeX 2.9\tex/latex/graphics-cfg\graphics.cfg"
+("D:\MiKTeX 2.9\tex/latex/graphics-cfg\graphics.cfg"
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: pdftex.def on input line 105.
 
-("E:\MiKTeX 2.9\tex/latex/graphics-def\pdftex.def"
+("D:\MiKTeX 2.9\tex/latex/graphics-def\pdftex.def"
 File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
 ))
 \Gin@req@height=\dimen117
 \Gin@req@width=\dimen118
 )
-("E:\MiKTeX 2.9\tex/latex/subfigure\subfigure.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/subfigure\subfigure.sty
 Package: subfigure 2002/07/30 v2.1.4 subfigure package
 \subfigtopskip=\skip44
 \subfigcapskip=\skip45
@@ -127,32 +127,32 @@ Package: subfigure 2002/07/30 v2.1.4 subfigure package
 ****************************************
 * Local config file subfigure.cfg used *
 ****************************************
-("E:\MiKTeX 2.9\tex/latex/subfigure\subfigure.cfg")
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/subfigure\subfigure.cfg)
 \subfig@top=\skip48
 \subfig@bottom=\skip49
 )
-("E:\MiKTeX 2.9\tex/latex/url\url.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/url\url.sty
 \Urlmuskip=\muskip10
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-("E:\MiKTeX 2.9\tex/latex/amsmath\amsmath.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amsmath.sty"
 Package: amsmath 2019/04/01 v2.17c AMS math features
 \@mathmargin=\skip50
 
 For additional information on amsmath, use the `?' option.
-("E:\MiKTeX 2.9\tex/latex/amsmath\amstext.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amstext.sty"
 Package: amstext 2000/06/29 v2.01 AMS text
 
-("E:\MiKTeX 2.9\tex/latex/amsmath\amsgen.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amsgen.sty"
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks16
 \ex@=\dimen121
 ))
-("E:\MiKTeX 2.9\tex/latex/amsmath\amsbsy.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amsbsy.sty"
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 \pmbraise@=\dimen122
 )
-("E:\MiKTeX 2.9\tex/latex/amsmath\amsopn.sty"
+("D:\MiKTeX 2.9\tex/latex/amsmath\amsopn.sty"
 Package: amsopn 2016/03/08 v2.02 operator names
 )
 \inf@bad=\count96
@@ -193,27 +193,27 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
 LaTeX Info: Redefining \[ on input line 2855.
 LaTeX Info: Redefining \] on input line 2856.
 )
-("E:\MiKTeX 2.9\tex/latex/jknappen\mathbbol.sty"
+("D:\MiKTeX 2.9\tex/latex/jknappen\mathbbol.sty"
 Package: mathbbol 1995/01/01
 \symbbold=\mathgroup4
 )
-("E:\MiKTeX 2.9\tex/latex/algorithm2e\algorithm2e.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/algorithm2e\algorithm2e.st
+y
 Package: algorithm2e 2017/07/18 v5.2 algorithms environments
 \c@AlgoLine=\count108
-
-("E:\MiKTeX 2.9\tex/latex/base\ifthen.sty"
+ ("D:\MiKTeX 2.9\tex/latex/base\ifthen.sty"
 Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
 )
 \algocf@hangindent=\skip53
 
-("E:\MiKTeX 2.9\tex/latex/ifoddpage\ifoddpage.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/ifoddpage\ifoddpage.sty
 Package: ifoddpage 2016/04/23 v1.1 Conditionals for odd/even page detection
 \c@checkoddpage=\count109
 )
-("E:\MiKTeX 2.9\tex/latex/tools\xspace.sty"
+("D:\MiKTeX 2.9\tex/latex/tools\xspace.sty"
 Package: xspace 2014/10/28 v1.13 Space after command names (DPC,MH)
 )
-("E:\MiKTeX 2.9\tex/latex/relsize\relsize.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/relsize\relsize.sty
 Package: relsize 2013/03/29 ver 4.1
 )
 \skiptotal=\skip54
@@ -252,10 +252,12 @@ Package: relsize 2013/03/29 ver 4.1
 \algocf@algoframe=\box36
 \algocf@algobox=\box37
 )
-("E:\MiKTeX 2.9\tex/latex/algorithmicx\algpseudocode.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/algorithmicx\algpseudocode
+.sty
 Package: algpseudocode 
 
-("E:\MiKTeX 2.9\tex/latex/algorithmicx\algorithmicx.sty"
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/algorithmicx\algorithmicx.
+sty
 Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
 
 Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
@@ -286,7 +288,8 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 140.
 LaTeX Font Info:    ... okay on input line 140.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 140.
 LaTeX Font Info:    ... okay on input line 140.
- ("E:\MiKTeX 2.9\tex/context/base/mkii\supp-pdf.mkii"
+
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/context/base/mkii\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count120
 \scratchdimen=\dimen136
@@ -299,39 +302,39 @@ LaTeX Font Info:    ... okay on input line 140.
 \MPnumerator=\count124
 \makeMPintoPDFobject=\count125
 \everyMPtoPDFconversion=\toks22
-) ("E:\MiKTeX 2.9\tex/latex/oberdiek\epstopdf-base.sty"
+) ("D:\MiKTeX 2.9\tex/latex/oberdiek\epstopdf-base.sty"
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\infwarerr.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\infwarerr.sty"
 Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
 )
-("E:\MiKTeX 2.9\tex/latex/oberdiek\grfext.sty"
+("D:\MiKTeX 2.9\tex/latex/oberdiek\grfext.sty"
 Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\kvdefinekeys.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\kvdefinekeys.sty"
 Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\ltxcmds.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\ltxcmds.sty"
 Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
 )))
-("E:\MiKTeX 2.9\tex/latex/oberdiek\kvoptions.sty"
+("D:\MiKTeX 2.9\tex/latex/oberdiek\kvoptions.sty"
 Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\kvsetkeys.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\kvsetkeys.sty"
 Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\etexcmds.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\etexcmds.sty"
 Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\ifluatex.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\ifluatex.sty"
 Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
 Package ifluatex Info: LuaTeX not detected.
 ))))
-("E:\MiKTeX 2.9\tex/generic/oberdiek\pdftexcmds.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\pdftexcmds.sty"
 Package: pdftexcmds 2019/07/25 v0.30 Utility functions of pdfTeX for LuaTeX (HO
 )
 
-("E:\MiKTeX 2.9\tex/generic/oberdiek\ifpdf.sty"
+("D:\MiKTeX 2.9\tex/generic/oberdiek\ifpdf.sty"
 Package: ifpdf 2018/09/07 v3.3 Provides the ifpdf switch
 )
 Package pdftexcmds Info: LuaTeX not detected.
@@ -356,12 +359,11 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/sc' in size <17> not available
 LaTeX Font Info:    Trying to load font information for U+bbold on input line 1
 78.
 
-("E:\MiKTeX 2.9\tex/latex/jknappen\ubbold.fd"
-File: ubbold.fd 1996/01/01 Blackboard Bold Font Definition File (jk)
-) [0
+(C:\Users\86136\AppData\Roaming\MiKTeX\2.9\tex/latex/bbold\ubbold.fd) [0
 
 
-{C:/Users/Lec/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map} <./SCUT.png>]
+{C:/Users/86136/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map} <./SCUT.png>
+]
 
 LaTeX Warning: No \author given.
 
@@ -374,124 +376,63 @@ Underfull \hbox (badness 2635) in paragraph at lines 263--264
 []\OT1/ptm/m/n/10 We con-duct all the ex-per-i-ments on self con-structed
  []
 
-<c_val_loss.png, id=10, 722.7pt x 578.16pt>
-File: c_val_loss.png Graphic file (type png)
-<use c_val_loss.png>
-Package pdftex.def Info: c_val_loss.png  used on input line 279.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-<c_val_acc.png, id=12, 722.7pt x 578.16pt>
-File: c_val_acc.png Graphic file (type png)
-<use c_val_acc.png>
-Package pdftex.def Info: c_val_acc.png  used on input line 291.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-<c_magnitude.png, id=13, 722.7pt x 578.16pt>
-File: c_magnitude.png Graphic file (type png)
-<use c_magnitude.png>
-Package pdftex.def Info: c_magnitude.png  used on input line 303.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-
-Overfull \hbox (16.04523pt too wide) in paragraph at lines 318--330
- [][] 
- []
-
+<d_weak_acc.png, id=10, 433.62pt x 289.08pt>
+File: d_weak_acc.png Graphic file (type png)
+<use d_weak_acc.png>
+Package pdftex.def Info: d_weak_acc.png  used on input line 277.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
+<d_acc.png, id=12, 433.62pt x 289.08pt>
+File: d_acc.png Graphic file (type png)
+<use d_acc.png>
+Package pdftex.def Info: d_acc.png  used on input line 289.
+(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
 [1
 
 
-]
-<loss_fn.png, id=31, 722.7pt x 578.16pt>
-File: loss_fn.png Graphic file (type png)
-<use loss_fn.png>
-Package pdftex.def Info: loss_fn.png  used on input line 341.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-<l_val_loss.png, id=32, 722.7pt x 578.16pt>
-File: l_val_loss.png Graphic file (type png)
-<use l_val_loss.png>
-Package pdftex.def Info: l_val_loss.png  used on input line 353.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-<l_val_acc.png, id=33, 722.7pt x 578.16pt>
-File: l_val_acc.png Graphic file (type png)
-<use l_val_acc.png>
-Package pdftex.def Info: l_val_acc.png  used on input line 365.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-
-Underfull \vbox (badness 2469) has occurred while \output is active []
-
-<lr_init_val_loss.png, id=34, 722.7pt x 578.16pt>
-File: lr_init_val_loss.png Graphic file (type png)
-<use lr_init_val_loss.png>
-Package pdftex.def Info: lr_init_val_loss.png  used on input line 382.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
- [2 <./c_val_loss.png> <./c_val_acc.png> <./c_magnitude.png> <./loss_fn.png>]
-<lr_init_val_acc.png, id=42, 722.7pt x 578.16pt>
-File: lr_init_val_acc.png Graphic file (type png)
-<use lr_init_val_acc.png>
-Package pdftex.def Info: lr_init_val_acc.png  used on input line 394.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-<svm_init_val_loss.png, id=43, 722.7pt x 578.16pt>
-File: svm_init_val_loss.png Graphic file (type png)
-<use svm_init_val_loss.png>
-Package pdftex.def Info: svm_init_val_loss.png  used on input line 406.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-<svm_init_val_acc.png, id=44, 722.7pt x 578.16pt>
-File: svm_init_val_acc.png Graphic file (type png)
-<use svm_init_val_acc.png>
-Package pdftex.def Info: svm_init_val_acc.png  used on input line 418.
-(pdftex.def)             Requested size: 252.0pt x 201.60033pt.
-<lr_optim_val_loss.png, id=45, 433.62pt x 289.08pt>
-File: lr_optim_val_loss.png Graphic file (type png)
-<use lr_optim_val_loss.png>
-Package pdftex.def Info: lr_optim_val_loss.png  used on input line 435.
+ <./d_weak_acc.png>]
+<n_ad_acc.png, id=28, 433.62pt x 289.08pt>
+File: n_ad_acc.png Graphic file (type png)
+<use n_ad_acc.png>
+Package pdftex.def Info: n_ad_acc.png  used on input line 349.
 (pdftex.def)             Requested size: 252.0pt x 168.00174pt.
-<lr_optim_val_acc.png, id=46, 433.62pt x 289.08pt>
-File: lr_optim_val_acc.png Graphic file (type png)
-<use lr_optim_val_acc.png>
-Package pdftex.def Info: lr_optim_val_acc.png  used on input line 447.
+<dn_ad_tr_acc.png, id=29, 433.62pt x 289.08pt>
+File: dn_ad_tr_acc.png Graphic file (type png)
+<use dn_ad_tr_acc.png>
+Package pdftex.def Info: dn_ad_tr_acc.png  used on input line 361.
 (pdftex.def)             Requested size: 252.0pt x 168.00174pt.
-<svm_optim_val_loss.png, id=47, 433.62pt x 289.08pt>
-File: svm_optim_val_loss.png Graphic file (type png)
-<use svm_optim_val_loss.png>
-Package pdftex.def Info: svm_optim_val_loss.png  used on input line 459.
+<dn_ad_val_acc.png, id=30, 433.62pt x 289.08pt>
+File: dn_ad_val_acc.png Graphic file (type png)
+<use dn_ad_val_acc.png>
+Package pdftex.def Info: dn_ad_val_acc.png  used on input line 373.
 (pdftex.def)             Requested size: 252.0pt x 168.00174pt.
-<svm_optim_val_acc.png, id=48, 433.62pt x 289.08pt>
-File: svm_optim_val_acc.png Graphic file (type png)
-<use svm_optim_val_acc.png>
-Package pdftex.def Info: svm_optim_val_acc.png  used on input line 471.
-(pdftex.def)             Requested size: 252.0pt x 168.00174pt.
- [3 <./l_val_loss.png> <./l_val_acc.png> <./lr_init_val_loss.png> <./lr_init_va
-l_acc.png>]
-
-LaTeX Warning: Text page 4 contains only floats.
-
-[4 <./svm_init_val_loss.png> <./svm_init_val_acc.png> <./lr_optim_val_loss.png>
- <./lr_optim_val_acc.png> <./svm_optim_val_loss.png> <./svm_optim_val_acc.png>]
-[5
+ [2 <./d_acc.png> <./n_ad_acc.png> <./dn_ad_tr_acc.png> <./dn_ad_val_acc.png>] 
+[3
 
 ] (paper.aux) ) 
 Here is how much of TeX's memory you used:
- 4640 strings out of 492452
- 68995 string characters out of 3136310
- 158206 words of memory out of 3000000
- 8918 multiletter control sequences out of 15000+200000
+ 4567 strings out of 492452
+ 68054 string characters out of 3136304
+ 155129 words of memory out of 3000000
+ 8844 multiletter control sequences out of 15000+200000
  55492 words of font info for 100 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 46i,12n,30p,770b,373s stack positions out of 5000i,500n,10000p,200000b,50000s
- <C:\Users\Lec\AppData\Local\MiKTeX\2.9\fonts/pk/ljfour/public/b
-bold/dpi600\bbold10.pk>{E:/MiKTeX 2.9/fonts/enc/dvips/base/8r.enc}<E:/MiKTeX 2.
-9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><E:/MiKTeX 2.9/fonts/type1/public/a
-msfonts/cm/cmex10.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
-<E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi5.pfb><E:/MiKTeX 2.9/fonts/ty
-pe1/public/amsfonts/cm/cmmi6.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/
-cmmi7.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><E:/MiKTeX 2.
-9/fonts/type1/public/amsfonts/cm/cmr10.pfb><E:/MiKTeX 2.9/fonts/type1/public/am
-sfonts/cm/cmr5.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr6.pfb><E:/M
-iKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr7.pfb><E:/MiKTeX 2.9/fonts/type1/pu
-blic/amsfonts/cm/cmsy10.pfb><E:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy7
-.pfb><E:/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><E:/MiKTeX 2.9/fonts/type1
-/urw/times/utmbi8a.pfb><E:/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><E:/MiKT
-eX 2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (6 pages, 3185516 bytes).
+ 46i,12n,30p,657b,373s stack positions out of 5000i,500n,10000p,200000b,50000s
+ <C:\Users\86136\AppData\Local\MiKTeX\2.9\fonts/pk/ljfour/public
+/bbold/dpi600\bbold10.pk>{D:/MiKTeX 2.9/fonts/enc/dvips/base/8r.enc}<D:/MiKTeX 
+2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><D:/MiKTeX 2.9/fonts/type1/public
+/amsfonts/cm/cmmi10.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi5.pfb
+><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi7.pfb><D:/MiKTeX 2.9/fonts/t
+ype1/public/amsfonts/cm/cmmi8.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm
+/cmr10.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr5.pfb><D:/MiKTeX 2.
+9/fonts/type1/public/amsfonts/cm/cmr7.pfb><D:/MiKTeX 2.9/fonts/type1/public/ams
+fonts/cm/cmr8.pfb><D:/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><D:/
+MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy7.pfb><D:/MiKTeX 2.9/fonts/type1/
+urw/times/utmb8a.pfb><D:/MiKTeX 2.9/fonts/type1/urw/times/utmbi8a.pfb><D:/MiKTe
+X 2.9/fonts/type1/urw/times/utmr8a.pfb><D:/MiKTeX 2.9/fonts/type1/urw/times/utm
+ri8a.pfb>
+Output written on paper.pdf (4 pages, 974112 bytes).
 PDF statistics:
- 125 PDF objects out of 1000 (max. 8388607)
+ 93 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 76 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
