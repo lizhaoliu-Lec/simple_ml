@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 np.random.seed(1234)
 
 # read the data
-data_path = './tmp/exp1/housing.scale'
+data_path = '../tmp/exp1/housing.scale'
 X, y = load_svmlight_file(data_path)
 # convert sparse matrix to numpy array
 X = X.A
@@ -82,7 +82,7 @@ def dlr():
     model = Model(Inputs, linear_out)
     model.compile('MSE', optimizer=SGD(lr=0.01))
     model.fit(X_train, y_train,
-              verbose=-1, epochs=5000,
+              verbose=100, epochs=500,
               validation_data=(X_test, y_test),
               batch_size=256, metric='MAE',
               shuffle=True,
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     # X_train = standardizer.transform(X_train)
     # X_test = standardizer.transform(X_test)
 
-    lr()
-    rlr()
-    dlr()
-    # dmlr()
+    # lr()
+    # rlr()
+    # dlr()
+    dmlr()

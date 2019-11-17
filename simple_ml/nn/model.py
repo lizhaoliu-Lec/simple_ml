@@ -445,11 +445,25 @@ class Model(Module):
         self.output = output
 
     def forward(self, X, is_training=False, *args, **kwargs):
+        """
+
+        ideal forward pass:
+        build hash table (implement with python dict)
+        {
+            node: next_list;
+            '1': [2, 3, 4],
+            '2': [3],
+            '3': [4]
+        }
+        """
         layer = self.input
         while layer is not None:
             X = layer.forward(X, is_training=is_training)
             layer = layer.next_layer
         return X
+
+
+
 
     def regularizer_loss(self):
         reg_loss = 0

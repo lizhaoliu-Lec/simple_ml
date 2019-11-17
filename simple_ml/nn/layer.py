@@ -156,7 +156,7 @@ class Input(Layer):
         raise ValueError('Input layer is not callable.')
 
     def forward(self, inputs, *args, **kwargs):
-        inputs = np.asarray(inputs)
+        inputs = np.asarray(inputs, dtype=self.dtype)
         assert self.input_shape[1:] == inputs.shape[1:]
         self.input_shape = inputs.shape
         self.output_shape = self.input_shape
@@ -739,3 +739,198 @@ class AvgPool2D(Layer):
 # alias names
 MaxPooling2D = MaxPool2D
 AvgPooling2D = AvgPool2D
+
+
+class Embedding(Layer):
+    def __init__(self,
+                 input_dim,
+                 output_dim,
+                 regularizer=None,
+                 initializer=xavier_uniform_initializer):
+        super(Embedding, self).__init__()
+        pass
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.regularizer = get_regularizer(regularizer)
+        self.initializer = get_initializer(initializer)
+        self.input_shape = None
+        self.output_shape = None
+        if self.input_dim is not None:
+            self.connection(None)
+
+    def connection(self, pre_layer):
+        self.pre_layer = pre_layer
+        if pre_layer is None:
+            if self.input_dim is None:
+                raise ValueError('input_size must not be `None` as the first layer.')
+            self.input_shape = [None, self.input_dim]
+            self.output_shape = [None, self.output_dim]
+        else:
+            pre_layer.next_layer = self
+            self.input_dim = pre_layer.output_shape[1]
+            self.input_shape = pre_layer.output_shape
+            self.output_shape = [self.input_shape[0], self.output_dim]
+        self.weight = self.initializer([self.output_dim, self.input_dim])
+        self.bias = self.initializer([self.output_dim])
+        self.delta_weight = np.zeros([self.output_dim, self.input_dim])
+        self.delta_bias = np.zeros([self.output_dim])
+        self.delta = np.zeros([self.input_dim])
+
+
+class _Merge(Layer):
+    """Generic merge layer for elementwise merge functions.
+
+    Used to implement `Sum`, `Average`, etc.
+
+    """
+
+    def __init__(self):
+        super(_Merge, self).__init__()
+
+    def _merge_function(self, inputs):
+        raise NotImplementedError
+
+    def _compute_elemwise_op_output_shape(self, shape1, shape2):
+        """Computes the shape of the resultant of an elementwise operation.
+
+        # Arguments
+            shape1: tuple or None. Shape of the first tensor
+            shape2: tuple or None. Shape of the second tensor
+
+        # Returns
+            expected output shape when an element-wise operation is
+            carried out on 2 tensors with shapes shape1 and shape2.
+            tuple or None.
+
+        # Raises
+            ValueError: if shape1 and shape2 are not compatible for
+                element-wise operations.
+        """
+        if None in [shape1, shape2]:
+            return None
+        elif len(shape1) < len(shape2):
+            return self._compute_elemwise_op_output_shape(shape2, shape1)
+        elif not shape2:
+            return shape1
+        output_shape = list(shape1[:-len(shape2)])
+        for i, j in zip(shape1[-len(shape2):], shape2):
+            if i is None or j is None:
+                output_shape.append(None)
+            elif i == 1:
+                output_shape.append(j)
+            elif j == 1:
+                output_shape.append(i)
+            else:
+                if i != j:
+                    raise ValueError('Operands could not be broadcast '
+                                     'together with shapes ' +
+                                     str(shape1) + ' ' + str(shape2))
+                output_shape.append(i)
+        return tuple(output_shape)
+
+    def call(self, inputs):
+        return self._merge_function(inputs)
+
+    def compute_output_shape(self, input_shape):
+        if input_shape[0] is None:
+            output_shape = None
+        else:
+            output_shape = input_shape[0][1:]
+        for i in range(1, len(input_shape)):
+            if input_shape[i] is None:
+                shape = None
+            else:
+                shape = input_shape[i][1:]
+            output_shape = self._compute_elemwise_op_output_shape(output_shape,
+                                                                  shape)
+        batch_sizes = [s[0] for s in input_shape if s is not None]
+        batch_sizes = set(batch_sizes)
+        batch_sizes -= {None}
+        if len(batch_sizes) == 1:
+            output_shape = (list(batch_sizes)[0],) + output_shape
+        else:
+            output_shape = (None,) + output_shape
+        return output_shape
+
+
+class Add(_Merge):
+    """Layer that adds a list of inputs.
+
+    It takes as input a list of tensors,
+    all of the same shape, and returns
+    a single tensor (also of the same shape).
+
+    # Examples
+
+    ```python
+        import keras
+
+        input1 = keras.layers.Input(shape=(16,))
+        x1 = keras.layers.Dense(8, activation='relu')(input1)
+        input2 = keras.layers.Input(shape=(32,))
+        x2 = keras.layers.Dense(8, activation='relu')(input2)
+        # equivalent to added = keras.layers.add([x1, x2])
+        added = keras.layers.Add()([x1, x2])
+
+        out = keras.layers.Dense(4)(added)
+        model = keras.models.Model(inputs=[input1, input2], outputs=out)
+    ```
+    """
+
+    def _merge_function(self, inputs):
+        output = inputs[0]
+        for i in range(1, len(inputs)):
+            output += inputs[i]
+        return output
+
+
+class Subtract(_Merge):
+    """Layer that subtracts two inputs.
+
+    It takes as input a list of tensors of size 2,
+    both of the same shape, and returns a single tensor, (inputs[0] - inputs[1]),
+    also of the same shape.
+
+    # Examples
+
+    ```python
+        import keras
+
+        input1 = keras.layers.Input(shape=(16,))
+        x1 = keras.layers.Dense(8, activation='relu')(input1)
+        input2 = keras.layers.Input(shape=(32,))
+        x2 = keras.layers.Dense(8, activation='relu')(input2)
+        # Equivalent to subtracted = keras.layers.subtract([x1, x2])
+        subtracted = keras.layers.Subtract()([x1, x2])
+
+        out = keras.layers.Dense(4)(subtracted)
+        model = keras.models.Model(inputs=[input1, input2], outputs=out)
+    ```
+    """
+
+    def build(self, input_shape):
+        super(Subtract, self).build(input_shape)
+        if len(input_shape) != 2:
+            raise ValueError('A `Subtract` layer should be called '
+                             'on exactly 2 inputs')
+
+    def _merge_function(self, inputs):
+        if len(inputs) != 2:
+            raise ValueError('A `Subtract` layer should be called '
+                             'on exactly 2 inputs')
+        return inputs[0] - inputs[1]
+
+
+class Multiply(_Merge):
+    """Layer that multiplies (element-wise) a list of inputs.
+
+    It takes as input a list of tensors,
+    all of the same shape, and returns
+    a single tensor (also of the same shape).
+    """
+
+    def _merge_function(self, inputs):
+        output = inputs[0]
+        for i in range(1, len(inputs)):
+            output *= inputs[i]
+        return output
