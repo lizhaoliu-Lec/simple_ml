@@ -741,196 +741,121 @@ MaxPooling2D = MaxPool2D
 AvgPooling2D = AvgPool2D
 
 
-class Embedding(Layer):
-    def __init__(self,
-                 input_dim,
-                 output_dim,
+class Factorization(Layer):
+    def __init__(self, a_dim, b_dim, k,
+                 activation=None,
                  regularizer=None,
                  initializer=xavier_uniform_initializer):
-        super(Embedding, self).__init__()
-        pass
-        self.input_dim = input_dim
-        self.output_dim = output_dim
+        super(Factorization, self).__init__()
+        self.input_dim = (1, 1)
+        self.a_dim = a_dim
+        self.b_dim = b_dim
+        self.k = k
+        self.output_dim = 1
         self.regularizer = get_regularizer(regularizer)
+        self.activation = get_activation(activation)
         self.initializer = get_initializer(initializer)
         self.input_shape = None
         self.output_shape = None
         if self.input_dim is not None:
             self.connection(None)
 
+    @property
+    def embedding_a(self):
+        return self.__embedding_a
+
+    @property
+    def embedding_b(self):
+        return self.__embedding_b
+
+    @property
+    def delta_embedding_a(self):
+        return self.__delta_embedding_a
+
+    @property
+    def delta_embedding_b(self):
+        return self.__delta_embedding_b
+
+    @embedding_a.setter
+    def embedding_a(self, embedding_a):
+        self.__embedding_a = embedding_a
+
+    @embedding_b.setter
+    def embedding_b(self, embedding_b):
+        self.__embedding_b = embedding_b
+
+    @delta_embedding_a.setter
+    def delta_embedding_a(self, delta_embedding_a):
+        self.__delta_embedding_a = delta_embedding_a
+
+    @delta_embedding_b.setter
+    def delta_embedding_b(self, delta_embedding_b):
+        self.__delta_embedding_b = delta_embedding_b
+
+    @property
+    def params(self):
+        return [self.embedding_a, self.embedding_b]
+
+    @property
+    def grads(self):
+        return [self.delta_embedding_a, self.delta_embedding_b]
+
+    def call(self, pre_layer=None, *args, **kwargs):
+        self.connection(pre_layer)
+        return self
+
     def connection(self, pre_layer):
         self.pre_layer = pre_layer
         if pre_layer is None:
             if self.input_dim is None:
                 raise ValueError('input_size must not be `None` as the first layer.')
-            self.input_shape = [None, self.input_dim]
+            self.input_shape = [None, *self.input_dim]
             self.output_shape = [None, self.output_dim]
         else:
             pre_layer.next_layer = self
             self.input_dim = pre_layer.output_shape[1]
             self.input_shape = pre_layer.output_shape
             self.output_shape = [self.input_shape[0], self.output_dim]
-        self.weight = self.initializer([self.output_dim, self.input_dim])
-        self.bias = self.initializer([self.output_dim])
-        self.delta_weight = np.zeros([self.output_dim, self.input_dim])
-        self.delta_bias = np.zeros([self.output_dim])
-        self.delta = np.zeros([self.input_dim])
 
+        self.embedding_a = self.initializer([self.a_dim, self.k])
+        self.delta_embedding_a = np.zeros([self.a_dim, self.k])
 
-class _Merge(Layer):
-    """Generic merge layer for elementwise merge functions.
+        self.embedding_b = self.initializer([self.b_dim, self.k])
+        self.delta_embedding_b = np.zeros([self.b_dim, self.k])
 
-    Used to implement `Sum`, `Average`, etc.
+    def zero_grad(self):
+        self.delta_embedding_a = np.zeros([self.a_dim, self.k])
+        self.delta_embedding_b = np.zeros([self.b_dim, self.k])
 
-    """
+    def forward(self, inputs, *args, **kwargs):
+        inputs = np.asarray(inputs)
+        if len(inputs.shape) == 1:
+            inputs = inputs[None, :]
+        self.assert_shape(self.input_shape, inputs.shape)
+        self.input_shape = inputs.shape
+        self.output_shape[0] = self.input_shape[0]
+        self.inputs = inputs
+        self.a_list = self.inputs[:, 0]
+        self.b_list = self.inputs[:, 1]
+        self.embedding_a_sub = self.embedding_a[self.a_list]
+        self.embedding_b_sub = self.embedding_b[self.b_list]
+        self.logit = np.sum(self.embedding_a_sub * self.embedding_b_sub, keepdims=True)
+        self.assert_shape(self.output_shape, self.logit.shape)
+        self.output = self.activation.forward(self.logit)
+        self.assert_shape(self.output_shape, self.output.shape)
+        return self.output
 
-    def __init__(self):
-        super(_Merge, self).__init__()
+    def backward(self, pre_delta, *args, **kwargs):
+        if len(pre_delta.shape) == 1:
+            pre_delta = pre_delta[None, :]
+        self.assert_shape(self.output_shape, pre_delta.shape)
+        batch_size, _ = self.inputs.shape
+        act_delta = pre_delta * self.activation.backward(self.logit)
+        self.assert_shape(self.output_shape, act_delta.shape)
+        self.zero_grad()
+        self.delta_embedding_a[self.a_list] = self.embedding_b_sub + self.regularizer.backward(self.embedding_a_sub)
+        self.delta_embedding_b[self.b_list] = self.embedding_a_sub + self.regularizer.backward(self.embedding_b_sub)
 
-    def _merge_function(self, inputs):
-        raise NotImplementedError
-
-    def _compute_elemwise_op_output_shape(self, shape1, shape2):
-        """Computes the shape of the resultant of an elementwise operation.
-
-        # Arguments
-            shape1: tuple or None. Shape of the first tensor
-            shape2: tuple or None. Shape of the second tensor
-
-        # Returns
-            expected output shape when an element-wise operation is
-            carried out on 2 tensors with shapes shape1 and shape2.
-            tuple or None.
-
-        # Raises
-            ValueError: if shape1 and shape2 are not compatible for
-                element-wise operations.
-        """
-        if None in [shape1, shape2]:
-            return None
-        elif len(shape1) < len(shape2):
-            return self._compute_elemwise_op_output_shape(shape2, shape1)
-        elif not shape2:
-            return shape1
-        output_shape = list(shape1[:-len(shape2)])
-        for i, j in zip(shape1[-len(shape2):], shape2):
-            if i is None or j is None:
-                output_shape.append(None)
-            elif i == 1:
-                output_shape.append(j)
-            elif j == 1:
-                output_shape.append(i)
-            else:
-                if i != j:
-                    raise ValueError('Operands could not be broadcast '
-                                     'together with shapes ' +
-                                     str(shape1) + ' ' + str(shape2))
-                output_shape.append(i)
-        return tuple(output_shape)
-
-    def call(self, inputs):
-        return self._merge_function(inputs)
-
-    def compute_output_shape(self, input_shape):
-        if input_shape[0] is None:
-            output_shape = None
-        else:
-            output_shape = input_shape[0][1:]
-        for i in range(1, len(input_shape)):
-            if input_shape[i] is None:
-                shape = None
-            else:
-                shape = input_shape[i][1:]
-            output_shape = self._compute_elemwise_op_output_shape(output_shape,
-                                                                  shape)
-        batch_sizes = [s[0] for s in input_shape if s is not None]
-        batch_sizes = set(batch_sizes)
-        batch_sizes -= {None}
-        if len(batch_sizes) == 1:
-            output_shape = (list(batch_sizes)[0],) + output_shape
-        else:
-            output_shape = (None,) + output_shape
-        return output_shape
-
-
-class Add(_Merge):
-    """Layer that adds a list of inputs.
-
-    It takes as input a list of tensors,
-    all of the same shape, and returns
-    a single tensor (also of the same shape).
-
-    # Examples
-
-    ```python
-        import keras
-
-        input1 = keras.layers.Input(shape=(16,))
-        x1 = keras.layers.Dense(8, activation='relu')(input1)
-        input2 = keras.layers.Input(shape=(32,))
-        x2 = keras.layers.Dense(8, activation='relu')(input2)
-        # equivalent to added = keras.layers.add([x1, x2])
-        added = keras.layers.Add()([x1, x2])
-
-        out = keras.layers.Dense(4)(added)
-        model = keras.models.Model(inputs=[input1, input2], outputs=out)
-    ```
-    """
-
-    def _merge_function(self, inputs):
-        output = inputs[0]
-        for i in range(1, len(inputs)):
-            output += inputs[i]
-        return output
-
-
-class Subtract(_Merge):
-    """Layer that subtracts two inputs.
-
-    It takes as input a list of tensors of size 2,
-    both of the same shape, and returns a single tensor, (inputs[0] - inputs[1]),
-    also of the same shape.
-
-    # Examples
-
-    ```python
-        import keras
-
-        input1 = keras.layers.Input(shape=(16,))
-        x1 = keras.layers.Dense(8, activation='relu')(input1)
-        input2 = keras.layers.Input(shape=(32,))
-        x2 = keras.layers.Dense(8, activation='relu')(input2)
-        # Equivalent to subtracted = keras.layers.subtract([x1, x2])
-        subtracted = keras.layers.Subtract()([x1, x2])
-
-        out = keras.layers.Dense(4)(subtracted)
-        model = keras.models.Model(inputs=[input1, input2], outputs=out)
-    ```
-    """
-
-    def build(self, input_shape):
-        super(Subtract, self).build(input_shape)
-        if len(input_shape) != 2:
-            raise ValueError('A `Subtract` layer should be called '
-                             'on exactly 2 inputs')
-
-    def _merge_function(self, inputs):
-        if len(inputs) != 2:
-            raise ValueError('A `Subtract` layer should be called '
-                             'on exactly 2 inputs')
-        return inputs[0] - inputs[1]
-
-
-class Multiply(_Merge):
-    """Layer that multiplies (element-wise) a list of inputs.
-
-    It takes as input a list of tensors,
-    all of the same shape, and returns
-    a single tensor (also of the same shape).
-    """
-
-    def _merge_function(self, inputs):
-        output = inputs[0]
-        for i in range(1, len(inputs)):
-            output *= inputs[i]
-        return output
+    @property
+    def regularizer_loss(self):
+        return self.regularizer.forward(self.embedding_a_sub) + self.regularizer.forward(self.embedding_b_sub)
