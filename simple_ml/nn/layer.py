@@ -13,6 +13,7 @@ __all__ = [
     'Conv2d',
     'AvgPooling2D', 'AvgPool2D',
     'MaxPooling2D', 'MaxPool2D',
+    'Factorization',
 ]
 
 
@@ -743,6 +744,7 @@ AvgPooling2D = AvgPool2D
 
 class Factorization(Layer):
     def __init__(self, a_dim, b_dim, k,
+                 use_bias=True,
                  activation=None,
                  regularizer=None,
                  initializer=xavier_uniform_initializer):
@@ -751,6 +753,7 @@ class Factorization(Layer):
         self.a_dim = a_dim
         self.b_dim = b_dim
         self.k = k
+        self.use_bias = use_bias
         self.output_dim = 1
         self.regularizer = get_regularizer(regularizer)
         self.activation = get_activation(activation)
@@ -769,12 +772,28 @@ class Factorization(Layer):
         return self.__embedding_b
 
     @property
+    def bias_a(self):
+        return self.__bias_a
+
+    @property
+    def bias_b(self):
+        return self.__bias_b
+
+    @property
     def delta_embedding_a(self):
         return self.__delta_embedding_a
 
     @property
     def delta_embedding_b(self):
         return self.__delta_embedding_b
+
+    @property
+    def delta_bias_a(self):
+        return self.__delta_bias_a
+
+    @property
+    def delta_bias_b(self):
+        return self.__delta_bias_b
 
     @embedding_a.setter
     def embedding_a(self, embedding_a):
@@ -784,6 +803,14 @@ class Factorization(Layer):
     def embedding_b(self, embedding_b):
         self.__embedding_b = embedding_b
 
+    @bias_a.setter
+    def bias_a(self, bias_a):
+        self.__bias_a = bias_a
+
+    @bias_b.setter
+    def bias_b(self, bias_b):
+        self.__bias_b = bias_b
+
     @delta_embedding_a.setter
     def delta_embedding_a(self, delta_embedding_a):
         self.__delta_embedding_a = delta_embedding_a
@@ -792,13 +819,27 @@ class Factorization(Layer):
     def delta_embedding_b(self, delta_embedding_b):
         self.__delta_embedding_b = delta_embedding_b
 
+    @delta_bias_a.setter
+    def delta_bias_a(self, delta_bias_a):
+        self.__delta_bias_a = delta_bias_a
+
+    @delta_bias_b.setter
+    def delta_bias_b(self, delta_bias_b):
+        self.__delta_bias_b = delta_bias_b
+
     @property
     def params(self):
-        return [self.embedding_a, self.embedding_b]
+        if self.use_bias:
+            return [self.embedding_a, self.embedding_b, self.bias_a, self.bias_b]
+        else:
+            return [self.embedding_a, self.embedding_b]
 
     @property
     def grads(self):
-        return [self.delta_embedding_a, self.delta_embedding_b]
+        if self.use_bias:
+            return [self.delta_embedding_a, self.delta_embedding_b, self.delta_bias_a, self.delta_bias_b]
+        else:
+            return [self.delta_embedding_a, self.delta_embedding_b]
 
     def call(self, pre_layer=None, *args, **kwargs):
         self.connection(pre_layer)
@@ -823,12 +864,22 @@ class Factorization(Layer):
         self.embedding_b = self.initializer([self.b_dim, self.k])
         self.delta_embedding_b = np.zeros([self.b_dim, self.k])
 
+        if self.use_bias:
+            self.bias_a = np.zeros([self.a_dim, 1])
+            self.delta_bias_a = np.zeros([self.a_dim, 1])
+
+            self.bias_b = np.zeros([self.b_dim, 1])
+            self.delta_bias_b = np.zeros([self.b_dim, 1])
+
     def zero_grad(self):
-        self.delta_embedding_a = np.zeros([self.a_dim, self.k])
-        self.delta_embedding_b = np.zeros([self.b_dim, self.k])
+        self.delta_embedding_a.fill(0)
+        self.delta_embedding_b.fill(0)
+        if self.use_bias:
+            self.delta_bias_a.fill(0)
+            self.delta_bias_b.fill(0)
 
     def forward(self, inputs, *args, **kwargs):
-        inputs = np.asarray(inputs)
+        inputs = np.asarray(inputs, dtype=np.int)
         if len(inputs.shape) == 1:
             inputs = inputs[None, :]
         self.assert_shape(self.input_shape, inputs.shape)
@@ -839,7 +890,16 @@ class Factorization(Layer):
         self.b_list = self.inputs[:, 1]
         self.embedding_a_sub = self.embedding_a[self.a_list]
         self.embedding_b_sub = self.embedding_b[self.b_list]
-        self.logit = np.sum(self.embedding_a_sub * self.embedding_b_sub, keepdims=True)
+        if self.use_bias:
+            self.bias_a_sub = self.bias_a[self.a_list]
+            self.bias_b_sub = self.bias_b[self.b_list]
+            self.logit = np.sum(self.embedding_a_sub * self.embedding_b_sub + self.bias_a_sub + self.bias_b_sub,
+                                axis=1,
+                                keepdims=True)
+        else:
+            self.logit = np.sum(self.embedding_a_sub * self.embedding_b_sub,
+                                axis=1,
+                                keepdims=True)
         self.assert_shape(self.output_shape, self.logit.shape)
         self.output = self.activation.forward(self.logit)
         self.assert_shape(self.output_shape, self.output.shape)
@@ -853,9 +913,17 @@ class Factorization(Layer):
         act_delta = pre_delta * self.activation.backward(self.logit)
         self.assert_shape(self.output_shape, act_delta.shape)
         self.zero_grad()
-        self.delta_embedding_a[self.a_list] = self.embedding_b_sub + self.regularizer.backward(self.embedding_a_sub)
-        self.delta_embedding_b[self.b_list] = self.embedding_a_sub + self.regularizer.backward(self.embedding_b_sub)
+        self.delta_embedding_a[self.a_list] = self.embedding_b_sub * act_delta + self.regularizer.backward(
+            self.embedding_a_sub)
+        self.delta_embedding_b[self.b_list] = self.embedding_a_sub * act_delta + self.regularizer.backward(
+            self.embedding_b_sub)
+        if self.use_bias:
+            self.delta_bias_a[self.a_list] = act_delta + self.regularizer.backward(self.bias_a_sub)
+            self.delta_bias_b[self.b_list] = act_delta + self.regularizer.backward(self.bias_b_sub)
 
     @property
     def regularizer_loss(self):
-        return self.regularizer.forward(self.embedding_a_sub) + self.regularizer.forward(self.embedding_b_sub)
+        reg_loss = self.regularizer.forward(self.embedding_a_sub) + self.regularizer.forward(self.embedding_b_sub)
+        if self.use_bias:
+            reg_loss += self.regularizer.forward(self.bias_a_sub) + self.regularizer.forward(self.bias_b_sub)
+        return

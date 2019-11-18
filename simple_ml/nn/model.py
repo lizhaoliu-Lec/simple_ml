@@ -62,11 +62,14 @@ class Module(object):
             return []
         return self.valid_metrics[self.metric]
 
-    def best_performance(self):
+    def best_performance(self, bigger=True):
         performance = {}
         key = 'train_set'
         tr_metrics = np.array(self.training_metrics[self.metric])
-        best_epoch = tr_metrics.argmax()
+        if bigger:
+            best_epoch = tr_metrics.argmax()
+        else:
+            best_epoch = tr_metrics.argmin()
         best_metric = tr_metrics[best_epoch]
         best_loss = self.training_losses[best_epoch]
         performance[key] = {
@@ -85,7 +88,10 @@ class Module(object):
 
         else:
             val_metrics = np.array(self.valid_metrics[self.metric])
-            best_epoch = val_metrics.argmax()
+            if bigger:
+                best_epoch = val_metrics.argmax()
+            else:
+                best_epoch = val_metrics.argmin()
             best_metric = val_metrics[best_epoch]
             best_loss = self.valid_losses[best_epoch]
             performance[key] = {
@@ -252,7 +258,9 @@ class Module(object):
                     description = 'Epoch: {} | Loss: {:.4f} | Metric: {:.4f}'.format(iter_idx, per_loss, per_metric)
                 # tqdm_gen.set_description(description)
 
-            train_losses = train_losses / train_size + self.regularizer_loss()
+            # Don't reg loss get better vision
+            # train_losses = train_losses / train_size + self.regularizer_loss()
+            train_losses = train_losses / train_size
             train_matrices = train_matrices / train_size
 
             run_out = "epoch %5d/%5d, train-[loss: %.4f" % (
@@ -282,7 +290,9 @@ class Module(object):
                     if metric is not None:
                         valid_matrices += metric(y_pred, y_batch)
 
-                valid_losses = valid_losses / val_size + self.regularizer_loss()
+                # Don't reg loss get better vision
+                # valid_losses = valid_losses / val_size + self.regularizer_loss()
+                valid_losses = valid_losses / val_size
                 valid_matrices = valid_matrices / val_size
 
                 run_out += "valid-[loss: %.4f" % (float(valid_losses))
@@ -461,9 +471,6 @@ class Model(Module):
             X = layer.forward(X, is_training=is_training)
             layer = layer.next_layer
         return X
-
-
-
 
     def regularizer_loss(self):
         reg_loss = 0
