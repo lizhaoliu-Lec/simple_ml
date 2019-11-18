@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='simple_machine_learning',
-    version='0.1.4',
+    version='0.1.5',
     description='simple: simple machine learning framework.',
     classifiers=[
         'License :: OSI Approved :: MIT License',

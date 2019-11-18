@@ -1,17 +1,11 @@
 import numpy as np
 
-from sklearn.datasets import load_svmlight_file
-from sklearn.model_selection import train_test_split
-
-from simple_ml.utils.distance import euclidean
-from simple_ml.preprocessing.general import Standardizer
-from simple_ml.linear.model import LinearRegression, RidgeRegression
 from simple_ml.nn.layer import Factorization, Input
 from simple_ml.nn.model import Model
-from simple_ml.nn.initializer import zeros, ones
-from simple_ml.nn.regularizer import L2_Regularizer, L1_Regularizer
+from simple_ml.nn.regularizer import L2_Regularizer, L1_Regularizer, L1L2_Regularizer
+from simple_ml.nn.loss import MAE, MSE, HuberLoss
 from simple_ml.nn.optimizer import SGD, Momentum, Adam, RMSProp
-from simple_ml.utils.metric import accuracy, absolute_error, square_error
+from simple_ml.utils.metric import absolute_error
 
 import matplotlib.pyplot as plt
 
@@ -65,7 +59,7 @@ def dlr():
     # out = Factorization(a_dim=num_user, b_dim=num_item, k=10)(Inputs)
     model = Model(Inputs, out)
     # model.compile('MSE', optimizer=Adam(lr=0.001))
-    model.compile('HB', optimizer=Adam(lr=0.001))
+    model.compile(HuberLoss(), optimizer=Adam(lr=0.001))
     model.fit(X_train, y_train,
               verbose=10, epochs=300,
               validation_data=(X_val, y_val),
